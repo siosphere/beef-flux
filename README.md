@@ -26,6 +26,10 @@ var MY_API_URL = '/api/v1/users/{userId}/';
 Beef.Api.get(MY_API_URL, {userId: 1}).success().error(); //will replace {userId} with the given param
 ```
 
+```
+Beef.Api.get('/my/url', {userId: 1}); //final url would be /my/url?userId=1
+```
+
 #Store
 ```
 var MyStore = Beef.Store.create({
