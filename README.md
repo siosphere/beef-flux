@@ -68,6 +68,9 @@ var MyStore = Beef.Store.create({
 var MyStore = Beef.Store.create({
     events: {
         UPDATE: 'MyStore.events.UPDATE'
+    },
+    createToDo: function() {
+        MyStore.emit(MyStore.events.UPDATE);
     }
 });
 
