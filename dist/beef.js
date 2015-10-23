@@ -757,7 +757,7 @@ Beef.Router = new function() {
          * @returns {undefined}
          */
         routes: function(routes_obj){
-            this._routes = routes_obj;
+            Beef.Router._routes = routes_obj;
         },
         
         /**
@@ -777,10 +777,10 @@ Beef.Router = new function() {
          * @returns {undefined}
          */
         route: function(route, data){
-            if(typeof(this._routes[route]) !== 'undefined'){
-                this._routes[route](data);
-                this._activeRoute = route;
-                this.onRoute();
+            if(typeof(Beef.Router._routes[route]) !== 'undefined'){
+                Beef.Router._routes[route](data);
+                Beef.Router._activeRoute = route;
+                Beef.Router.onRoute();
             }
         },
         /**
@@ -788,7 +788,7 @@ Beef.Router = new function() {
          * @returns {undefined}
          */
         doRouting: function(){
-            for(var raw_route in this._routes){
+            for(var raw_route in Beef.Router._routes){
                 var route = match_route = raw_route;
                 var raw_hash = window.location.hash;
                 if (raw_hash.indexOf('?') >= 0) {
@@ -840,26 +840,16 @@ Beef.Router = new function() {
                 match_route = match_route.replace('+', '\\+');
                 var regex = new RegExp('^#\/' + match_route + '$', 'gi');
                 if(raw_hash.match(regex) !== null){
-                    if(this._activeRoute === route && data === this._routeData){
+                    if(Beef.Router._activeRoute === route && data === Beef.Router._routeData){
                         return; //already active
                     }
-                    this._routeData = data;
-                    this._activeRoute = route;
-                    this.route(route, data);
+                    Beef.Router._routeData = data;
+                    Beef.Router._activeRoute = route;
+                    Beef.Router.route(route, data);
                     return;
                 }
             }
-            this.route('/'); //default route
-        },
-        
-        /**
-         * Start our routing
-         * @returns {undefined}
-         */
-        start: function(){
-            if(typeof this.onStart !== 'undefined'){
-                this.onStart();
-            }
+            Beef.Router.route('/'); //default route
         },
         
         /**
