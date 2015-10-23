@@ -13,6 +13,13 @@ var files = [
 
 gulp.task('default', function(){
     gulp.src(files)
+    .pipe(concat('beef.js'))
+    .pipe(gulp.dest('./dist/'));
+});
+
+gulp.task('minify', function(){
+    gulp.src(files)
     .pipe(concat('beef.min.js'))
+    .pipe(uglify())
     .pipe(gulp.dest('./dist/'));
 });
