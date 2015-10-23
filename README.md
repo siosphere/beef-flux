@@ -78,3 +78,22 @@ var onUpdate = function() {
 MyStore.listen(MyStore.events.UPDATE, onUpdate);
 MyStore.ignore(MyStore.events.UPDATE, onUpdate);
 ```
+
+# Dispatcher
+```
+Beef.Dispatcher.register(function(payload) {
+    var event = payload.event;
+    var data = payload.data;
+    switch(event) {
+        case 'SOME_ACTION':
+            console.log('SOME_ACTION took place', data.some);
+            break;
+    }
+}, []);
+```
+
+```
+Beef.Dispatcher.dispatch('SOME_ACTION', {
+    some: 'data'
+});
+```
