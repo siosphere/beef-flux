@@ -8,7 +8,8 @@ var files = [
     './src/beef.js',
     './src/api.js',
     './src/dispatcher.js',
-    './src/store.js'
+    './src/store.js',
+    './src/router.js'
 ];
 
 gulp.task('default', function(){
