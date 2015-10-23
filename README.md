@@ -37,9 +37,12 @@ var MyStore = Beef.Store.create({
 ## Rows
 ```
 MyStore.upsertRow('todos', 'id', 1, {
+    id: 1,
     title: 'My Title',
     desc: 'My Description'
 });
+
+MyStore.getRows('todos'); //[{id: 1, title: 'My Title', desc: 'My Description}]
 ```
 
 ## Schema
