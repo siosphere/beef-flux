@@ -43,6 +43,9 @@ MyStore.upsertRow('todos', 'id', 1, {
 });
 
 MyStore.getRows('todos'); //[{id: 1, title: 'My Title', desc: 'My Description}]
+
+var byTitle = MyStore.getRows('todos').sort(MyStore.sortBy('name', 'ASC'));
+
 ```
 
 ## Schema
