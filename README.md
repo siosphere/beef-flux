@@ -1,5 +1,5 @@
 # beefjs
-BeefJS is a React/Flux architecture friendly micro routing framework. It also contains a few abstractions of jQuery to simplify API calls.
+BeefJS is a React/Flux architecture friendly micro framework. It also contains a few abstractions of jQuery to simplify API calls.
 
 # Routing
 ```
