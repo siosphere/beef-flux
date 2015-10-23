@@ -58,3 +58,18 @@ var MyStore = Beef.Store.create({
     }
 });
 ```
+## Events
+```
+var MyStore = Beef.Store.create({
+    events: {
+        UPDATE: 'MyStore.events.UPDATE'
+    }
+});
+
+var onUpdate = function() {
+   console.log('updated');
+};
+
+MyStore.listen(MyStore.events.UPDATE, onUpdate);
+MyStore.ignore(MyStore.events.UPDATE, onUpdate);
+```
