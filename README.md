@@ -21,6 +21,11 @@ $(window).on('hashchange', Beef.Router.doRouting);
 Beef.Api.get(url, {param: 'value'}).success().error()
 ```
 
+```
+var MY_API_URL = '/api/v1/users/{userId}/';
+Beef.Api.get(MY_API_URL, {userId: 1}).success().error(); //will replace {userId} with the given param
+```
+
 #Store
 ```
 var MyStore = Beef.Store.create({
