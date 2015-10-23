@@ -38,6 +38,7 @@ MyStore.upsertRow('todos', 'id', 1, {
 ```
 
 ## Schema
+```
 var MyStore = Beef.Store.create({
     schema: {
         Todo: {
@@ -56,4 +57,4 @@ var MyStore = Beef.Store.create({
         }, MyStore.schema.Todo);
     }
 });
-
+```
