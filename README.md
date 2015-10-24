@@ -73,6 +73,30 @@ var MyStore = Beef.Store.create({
     }
 });
 ```
+### Validation
+You an also add validation to the schema, which when passed through the validator will return the object, or an array of errors if it isn't valid.
+```
+var MyStore = Beef.Store.create({
+    schema: {
+        Todo: {
+            title: {
+                type: 'string'
+            },
+            desc: {
+                type: 'string',
+                validation: {
+                    minLength: 5,
+                    maxLength: 10,
+                    required: true,
+                    isNotLoremIpsum: function(value) {
+                        return value !== 'Lorem Ipsum';
+                    }
+                }
+            }
+        }
+    }
+});
+```
 ## Events
 ```
 var MyStore = Beef.Store.create({
