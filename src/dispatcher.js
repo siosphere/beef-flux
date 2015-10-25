@@ -18,7 +18,7 @@ Beef.Dispatcher = new function(){
          * 
          * @param {type} callback
          * @param {type} dependencies
-         * @returns {_L3.register.dispatch_id|Dispatcher.register@pro;callbacks@pro;length}register a callback with given dependencies
+         * @returns {_L3.register.dispatch_id|Beef.Dispatcher.register@pro;callbacks@pro;length}register a callback with given dependencies
          * @param {function} callback
          * @param {array} dependencies
          * @returns int
@@ -50,14 +50,14 @@ Beef.Dispatcher = new function(){
             var success = [];
             var i = 0;
             var index = 0;
-            while(i < Dispatcher.max_iterations && success.length < Dispatcher.callbacks.length){
+            while(i < Dispatcher.max_iterations && success.length < Beef.Dispatcher.callbacks.length){
                 
-                if(index >= Dispatcher.callbacks.length){
+                if(index >= Beef.Dispatcher.callbacks.length){
                     index = 0;
                     i++;
                 }
                 
-                var callback = Dispatcher.callbacks[index];
+                var callback = Beef.Dispatcher.callbacks[index];
                 if(typeof(callback['dependencies']) !== 'undefined'){
                     if(success.filter(function(dispatch_index){
                         return callback.dependencies.indexOf(dispatch_index) !== -1;
@@ -71,7 +71,7 @@ Beef.Dispatcher = new function(){
                 index++;
             }
             
-            if(i >= Dispatcher.max_iterations){
+            if(i >= Beef.Dispatcher.max_iterations){
                 console.warn('Hit max dispatcher iterations, check dependencies of callbacks');
             }
         }
