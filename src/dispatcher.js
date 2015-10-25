@@ -50,7 +50,7 @@ Beef.Dispatcher = new function(){
             var success = [];
             var i = 0;
             var index = 0;
-            while(i < Dispatcher.max_iterations && success.length < Beef.Dispatcher.callbacks.length){
+            while(i < Beef.Dispatcher.max_iterations && success.length < Beef.Dispatcher.callbacks.length){
                 
                 if(index >= Beef.Dispatcher.callbacks.length){
                     index = 0;
