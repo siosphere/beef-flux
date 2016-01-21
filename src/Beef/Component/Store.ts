@@ -10,6 +10,8 @@ class Store
 {
     protected rows : any = {};
     
+    public dispatchIndex : number = null;
+    
     public listen(event : string, callback : ((...args : any[]) => any))
     {
         $(window).on(event, callback);
@@ -400,5 +402,9 @@ class Store
         return value.map(function(v){
             return $me.sanitize(v, schemaConfig.schema(), json);
         });
+    }
+    
+    protected getDispatcher() : Dispatcher {
+        return Beef.service(Dispatcher.SERVICE_ID);
     }
 }

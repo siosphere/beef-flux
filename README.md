@@ -3,7 +3,10 @@ BeefJS is a React/Flux architecture friendly micro framework. It also contains a
 
 # Routing
 ```
-Beef.Router.routes({
+
+var Router = Beef.service(RoutingService.SERVICE_ID);
+
+Router.routes({
     'url/slug': function() {
         console.log('when the slug matches');
     },
@@ -13,49 +16,60 @@ Beef.Router.routes({
 });
 ```
 ```
-$(window).on('hashchange', Beef.Router.doRouting);
+$(window).on('hashchange', Router.doRouting);
 ```
 
 # Api Calls
 ```
-Beef.Api.get(url, {param: 'value'}).success().error()
+var Api = Beef.service(ApiService.SERVICE_ID);
+Api.get(url, {param: 'value'}).success().error()
 ```
 
 ```
 var MY_API_URL = '/api/v1/users/{userId}/';
-Beef.Api.get(MY_API_URL, {userId: 1}).success().error(); //will replace {userId} with the given param
+Api.get(MY_API_URL, {userId: 1}).success().error(); //will replace {userId} with the given param
 ```
 
 ```
-Beef.Api.get('/my/url', {userId: 1}); //final url would be /my/url?userId=1
+Api.get('/my/url', {userId: 1}); //final url would be /my/url?userId=1
 ```
 
-#Store
+#Store - using TypeScript
 ```
-var MyStore = Beef.Store.create({
-    dispatchIndex: Beef.Dispatcher.register(function(payload) {
-        
-    })
-});
+class MyStore extends Store {
+    constructor() {
+        this.dispatchIndex = this.getDispatcher().register(function( payload : DispatcherPayload) {
+        });
+    }
+}
+
+var store = new MyStore();
 ```
 ## Rows
 ```
-MyStore.upsertRow('todos', 'id', 1, {
+store.upsertRow('todos', 'id', 1, {
     id: 1,
     title: 'My Title',
     desc: 'My Description'
 });
 
-MyStore.getRows('todos'); //[{id: 1, title: 'My Title', desc: 'My Description}]
+store.getRows('todos'); //[{id: 1, title: 'My Title', desc: 'My Description}]
 
-var byTitle = MyStore.getRows('todos').sort(MyStore.sortBy('name', 'ASC'));
+var byTitle = store.getRows('todos').sort(MyStore.sortBy('name', 'ASC'));
 
 ```
 
 ## Schema
 ```
-var MyStore = Beef.Store.create({
-    schema: {
+class MyStore extends Store {
+    public createTodo(title : string, description : string) {
+        return this.sanitize({
+            title: title,
+            desc: description
+        }, MyStore.schema.Todo);
+    }
+
+    public static schema : any = {
         Todo: {
             title: {
                 type: 'string'
@@ -64,20 +78,21 @@ var MyStore = Beef.Store.create({
                 type: 'string'
             }
         }
-    },
-    createTodo: function(title, description) {
-        return MyStore.sanitize({
-            title: title,
-            desc: description
-        }, MyStore.schema.Todo);
     }
-});
+}
 ```
 ### Validation
 You an also add validation to the schema, which when passed through the validator will return the object, or an array of errors if it isn't valid.
 ```
-var MyStore = Beef.Store.create({
-    schema: {
+class MyStore extends Store {
+    public createTodo(title : string, description : string) {
+        return this.sanitize({
+            title: title,
+            desc: description
+        }, MyStore.schema.Todo);
+    }
+
+    public static schema : any = {
         Todo: {
             title: {
                 type: 'string'
@@ -95,30 +110,31 @@ var MyStore = Beef.Store.create({
             }
         }
     }
-});
+}
 ```
 ## Events
 ```
-var MyStore = Beef.Store.create({
-    events: {
-        UPDATE: 'MyStore.events.UPDATE'
-    },
-    createToDo: function() {
-        MyStore.emit(MyStore.events.UPDATE);
+class MyStore extends Store {
+    public createTodo(title : string, description : string) {
+        this.emit(MyStore.events.UPDATE);
     }
-});
+
+    public static events : any = {
+        UPDATE: 'MyStore.events.UPDATE'
+    }
+}
 
 var onUpdate = function() {
    console.log('updated');
 };
 
-MyStore.listen(MyStore.events.UPDATE, onUpdate);
-MyStore.ignore(MyStore.events.UPDATE, onUpdate);
+store.listen(MyStore.events.UPDATE, onUpdate);
+store.ignore(MyStore.events.UPDATE, onUpdate);
 ```
 
 # Dispatcher
 ```
-Beef.Dispatcher.register(function(payload) {
+Dispatcher.register(function(payload : DispatcherPayload) {
     var event = payload.event;
     var data = payload.data;
     switch(event) {
@@ -130,7 +146,7 @@ Beef.Dispatcher.register(function(payload) {
 ```
 
 ```
-Beef.Dispatcher.dispatch('SOME_ACTION', {
+Dispatcher.dispatch('SOME_ACTION', {
     some: 'data'
 });
 ```
