@@ -1,864 +1,635 @@
 /**
- * Setup the initial Beef Namespace
+ * Handles our services, our initial setup of services, and starts the
+ * framework
  */
-var Beef = new function() {
-    return {
-        
-    };
-};
-
-Beef.Api = new function(){
-    return {
-        
-        /**
-         * Throttle function by given wait time (in ms)
-         * @param {type} func
-         * @param {type} wait
-         * @param {type} immediate
-         * @returns {Function}
-         */
-        throttle: function(func, wait, immediate) {
-            var timeout;
-            return function() {
-                var context = this, args = arguments;
-                var later = function() {
-                    timeout = null;
-                    if (!immediate) func.apply(context, args);
-                };
-                var callNow = immediate && !timeout;
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-                if (callNow) func.apply(context, args);
-            };
-        },
-        
-        /**
-         * Build the URL for get and delete methods that can't accept parameters
-         * Replace magic parts of a URL, i.e. my/url/{test_id}/ would replace
-         * {test_id} with the value of data.test_id
-         * @param {type} url
-         * @param {type} data
-         * @param {bool} query_string
-         * @returns {unresolved}
-         */
-        _buildUrl: function(url, data, query_string){
-            //build the url
-            for(var i in data){
-                //check if URL requires data, and if provided, replace in URL.
-                
-                if(url.indexOf('{'+i+'}') !== -1){
-                    url = url.replace('{'+i+'}', data[i]);
-                    continue;
-                }
-                
-                if(typeof(query_string) !== 'undefined' && query_string === false){
-                    continue;
-                }
-                
-                if(url.indexOf('?') !== -1){
-                    url += '&';
-                } else {
-                    url += '?';
-                }
-                
-                url += i + '=' + data[i];
-            }
-            
-            return url;
-        },
-        
-        get: function(url, data){
-            return $.ajax({
-                url: this._buildUrl(url, data),
-                data: JSON.stringify(data),
-                method: "GET",
-                dataType: 'json'
-            });
-        },
-        post: function(url, data){
-            return $.ajax({
-                url: this._buildUrl(url, data, false),
-                data: JSON.stringify(data),
-                method: "POST",
-                dataType: 'json'
-            });
-        },
-        put: function(url, data){
-            return $.ajax({
-                url: this._buildUrl(url, data, false),
-                data: JSON.stringify(data),
-                method: "PUT",
-                dataType: 'json'
-            });
-        },
-        'delete': function(url, data){
-            return $.ajax({
-                url: this._buildUrl(url, data),
-                data: JSON.stringify(data),
-                method: "DELETE",
-                dataType: 'json'
-            });
+var Beef = (function () {
+    function Beef() {
+    }
+    Beef.service = function (serviceId, service) {
+        if (service === void 0) { service = null; }
+        if (service !== null) {
+            this.services[serviceId] = service;
         }
+        return this.services[serviceId];
     };
-};
-
-
-Beef.Dispatcher = new function(){
-    
-    return {
-        /**
-         * Max number of times we can loop through all our callbacks before 
-         * giving up.
-         */
-        max_iterations: 10,
-        
-        /**
-         * Holds our callback objects
-         */
-        callbacks: [],
-        
-        /**
-         * 
-         * @param {type} callback
-         * @param {type} dependencies
-         * @returns {_L3.register.dispatch_id|Beef.Dispatcher.register@pro;callbacks@pro;length}register a callback with given dependencies
-         * @param {function} callback
-         * @param {array} dependencies
-         * @returns int
-         */
-        register: function(callback, dependencies){
-            
-            var dispatch_id = this.callbacks.length;
-            
-            this.callbacks.push({
-                func: callback,
-                dependencies: dependencies,
-                dispatch_id: dispatch_id
-            });
-            
-            return dispatch_id;
-        },
-        
-        /**
-         * Dispatch a message to our registered callbacks
-         * @param {string} action
-         * @param {object} data
-         */
-        dispatch: function(action, data){
-            var payload = {
-                action: action,
-                data: data
-            };
-            
-            var success = [];
-            var i = 0;
-            var index = 0;
-            while(i < Beef.Dispatcher.max_iterations && success.length < Beef.Dispatcher.callbacks.length){
-                
-                if(index >= Beef.Dispatcher.callbacks.length){
-                    index = 0;
-                    i++;
-                }
-                
-                var callback = Beef.Dispatcher.callbacks[index];
-                if(typeof(callback['dependencies']) !== 'undefined'){
-                    if(success.filter(function(dispatch_index){
-                        return callback.dependencies.indexOf(dispatch_index) !== -1;
-                    }).length !== callback.dependencies.length){
-                        continue; //waiting on a dependency
-                    }
-                }
-                
-                callback.func(payload);
-                success.push(callback.dispatch_id);
-                index++;
-            }
-            
-            if(i >= Beef.Dispatcher.max_iterations){
-                console.warn('Hit max dispatcher iterations, check dependencies of callbacks');
-            }
-        }
+    Beef.setup = function (callback) {
+        this.setupCallbacks.push(callback);
     };
-};
+    Beef.start = function () {
+        this.setupCallbacks.forEach(function (callback) {
+            callback();
+        });
+    };
+    Beef.services = {};
+    Beef.setupCallbacks = [];
+    return Beef;
+})();
 /**
- * DataStore that hooks into actions dispatched by a Dispatcher
- * 
- * DataStore holds all data and is the only class that should modify the data,
+ * Used to create an application
+ * TODO: setup
+ */
+var BaseApp = (function () {
+    function BaseApp() {
+    }
+    BaseApp.prototype.setup = function () {
+    };
+    BaseApp.prototype.run = function () {
+    };
+    return BaseApp;
+})();
+/**
+ * All services should extend from this class
+ */
+var BaseService = (function () {
+    function BaseService() {
+    }
+    return BaseService;
+})();
+/// <reference path="../../../lib/moment.d.ts" />
+/**
+ * Store that hooks into actions dispatched by a Dispatcher
+ *
+ * Store holds all data and is the only class that should modify the data,
  * anything that pulls data from the DataStore cannot modify it and should treat
  * it as immutable
- * 
  */
-
-Beef.Store = new function(){
-    
-    $ = jQuery.noConflict();
-    
-    return {
-        /**
-         * Holds our data
-         */
-        rows: {},
-        
-        /**
-         * Used to create our stores
-         * i.e. var MyStore = DataStore.create({}).
-         * 
-         * @param {Object} config
-         * @returns {undefined}
-         */
-        create: function(config){
-            if(typeof(config) === 'undefined'){
-                throw new Error('Invalid store configuration, please supply a valid Javascript Object');
-            }
-            
-            var tmp = {};
-            $.extend(true, tmp, this, config);
-            return tmp;
-        },
-        
-        /**
-         * Attach a listener to an event for this store
-         * 
-         * @param {type} event
-         * @param {type} callback
-         * @returns {undefined}
-         */
-        listen: function(event, callback){
-            $(window).on(event, callback);
-        },
-        
-        /**
-         * Detach a listener to an event for this store
-         * @param {type} event
-         * @param {type} callback
-         * @returns {undefined}
-         */
-        ignore: function(event, callback){
-            $(window).off(event, callback);
-        },
-        
-        /**
-         * Deprecated, use ignore instead
-         * @param {type} event
-         * @param {type} callback
-         * @returns {undefined}
-         */
-        stopListen: function(event, callback){
-            this.ignore(event, callback);
-        },
-        
-        /**
-         * Emit an event, supply additional data
-         */
-        emit: function(event, data){
-            $(window).trigger(event, [data]);
-        },
-        
-        _merge: function(obj1, obj2, depth) {
-            if(typeof(depth) === 'undefined'){
-                depth = 1;
-            }
-            var $me = this;
-            
-            if(depth === 3){
-                return obj2;
-            }
-            
-            for (var p in obj2) {
-              try {
-                // Property in destination object set; update its value.
-                if ( obj2[p].constructor === Object ) {
-                  obj1[p] = $me._merge(obj1[p], obj2[p], depth + 1);
-
-                } else {
-                  obj1[p] = obj2[p];
+var Store = (function () {
+    function Store() {
+        this.rows = {};
+    }
+    Store.prototype.listen = function (event, callback) {
+        $(window).on(event, callback);
+    };
+    Store.prototype.ignore = function (event, callback) {
+        $(window).off(event, callback);
+    };
+    Store.prototype.emit = function (event, data) {
+        $(window).trigger(event, [data]);
+    };
+    Store.prototype.upsertRow = function (modelType, keyField, keyValue, newRow) {
+        var updated = false;
+        if (typeof (this.rows[modelType]) === 'undefined') {
+            this.rows[modelType] = [];
+        }
+        var rows = this.rows[modelType];
+        var self = this;
+        rows.forEach(function (row, index) {
+            if (typeof (row[keyField]) !== 'undefined' && row[keyField] === keyValue) {
+                if (typeof (rows[index]) === 'undefined') {
+                    rows[index] = {};
                 }
-
-              } catch(e) {
+                rows[index] = self.merge(rows[index], newRow);
+                updated = true;
+            }
+        });
+        if (!updated) {
+            this.rows[modelType].push(newRow);
+        }
+    };
+    Store.prototype.removeRow = function (modelType, keyField, keyValue) {
+        if (typeof (this.rows[modelType]) === 'undefined') {
+            return;
+        }
+        var rows = this.rows[modelType];
+        var indexes = [];
+        rows.forEach(function (row, index) {
+            if (typeof (row[keyField]) !== 'undefined' && row[keyField] == keyValue) {
+                indexes.push(index);
+            }
+        });
+        if (indexes.length === 0) {
+            return;
+        }
+        for (var i = 0; i < indexes.length; i++) {
+            this.rows[modelType].splice(indexes[i], 1);
+        }
+    };
+    Store.prototype.getRows = function (modelType) {
+        if (typeof (this.rows[modelType]) !== 'undefined') {
+            return this.rows[modelType].slice(0);
+        }
+        return [];
+    };
+    Store.prototype.sanitizeAndValidate = function (obj, schema) {
+        var model = this.sanitize(obj, schema, false);
+        var validation = this.validate(model, schema);
+        if (validation === true) {
+            return model;
+        }
+        return validation;
+    };
+    Store.prototype.validate = function (obj, schema) {
+        var errors = [];
+        for (var field in schema) {
+            if (typeof (schema[field].validation) !== 'undefined') {
+                for (var validation in schema[field].validation) {
+                    if (errors.length > 0) {
+                        break;
+                    }
+                    var value = obj[field];
+                    var label = schema[field].label ? schema[field].label : field;
+                    switch (validation) {
+                        case 'required':
+                            if (typeof (value) === 'undefined' || value === null || value === '') {
+                                errors.push(label + ' is required');
+                            }
+                            break;
+                        case 'minLength':
+                            if (value.length < schema[field].validation[validation]) {
+                                errors.push(label + ' must be at least ' + schema[field].validation[validation] + ' characters');
+                            }
+                            break;
+                        case 'maxLength':
+                            if (value.length > schema[field].validation[validation]) {
+                                errors.push(label + ' must be at under ' + schema[field].validation[validation] + ' characters');
+                            }
+                            break;
+                        default:
+                            if (typeof (schema[field].validation[validation]) === 'function') {
+                                var results = schema[field].validation[validation](value);
+                                if (results !== true) {
+                                    errors.concat(results);
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+        return errors.length > 0 ? errors : true;
+    };
+    Store.prototype.sanitize = function (obj, schema, json) {
+        var clean = {};
+        var tmp = jQuery.extend(true, {}, obj);
+        for (var field in schema) {
+            clean[field] = this.sanitizeField(field, tmp, schema, json);
+        }
+        return clean;
+    };
+    Store.prototype.merge = function (obj1, obj2, depth) {
+        if (depth === void 0) { depth = 1; }
+        var self = this;
+        if (depth === 3) {
+            return obj2;
+        }
+        for (var p in obj2) {
+            try {
+                // Property in destination object set; update its value.
+                if (obj2[p].constructor === Object) {
+                    obj1[p] = self.merge(obj1[p], obj2[p], depth + 1);
+                }
+                else {
+                    obj1[p] = obj2[p];
+                }
+            }
+            catch (e) {
                 // Property in destination object not set; create it and set its value.
                 obj1[p] = obj2[p];
-              }
             }
-
-            return obj1;
-        },
-        
-        /**
-         * Update or Insert a row by key_field/key_value
-         * 
-         * @param {type} key_field
-         * @param {type} key_value
-         * @param {type} newRow
-         * @returns {undefined}
-         */
-        upsertRow: function(model, key_field, key_value, newRow){
-            var bUpdated = false;
-            
-            if(typeof(this.rows[model]) === 'undefined'){
-                this.rows[model] = [];
+        }
+        return obj1;
+    };
+    Store.prototype.sortBy = function (key, dir) {
+        if (dir === void 0) { dir = 'desc'; }
+        return function (a, b) {
+            if ((b[key] && !a[key]) || (b[key] && a[key] && b[key] > a[key])) {
+                return dir.toLowerCase() === 'desc' ? 1 : -1;
             }
-            
-            var rows = this.rows[model];
-            
-            var $me = this;
-            rows.forEach(function(row, index){
-                if(typeof(row[key_field]) !== 'undefined' && row[key_field] === key_value){
-                    if(typeof(rows[index]) === 'undefined'){
-                        rows[index] = {};
-                    }
-                    
-                    rows[index] = $me._merge(rows[index], newRow);
-                    bUpdated = true;
+            if ((!b[key] && a[key]) || (b[key] && a[key] && b[key] < a[key])) {
+                return dir.toLowerCase() === 'desc' ? -1 : 1;
+            }
+            if (b[key] && a[key] && b[key] == a[key]) {
+                return 0;
+            }
+            if (b[key] && !a[key]) {
+                return 0;
+            }
+        };
+    };
+    Store.prototype.money = function (value) {
+        return value.toFixed(2);
+    };
+    Store.prototype.uuid = function () {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
+    Store.prototype.sanitizeField = function (field, obj, schema, json) {
+        if (schema[field].type === 'function') {
+            return schema[field].value; //return function
+        }
+        if (typeof (obj[field]) === 'undefined') {
+            //see if schema has a default
+            if (typeof (schema[field]['initial']) !== 'undefined') {
+                obj[field] = schema[field]['initial']();
+            }
+            else {
+                obj[field] = null;
+            }
+        }
+        var type = schema[field]['type'];
+        if (obj[field] === null && type !== 'obj' && type !== 'object') {
+            return null;
+        }
+        schema[field].field = field;
+        switch (type) {
+            case 'int':
+            case 'integer':
+                return this.sanitizeInteger(obj[field], schema[field]);
+                break;
+            case 'float':
+            case 'double':
+                return this.sanitizeFloat(obj[field], schema[field]);
+                break;
+            case 'string':
+            case 'char':
+            case 'varchar':
+                return this.sanitizeString(obj[field], schema[field]);
+                break;
+            case 'date':
+            case 'datetime':
+            case 'timestamp':
+                return this.sanitizeDateTime(obj[field], schema[field], json);
+                break;
+            case 'bool':
+            case 'boolean':
+                return this.sanitizeBoolean(obj[field], schema[field]);
+                break;
+            case 'obj':
+            case 'object':
+                return this.sanitizeObject(obj[field], schema[field], json);
+                break;
+            case 'array':
+            case 'collection':
+                return this.sanitizeArray(obj[field], schema[field], json);
+                break;
+            default:
+                if (schema[field].sanitize !== 'undefined') {
+                    return schema[field].sanitize(obj[field], schema[field]);
                 }
-            });
-            
-            if(!bUpdated){
-                this.rows[model].push(newRow);
-            }
-        },
-        
-        /**
-         * Remove a row (or rows) if it exists by key value
-         * @param {type} model
-         * @param {type} key_field
-         * @param {type} key_value
-         * @param {type} newRow
-         * @returns {undefined}
-         */
-        removeRow: function(model, key_field, key_value){
-            if(typeof(this.rows[model]) === 'undefined'){
-                return;
-            }
-            
-            var rows = this.rows[model];
-            
-            var indexes = [];
-            
-            rows.forEach(function(row, index){
-                if(typeof(row[key_field]) !== 'undefined' && row[key_field] == key_value){
-                    indexes.push(index);
-                }
-            });
-            
-            if(indexes.length === 0){
-                return;
-            }
-            
-            for(i = 0; i < indexes.length; i++){
-                this.rows[model].splice(indexes[i], 1);
-            }
-            
-        },
-        
-        /**
-         * Return rows based on model
-         * @param {type} model
-         * @returns {Array|DataStore.rows}
-         */
-        getRows: function(model){
-            if(typeof(this.rows[model]) !== 'undefined'){
-                return this.rows[model].slice(0);
-            }
-            
-            return [];
-        },
-        
-        /**
-         * Sanitize and Validate an object with provided schema
-         * Returns array of errors if fails validation, 
-         * otherwise returns sanitized object
-         * @param {type} obj
-         * @param {type} schema
-         * @returns {undefined}
-         */
-        sanitizeAndValidate: function(obj, schema){
-            var model = this.sanitize(obj, schema);
-            var validation = this.validate(model, schema);
-            if(validation === true){
-                return model;
-            }
-            return validation;
-        },
-        
-        /**
-         * Validate an object with provided schema, returns true if valid,
-         * array of errors if not valid
-         * @param {type} obj
-         * @param {type} schema
-         * @returns {undefined}
-         */
-        validate: function(obj, schema){
-            var errors = [];
-            for(var field in schema){
-                if(typeof(schema[field].validation) !== 'undefined'){
-                    var bError = false;
-                    for(var validation in schema[field].validation){
-                        if(bError){
-                            continue; //don't keep checking
-                        }
-                        var value = obj[field];
-                        
-                        if(typeof(schema[field].label) !== 'undefined'){
-                            var label = schema[field].label;
-                        } else {
-                            var label = field;
-                        }
-                        
-                        switch(validation){
-                            case 'required':
-                                if(typeof(value) === 'undefined' || value === null || value === ''){
-                                    errors.push(label + ' is required');
-                                    bError = true;
-                                }
-                                break;
-                            case 'minLength':
-                                if(value.length < schema[field].validation[validation]){
-                                    errors.push(label + ' must be at least ' + schema[field].validation[validation] + ' characters');
-                                    bError = true;
-                                }
-                                break;
-                            case 'maxLength':
-                                if(value.length > schema[field].validation[validation]){
-                                    errors.push(label + ' must be at under ' + schema[field].validation[validation] + ' characters');
-                                    bError = true;
-                                }
-                                break;
-                            default:
-                                if(typeof(schema[field].validation[validation]) === 'function'){
-                                    var results = schema[field].validation[validation](value);
-                                    if(results !== true){
-                                        errors.concat(results);
-                                        bError = true;
-                                    }
-                                }
-                                break;
-                        }
-                    }
-                }
-            }
-            
-            if(errors.length > 0){
-                return errors;
-            }
-            
-            return true;
-        },
-        
-        /**
-         * Sanitize the object being passed in based on the schema being passed in
-         * @param {type} obj
-         * @param {type} schema
-         * @returns {undefined}
-         */
-        sanitize: function(obj, schema, json){
-            var clean = {};
-            var tmp = jQuery.extend(true, {}, obj);
-            for(var field in schema){
-                clean[field] = this._sanitizeField(field, tmp, schema, json);
-            }
-            
-            return clean;
-        },
-        
-        /**
-         * Santize a given field
-         */
-        _sanitizeField: function(field, obj, schema, json){
-            
-            if(schema[field].type === 'function'){
-                return schema[field].value; //return function
-            }
-            
-            if(typeof(obj[field]) === 'undefined'){
-                //see if schema has a default
-                if(typeof(schema[field]['initial']) !== 'undefined'){
-                    obj[field] = schema[field]['initial']();
-                } else {
-                    obj[field] = null;
-                }
-            }
-            var type = schema[field]['type'];
-            if(obj[field] === null && type !== 'obj' && type !== 'object'){
-                return null;
-            }
-            
-            schema[field].field = field;
-            
-            switch(type){
-                case 'int':
-                case 'integer':
-                    return this._sanitizeInteger(obj[field], schema[field]);
-                    break;
-                case 'float':
-                case 'double':
-                    return this._sanitizeFloat(obj[field], schema[field]);
-                    break;
-                case 'string':
-                case 'char':
-                case 'varchar':
-                    return this._sanitizeString(obj[field], schema[field]);
-                    break;
-                case 'date':
-                case 'datetime':
-                case 'timestamp':
-                    return this._sanitizeDateTime(obj[field], schema[field], json);
-                    break;
-                case 'bool':
-                case 'boolean':
-                    return this._sanitizeBoolean(obj[field], schema[field]);
-                    break;
-                case 'obj':
-                case 'object':
-                    return this._sanitizeObject(obj[field], schema[field], json);
-                    break;
-                case 'array':
-                case 'collection':
-                    return this._sanitizeArray(obj[field], schema[field]);
-                    break;
-                default:
-                    if(schema[field].sanitize !== 'undefined'){
-                        return schema[field].sanitize(obj[field], schema[field]);
-                    }
-                    break;
-            }
-            
-        },
-
-        /**
-         * Sanitize value as integer
-         * @param {type} value
-         * @param {type} schemaConfig
-         * @returns {_L11._sanitizeInteger.value}
-         */
-        _sanitizeInteger: function(value, schemaConfig){
-            if(typeof value === 'string'){
-                value = value.replace(/[a-zA-Z]+/gi, '');
-                if(value.length === 0){
-                    return value = '';
-                }
-            }
-            
-            value = parseInt(value);
-            
-            if(typeof(schemaConfig.min) !== 'undefined' && value < schemaConfig.min){
-                throw new Error('Provided value cannot be sanitized, value is below minimum integer allowed');
-            }
-            if(typeof(schemaConfig.max) !== 'undefined' && value > schemaConfig.max){
-                throw new Error('Provided value cannot be sanitized, value is greater than maximum integer allowed');
-            }
-            
-            if(isNaN(value)){
+                break;
+        }
+    };
+    Store.prototype.sanitizeInteger = function (value, schemaConfig) {
+        if (typeof value === 'string') {
+            value = value.replace(/[a-zA-Z]+/gi, '');
+            if (value.length === 0) {
                 return value = '';
             }
-
+        }
+        value = parseInt(value);
+        if (typeof (schemaConfig.min) !== 'undefined' && value < schemaConfig.min) {
+            throw new Error('Provided value cannot be sanitized, value is below minimum integer allowed');
+        }
+        if (typeof (schemaConfig.max) !== 'undefined' && value > schemaConfig.max) {
+            throw new Error('Provided value cannot be sanitized, value is greater than maximum integer allowed');
+        }
+        if (isNaN(value)) {
+            return value = '';
+        }
+        return value;
+    };
+    Store.prototype.sanitizeFloat = function (value, schemaConfig) {
+        value = parseFloat(value);
+        if (typeof (schemaConfig.min) !== 'undefined' && value < schemaConfig.min) {
+            throw new Error('Provided value cannot be sanitized, value is below minimum float allowed');
+        }
+        if (typeof (schemaConfig.max) !== 'undefined' && value > schemaConfig.max) {
+            throw new Error('Provided value cannot be sanitized, value is greater than maximum float allowed');
+        }
+        return value;
+    };
+    Store.prototype.sanitizeString = function (value, schemaConfig) {
+        value = String(value);
+        if (typeof (schemaConfig.minLength) !== 'undefined' && value.length < schemaConfig.minLength) {
+            throw new Error('Provided value cannot be sanitized, string length is below minimum allowed');
+        }
+        if (typeof (schemaConfig.maxLength) !== 'undefined' && value.length > schemaConfig.maxLength) {
+            //truncate and do a warning
+            console.warn('Value was truncated during sanitation');
+            value = value.substr(0, schemaConfig.maxLength);
+        }
+        return value;
+    };
+    Store.prototype.sanitizeDateTime = function (value, schemaConfig, json) {
+        if (moment(value, schemaConfig.format).isValid()) {
+            if (json) {
+                return moment(value).utc().format('YYYY-MM-DD hh:mm:ss');
+            }
+            if (typeof schemaConfig.utc === 'undefined' || schemaConfig.utc) {
+                return moment.utc(value);
+            }
+            return moment(value);
+        }
+        throw new Error("Provided value (" + value + ") cannot be sanitized for field (" + schemaConfig.field + "), is not a valid date");
+    };
+    Store.prototype.sanitizeBoolean = function (value, schemaConfig) {
+        if (value === false || value === true) {
             return value;
-        },
-
-        /**
-         * Sanitize value as float
-         * @param {type} value
-         * @param {type} schemaConfig
-         * @returns {_L11._sanitizeInteger.value}
-         */
-        _sanitizeFloat: function(value, schemaConfig){
-            value = parseFloat(value);
-            if(typeof(schemaConfig.min) !== 'undefined' && value < schemaConfig.min){
-                throw new Error('Provided value cannot be sanitized, value is below minimum float allowed');
-            }
-            if(typeof(schemaConfig.max) !== 'undefined' && value > schemaConfig.max){
-                throw new Error('Provided value cannot be sanitized, value is greater than maximum float allowed');
-            }
-
-            return value;
-        },
-        
-        /**
-         * Sanitize a String
-         * @param {type} value
-         * @param {type} schemaConfig
-         * @returns {_L11._sanitizeString.value}
-         */
-        _sanitizeString: function(value, schemaConfig){
-            value = String(value);
-            if(typeof(schemaConfig.minLength) !== 'undefined' && value.length < schemaConfig.minLength){
-                throw new Error('Provided value cannot be sanitized, string length is below minimum allowed');
-            }
-            if(typeof(schemaConfig.maxLength) !== 'undefined' && value.length > schemaConfig.maxLength){
-                //truncate and do a warning
-                console.warn('Value was truncated during sanitation');
-                value = value.substr(0, schemaConfig.maxLength);
-            }
-            return value;
-        },
-        
-        /**
-         * Sanitize a datetime
-         * @param {type} value
-         * @param {type} schemaConfig
-         * @returns {unresolved}
-         */
-        _sanitizeDateTime: function(value, schemaConfig, json){
-            
-            if(moment(value, schemaConfig.format).isValid()){
-                if(json){
-                    return moment(value).utc().format('YYYY-MM-DD hh:mm:ss');
-                }
-                if(typeof schemaConfig.utc === 'undefined' || schemaConfig.utc){
-                    return moment.utc(value);
-                }
-                return moment(value);
-            }
-            
-            throw new Error("Provided value ("+ value +") cannot be sanitized for field ("+ schemaConfig.field +"), is not a valid date");
-        },
-        
-        /**
-         * Sanitize Boolean
-         * @param {type} value
-         * @param {type} schemaConfig
-         * @returns {Boolean}
-         */
-        _sanitizeBoolean: function(value, schemaConfig){
-            if(value === false || value === true){
-                return value;
-            }
-            if(typeof(value) == 'string'){
-                if(value.toLowerCase().trim() === 'false'){
-                    return false;
-                }
-                if(value.toLowerCase().trim() === 'true'){
-                    return true;
-                }
-            }
-            if(parseInt(value) === 0){
+        }
+        if (typeof (value) == 'string') {
+            if (value.toLowerCase().trim() === 'false') {
                 return false;
             }
-            if(parseInt(value) === 1){
+            if (value.toLowerCase().trim() === 'true') {
                 return true;
             }
-            
-            throw new Error('Provided value cannot be santized, is not a valid boolean');
-        },
-        
-        /**
-         * Sanitize an Object
-         * @param {type} value
-         * @param {type} schemaConfig
-         * @returns {_L11.sanitize.clean|DataStore.sanitize@call;_sanitizeField|undefined}
-         */
-        _sanitizeObject: function(value, schemaConfig, json){
-            if(typeof(schemaConfig.schema) === 'undefined'){
-                throw new Error('Provided value cannot be santized, no reference schema provided for field type of object');
-            }
-            
-            if(schemaConfig.schema === null){
-                return value;
-            }
-            
-            if(value === null){
-                return null;
-            }
-            
-            return this.sanitize(value, schemaConfig.schema());
-        },
-        
-        /**
-         * Sanitize an Array, with a given schema or type if needed
-         * @param {type} value
-         * @param {type} schemaConfig
-         * @returns {_L11.sanitize.clean|DataStore.sanitize@call;_sanitizeField|undefined}
-         */
-        _sanitizeArray: function(value, schemaConfig){
-            if(typeof(schemaConfig.schema) === 'undefined' || schemaConfig.schema === null || schemaConfig.schema === false){
-                return value;
-            }
-            
-            if(typeof(value.length) === 'undefined'){
-                return []; //empty array
-            }
-            
-            var $me = this;
-            
-            return value.map(function(v){
-                return $me.sanitize(v, schemaConfig.schema());
-            });
-        },
-        
-        /**
-         * Generate a unique UUID
-         * @returns {String}
-         */
-        uuid: function(){
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-                return v.toString(16);
-            });
-        },
-        
-        /**
-         * Sort by a given field in a given direction
-         */
-        sortBy: function(key, dir){
-            
-            return function(a, b){
-                var dir = dir ? dir : 'desc';
-                
-                if((b[key] && !a[key]) || (b[key] && a[key] && b[key] > a[key])){
-                    return dir.toLowerCase() === 'desc' ? 1 : -1;
-                }
-                
-                if((!b[key] && a[key]) || (b[key] && a[key] && b[key] < a[key])){
-                    return dir.toLowerCase() === 'desc' ? -1 : 1;
-                }
-                
-                if(b[key] && a[key] && b[key] == a[key]){
-                    return 0;
-                }
-                
-                if(b[key] && !a[key]){
-                    return 0;
-                }
-            };
-            
-        },
-        
-        /**
-         * format something as money
-         * @param {type} value
-         * @returns {unresolved}
-         */
-        money: function(value) {
-            return value.toFixed(2);
         }
-        
+        if (parseInt(value) === 0) {
+            return false;
+        }
+        if (parseInt(value) === 1) {
+            return true;
+        }
+        throw new Error('Provided value cannot be santized, is not a valid boolean');
     };
+    Store.prototype.sanitizeObject = function (value, schemaConfig, json) {
+        if (typeof (schemaConfig.schema) === 'undefined') {
+            throw new Error('Provided value cannot be santized, no reference schema provided for field type of object');
+        }
+        if (schemaConfig.schema === null) {
+            return value;
+        }
+        if (value === null) {
+            return null;
+        }
+        return this.sanitize(value, schemaConfig.schema(), json);
+    };
+    Store.prototype.sanitizeArray = function (value, schemaConfig, json) {
+        if (typeof (schemaConfig.schema) === 'undefined' || schemaConfig.schema === null || schemaConfig.schema === false) {
+            return value;
+        }
+        if (typeof (value.length) === 'undefined') {
+            return []; //empty array
+        }
+        var $me = this;
+        return value.map(function (v) {
+            return $me.sanitize(v, schemaConfig.schema(), json);
+        });
+    };
+    return Store;
+})();
+/**
+ * Holds a dispatcher callback function, with dependencies (array of dispatchIds)
+ * that need to be called before this callback will fire. Also holds its
+ * dispatchId
+ */
+var DispatcherCallback = (function () {
+    function DispatcherCallback(func, dependencies, dispatchId) {
+        if (dependencies === void 0) { dependencies = []; }
+        this.func = func;
+        this.dependencies = dependencies;
+        this.dispatchId = dispatchId;
+    }
+    return DispatcherCallback;
+})();
+;
+/**
+ * The payload that will be sent to the dispatch callback
+ */
+var DispatcherPayload = (function () {
+    function DispatcherPayload(action, data) {
+        this.action = action;
+        this.data = data;
+    }
+    return DispatcherPayload;
+})();
+/**
+ * Holds routes (an object with 'url/pattern': function())
+ */
+var RoutingConfig = (function () {
+    function RoutingConfig(routes) {
+        this.routes = routes;
+    }
+    RoutingConfig.prototype.isRoute = function (url) {
+        return typeof (this.routes[url]) !== 'undefined';
+    };
+    RoutingConfig.prototype.callRoute = function (url, data) {
+        this.routes[url](data);
+    };
+    return RoutingConfig;
+})();
+/// <reference path="../../../lib/jquery.d.ts" />
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * 
- * 
+ * Wrapper to create a consistent sdk for doing XHR requests. Will
+ * automatically replace matching variables in urls that match the pattern.
+ * i.e/ /my/url/{someId}/ { someId: 1 } = /my/url/1/
  */
-
-Beef.Router = new function() {
-    return {
-        /**
-         * On route change
-         * @returns {undefined}
-         */
-        onRoute: function(){ },
-        
-        /**
-         * Holds our routes
-         */
-        _routes: null,
-        
-        /**
-         * Sets our routes
-         * @param {type} routes_obj
-         * @returns {undefined}
-         */
-        routes: function(routes_obj){
-            Beef.Router._routes = routes_obj;
-        },
-        
-        /**
-         * What is our current active route
-         */
-        _activeRoute: '',
-        
-        /**
-         * Holds the data submitted from the route url. {params}
-         */
-        _routeData: {},
-        
-        /**
-         * Completes our route
-         * @param {type} route
-         * @param {type} data
-         * @returns {undefined}
-         */
-        route: function(route, data){
-            if(typeof(Beef.Router._routes[route]) !== 'undefined'){
-                Beef.Router._routes[route](data);
-                Beef.Router._activeRoute = route;
-                Beef.Router.onRoute();
+var ApiService = (function (_super) {
+    __extends(ApiService, _super);
+    function ApiService() {
+        _super.apply(this, arguments);
+    }
+    ApiService.prototype.throttle = function (func, wait, immediate) {
+        var timeout;
+        return function () {
+            var context = this, args = arguments;
+            var later = function () {
+                timeout = null;
+                if (!immediate)
+                    func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow)
+                func.apply(context, args);
+        };
+    };
+    ApiService.prototype.get = function (url, data) {
+        return $.ajax({
+            url: this._buildUrl(url, data),
+            data: JSON.stringify(data),
+            method: "GET",
+            dataType: 'json'
+        });
+    };
+    ApiService.prototype.post = function (url, data) {
+        return $.ajax({
+            url: this._buildUrl(url, data, false),
+            data: JSON.stringify(data),
+            method: "POST",
+            dataType: 'json'
+        });
+    };
+    ApiService.prototype.put = function (url, data) {
+        return $.ajax({
+            url: this._buildUrl(url, data, false),
+            data: JSON.stringify(data),
+            method: "PUT",
+            dataType: 'json'
+        });
+    };
+    ApiService.prototype['delete'] = function (url, data) {
+        return $.ajax({
+            url: this._buildUrl(url, data),
+            data: JSON.stringify(data),
+            method: "DELETE",
+            dataType: 'json'
+        });
+    };
+    ApiService.prototype._buildUrl = function (url, data, queryString) {
+        if (queryString === void 0) { queryString = true; }
+        //build the url
+        for (var i in data) {
+            //check if URL requires data, and if provided, replace in URL.
+            if (url.indexOf('{' + i + '}') !== -1) {
+                url = url.replace('{' + i + '}', data[i]);
+                continue;
             }
-        },
-        /**
-         * Parse our route from the URL
-         * @returns {undefined}
-         */
-        doRouting: function(){
-            for(var raw_route in Beef.Router._routes){
-                var route = match_route = raw_route;
-                var raw_hash = window.location.hash;
-                if (raw_hash.indexOf('?') >= 0) {
-                    raw_hash = raw_hash.substring(0, raw_hash.indexOf('?'));
-                }
-                var res = raw_route.match(/\{[a-z\_\-\+]+\}/gi);
-                var data = {};
-                
-                //pull these params from the route
-                if(res !== null){
-                    var route_parts = raw_route.split('/');
-                    var hash_parts = raw_hash.split('/');
-                    hash_parts = hash_parts.splice(1, hash_parts.length - 1);
-                    
-                    if(hash_parts.length !== route_parts.length){
-                        continue;
-                    }
-                    
-                    var i = 0;
-                    var bError = false;
-                    
-                    hash_parts.forEach(function(part){
-                        if(!route_parts[i].match(/\{[a-z\_\-\+]+\}/gi)){
-                            if(part !== route_parts[i]){
-                                bError = true;
-                            }
-                        }
-                        i++;
-                    });
-                    
-                    if(bError){
-                        continue;
-                    }
-                    
-                    
-                    //reset the match route for regex
-                    match_route = '';
-                    route_parts.forEach(function(part, index){
-                        if(index > 0){
-                            match_route += '/';
-                        }
-                        match_route += hash_parts[index];
-                        if(index > 0){
-                            data[part.replace(/[\{\}]/gi, '')] = hash_parts[index];
-                        }
-                    });
-                }
-                
-                match_route = match_route.replace('+', '\\+');
-                var regex = new RegExp('^#\/' + match_route + '$', 'gi');
-                if(raw_hash.match(regex) !== null){
-                    if(Beef.Router._activeRoute === route && data === Beef.Router._routeData){
-                        return; //already active
-                    }
-                    Beef.Router._routeData = data;
-                    Beef.Router._activeRoute = route;
-                    Beef.Router.route(route, data);
-                    return;
-                }
+            if (queryString === false) {
+                continue;
             }
-            Beef.Router.route('/'); //default route
-        },
-        
-        /**
-         * Go to app url
-         * @param {type} url
-         * @returns {undefined}
-         */
-        go: function(url){
-            document.location = '#/' + url;
+            if (url.indexOf('?') !== -1) {
+                url += '&';
+            }
+            else {
+                url += '?';
+            }
+            url += i + '=' + data[i];
+        }
+        return url;
+    };
+    ApiService.SERVICE_ID = 'beef.service.api';
+    return ApiService;
+})(BaseService);
+/**
+ * Used to dispatch messages to any registered listeners
+ */
+var Dispatcher = (function () {
+    function Dispatcher() {
+        this.maxIterations = 10;
+    }
+    Dispatcher.prototype.register = function (callback, dependencies) {
+        var dispatchId = this.callbacks.length;
+        this.callbacks.push(new DispatcherCallback(callback, dependencies, dispatchId));
+        return dispatchId;
+    };
+    Dispatcher.prototype.dispatch = function (action, data) {
+        var payload = new DispatcherPayload(action, data);
+        var success = [];
+        var i = 0;
+        var index = 0;
+        while (i < this.maxIterations && success.length < this.callbacks.length) {
+            if (index >= this.callbacks.length) {
+                index = 0;
+                i++;
+            }
+            var callback = this.callbacks[index];
+            if (success.filter(function (dispatch_index) {
+                return callback.dependencies.indexOf(dispatch_index) !== -1;
+            }).length !== callback.dependencies.length) {
+                continue; //waiting on a dependency
+            }
+            callback.func(payload);
+            success.push(callback.dispatchId);
+            index++;
+        }
+        if (i >= this.maxIterations) {
+            console.warn('Hit max dispatcher iterations, check dependencies of callbacks');
         }
     };
-};
+    Dispatcher.SERVICE_ID = 'beef.service.dispatcher';
+    return Dispatcher;
+})();
+/**
+ * Will match a given url to a route, and execute a function/callback defined
+ * for that route. Will also parse the URL for different parameters and
+ * pass that into the callback if found
+ */
+var RoutingService = (function () {
+    function RoutingService() {
+    }
+    RoutingService.prototype.onRouteFinished = function () {
+    };
+    RoutingService.prototype.routes = function (routes) {
+        this.routingConfig = new RoutingConfig(routes);
+    };
+    RoutingService.prototype.route = function (url, data) {
+        if (this.routingConfig.isRoute(url)) {
+            this.routingConfig.callRoute(url, data);
+            this.activeRoute = url;
+            this.onRouteFinished();
+        }
+    };
+    RoutingService.prototype.doRouting = function () {
+        var matchRoute = '';
+        for (var rawRoute in this.routingConfig.routes) {
+            var rawHash = window.location.hash;
+            if (rawHash.indexOf('?') >= 0) {
+                rawHash = rawHash.substring(0, rawHash.indexOf('?'));
+            }
+            var res = rawRoute.match(/\{[a-z\_\-\+]+\}/gi);
+            var data = {};
+            if (res !== null) {
+                var routeParts = rawRoute.split('/');
+                var hashParts = rawHash.split('/');
+                hashParts = hashParts.splice(1, hashParts.length - 1);
+                if (hashParts.length !== routeParts.length) {
+                    continue;
+                }
+                var i = 0;
+                var bError = false;
+                hashParts.forEach(function (part) {
+                    if (!routeParts[i].match(/\{[a-z\_\-\+]+\}/gi)) {
+                        if (part !== routeParts[i]) {
+                            bError = true;
+                        }
+                    }
+                    i++;
+                });
+                if (bError) {
+                    continue;
+                }
+                //reset the match route for regex
+                matchRoute = '';
+                routeParts.forEach(function (part, index) {
+                    if (index > 0) {
+                        matchRoute += '/';
+                    }
+                    matchRoute += hashParts[index];
+                    if (index > 0) {
+                        data[part.replace(/[\{\}]/gi, '')] = hashParts[index];
+                    }
+                });
+            }
+            matchRoute = matchRoute.replace('+', '\\+');
+            var regex = new RegExp('^#\/' + matchRoute + '$', 'gi');
+            if (rawHash.match(regex) !== null) {
+                if (this.activeRoute === rawRoute && data === this.routeData) {
+                    return; //already active
+                }
+                this.routeData = data;
+                this.activeRoute = rawRoute;
+                this.route(rawRoute, data);
+                return;
+            }
+        }
+    };
+    RoutingService.SERVICE_ID = 'beef.service.routing';
+    return RoutingService;
+})();
+/// <reference path="../Beef.ts" />
+/// <reference path="../Component/BaseApp.ts" />
+/// <reference path="../Component/BaseService.ts" />
+/// <reference path="../Component/Store.ts" />
+/// <reference path="../Component/Dispatcher/Callback.ts" />
+/// <reference path="../Component/Dispatcher/Payload.ts" />
+/// <reference path="../Component/Routing/Config.ts" />
+/// <reference path="../Service/ApiService.ts" />
+/// <reference path="../Service/Dispatcher.ts" />
+/// <reference path="../Service/RoutingService.ts" />
+/**
+ * Register our services
+ */
+Beef.setup(function () {
+    Beef.service(ApiService.SERVICE_ID, new ApiService());
+    Beef.service(Dispatcher.SERVICE_ID, new Dispatcher());
+    Beef.service(RoutingService.SERVICE_ID, new RoutingService());
+});
