@@ -3,7 +3,7 @@
  */
 class Dispatcher extends BaseService
 {
-    protected SERVICE_ID : string = 'beef.service.dispatcher';
+    public static SERVICE_ID : string = 'beef.service.dispatcher';
     protected maxIterations : number = 10;
     
     protected callbacks : DispatcherCallback[];
