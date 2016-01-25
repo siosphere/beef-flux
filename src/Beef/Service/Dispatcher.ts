@@ -6,7 +6,7 @@ class Dispatcher extends BaseService
     public static SERVICE_ID : string = 'beef.service.dispatcher';
     protected maxIterations : number = 10;
     
-    protected callbacks : DispatcherCallback[];
+    protected callbacks : DispatcherCallback[] = [];
     
     public register(callback : (payload: any) => any, dependencies:number[]) : number
     {
