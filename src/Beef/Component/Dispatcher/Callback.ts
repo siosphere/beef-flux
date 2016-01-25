@@ -9,7 +9,7 @@ class DispatcherCallback {
     public dependencies:number[];
     public dispatchId:number;
     
-    constructor(func : () => any, dependencies:number[] = [], dispatchId:number)
+    constructor(func : (payload : any) => any, dependencies:number[] = [], dispatchId:number)
     {
         this.func = func;
         this.dependencies = dependencies;

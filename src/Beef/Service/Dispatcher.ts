@@ -1,14 +1,14 @@
 /**
  * Used to dispatch messages to any registered listeners
  */
-class Dispatcher 
+class Dispatcher extends BaseService
 {
-    public static SERVICE_ID : string = 'beef.service.dispatcher';
+    protected SERVICE_ID : string = 'beef.service.dispatcher';
     protected maxIterations : number = 10;
     
     protected callbacks : DispatcherCallback[];
     
-    public register(callback : () => any, dependencies:number[]) : number
+    public register(callback : (payload: any) => any, dependencies:number[]) : number
     {
         var dispatchId = this.callbacks.length;
         this.callbacks.push(new DispatcherCallback(callback, dependencies, dispatchId));
