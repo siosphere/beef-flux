@@ -94,9 +94,9 @@ class RoutingService
                 this.route(rawRoute, data);
                 return;
             }
-            
-            this.route('/', {}); //default route
         }
+        
+        this.route('/', {}); //default route
         
     }
 }
