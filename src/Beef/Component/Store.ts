@@ -79,10 +79,10 @@ class Store
         }
     }
     
-    public getRows(modelType : string)
+    public getRows(modelType : string, noSlice : boolean = true)
     {
         if(typeof(this.rows[modelType]) !== 'undefined'){
-            return this.rows[modelType].slice(0);
+            return noSlice ? this.rows[modelType] : this.rows[modelType].slice(0);
         }
 
         return [];
