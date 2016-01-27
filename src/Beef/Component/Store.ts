@@ -27,7 +27,7 @@ class Store
          $(window).trigger(event, [data]);
     }
     
-    public upsertRow(modelType : string, keyField : string, keyValue : any, newRow : any)
+    public upsertRow(modelType : string, keyField : string, keyValue : any, newRow : any, overwrite : boolean = false)
     {
         var updated : boolean = false;
         
@@ -44,7 +44,7 @@ class Store
                     rows[index] = {};
                 }
 
-                rows[index] = self.merge(rows[index], newRow);
+                rows[index] = overwrite ? rows[index] = newRow : self.merge(rows[index], newRow);
                 updated = true;
             }
         });
