@@ -4,8 +4,8 @@
  */
 class DispatcherPayload
 {
-    protected action : string;
-    protected data : any;
+    public action : string;
+    public data : any;
     
     constructor(action : string, data : any)
     {
