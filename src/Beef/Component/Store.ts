@@ -8,25 +8,44 @@
  */
 class Store
 {
+    /**
+     * Holds all of our rows by modelType
+     */
     protected rows : any = {};
     
+    /**
+     * When registering a dispatcher, this becomes our callback index used
+     * for dependency resolution
+     */
     public dispatchIndex : number = null;
     
+    /**
+     * Listen on a given event
+     */
     public listen(event : string, callback : ((...args : any[]) => any))
     {
         $(window).on(event, callback);
     }
     
+    /**
+     * Ignore an event we are listening on
+     */
     public ignore(event : string, callback : ((...args : any[]) => any))
     {
         $(window).off(event, callback);
     }
     
-    public emit(event : string, data : any)
+    /**
+     * Emit an event
+     */
+    public emit(event : string, data : any = false)
     {
          $(window).trigger(event, [data]);
     }
     
+    /**
+     * Insert a row if it doesn't exist, update it otherwise
+     */
     public upsertRow(modelType : string, keyField : string, keyValue : any, newRow : any, overwrite : boolean = false)
     {
         var updated : boolean = false;
@@ -54,6 +73,9 @@ class Store
         }
     }
     
+    /**
+     * Remove a row
+     */
     public removeRow(modelType : string, keyField : string, keyValue : any)
     {
         if(typeof(this.rows[modelType]) === 'undefined'){
@@ -79,6 +101,26 @@ class Store
         }
     }
     
+    /**
+     * Pass in an array of keyValues and remove all rows that match
+     */
+    public removeRows(modelType : string, keyField : string, keyValues : any[]) {
+        var self = this;
+        keyValues.forEach(function(keyValue) {
+            self.removeRow(modelType, keyField, keyValue);
+        });
+    }
+    
+    /**
+     * Clear our store of the given modelType
+     */
+    public clearAll(modelType : string) {
+        this.rows[modelType] = [];
+    }
+    
+    /**
+     * Get rows of the given modelType
+     */
     public getRows(modelType : string, noSlice : boolean = true)
     {
         if(typeof(this.rows[modelType]) !== 'undefined'){
@@ -88,6 +130,9 @@ class Store
         return [];
     }
     
+    /**
+     * Sanitize and valide the given object to the given schema
+     */
     public sanitizeAndValidate(obj : any, schema : any)
     {
         var model = this.sanitize(obj, schema, false);
@@ -99,6 +144,10 @@ class Store
         return validation;
     }
     
+    /**
+     * Validate the given object to the given schema, will return an array
+     * of errors, or true if valid
+     */
     public validate(obj : any, schema : any) : any
     {
         var errors : string[] = [];
@@ -146,6 +195,10 @@ class Store
         return errors.length > 0 ? errors : true;
     }
     
+    /**
+     * Sanitize the given object to a schema, also an optional parameter if
+     * you are sending the object as JSON, to format datetimes properly
+     */
     public sanitize(obj : any, schema : any, json : boolean) : any
     {
         var clean = {};
@@ -157,6 +210,9 @@ class Store
         return clean;
     }
     
+    /**
+     * Merge objects together to a given depth
+     */
     public merge(obj1 : any, obj2 : any, depth : number = 1) 
     {
 
@@ -185,6 +241,9 @@ class Store
         return obj1;
     }
     
+    /**
+     * Creates a filter sort callback to sort by a given key
+     */
     public sortBy(key : string, dir : string = 'desc')
     {
         return function(a, b){
@@ -207,11 +266,17 @@ class Store
         };
     }
     
+    /**
+     * Formats a given number to two decimal places
+     */
     public money(value : number)
     {
         return value.toFixed(2);
     }
     
+    /**
+     * Generates a UUID
+     */
     public uuid()
     {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -220,6 +285,9 @@ class Store
         });
     }
     
+    /**
+     * Sanitizes a field on an object to the given schema
+     */
     protected sanitizeField(field : string, obj : any, schema : any, json : boolean)
     {
         if(schema[field].type === 'function'){
@@ -280,6 +348,9 @@ class Store
         }
     }
     
+    /**
+     * Sanitizes a field to an integer
+     */
     protected sanitizeInteger(value : any, schemaConfig : any)
     {
         if(typeof value === 'string'){
@@ -305,6 +376,9 @@ class Store
         return value;
     }
     
+    /**
+     * Sanitizes a field to a float
+     */
     protected sanitizeFloat(value : any, schemaConfig : any)
     {
         value = parseFloat(value);
@@ -318,6 +392,9 @@ class Store
         return value;
     }
     
+    /**
+     * Sanitizes a field to a string
+     */
     protected sanitizeString(value : any, schemaConfig : any)
     {
         value = String(value);
@@ -332,6 +409,9 @@ class Store
         return value;
     }
     
+    /**
+     * Sanitizes a field to a moment object
+     */
     protected sanitizeDateTime(value : any, schemaConfig : any, json : boolean) : any
     {
         if(moment(value, schemaConfig.format).isValid()){
@@ -347,6 +427,9 @@ class Store
         throw new Error("Provided value ("+ value +") cannot be sanitized for field ("+ schemaConfig.field +"), is not a valid date");
     }
     
+    /**
+     * Sanitizes a field to boolean
+     */
     protected sanitizeBoolean(value : any, schemaConfig : any)
     {
         if(value === false || value === true){
@@ -370,6 +453,9 @@ class Store
         throw new Error('Provided value cannot be santized, is not a valid boolean');
     }
     
+    /**
+     * Sanitizes an object
+     */
     protected sanitizeObject(value : any, schemaConfig : any, json : boolean)
     {
         if(typeof(schemaConfig.schema) === 'undefined'){
@@ -387,6 +473,9 @@ class Store
         return this.sanitize(value, schemaConfig.schema(), json);
     }
     
+    /**
+     * Sanitizes an array of objects
+     */
     protected sanitizeArray(value : any, schemaConfig : any, json : boolean)
     {
         if(typeof(schemaConfig.schema) === 'undefined' || schemaConfig.schema === null || schemaConfig.schema === false){
@@ -404,6 +493,9 @@ class Store
         });
     }
     
+    /**
+     * Gets the dispatcher
+     */
     protected getDispatcher() : Dispatcher {
         return Beef.service(Dispatcher.SERVICE_ID);
     }
