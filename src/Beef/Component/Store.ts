@@ -285,6 +285,61 @@ class Store
         });
     }
     
+    public static string(params = {}) {
+        return $.extend(true, {
+            type: 'string'
+        }, params);
+    }
+    
+    public static int(params = {}) {
+        return $.extend(true, {
+            type: 'int'
+        }, params);
+    }
+    
+    public static double(params = {}) {
+        return $.extend(true, {
+            type: 'double'
+        }, params);
+    }
+    public static bool(params = {}) {
+        return $.extend(true, {
+            type: 'bool'
+        }, params);
+    }
+    
+    public static float(params = {}) {
+        return $.extend(true, {
+            type: 'float'
+        }, params);
+    }
+    
+    public static array (params = {}) {
+        return $.extend(true, {
+            type: 'array',
+            schema: null
+        }, params);
+    }
+    public static object (params = {}) {
+        return $.extend(true, {
+            type: 'object',
+            schema: null
+        }, params);
+    }
+    
+    public static datetime (params = {}) {
+        return $.extend(true, {
+            type: 'datetime',
+            schema: null
+        }, params);
+    }
+    public static callback(params = {}) {
+        return $.extend(true, {
+            type: 'callback',
+            schema: null
+        }, params);
+    }
+    
     /**
      * Sanitizes a field on an object to the given schema
      */
