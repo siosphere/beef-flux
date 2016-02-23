@@ -1,5 +1,3 @@
-/// <reference path="../../../lib/jquery.d.ts" />
-
 /**
  * Wrapper to create a consistent sdk for doing XHR requests. Will
  * automatically replace matching variables in urls that match the pattern.

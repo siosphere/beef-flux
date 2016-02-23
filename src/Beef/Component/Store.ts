@@ -199,7 +199,7 @@ class Store
      * Sanitize the given object to a schema, also an optional parameter if
      * you are sending the object as JSON, to format datetimes properly
      */
-    public sanitize(obj : any, schema : any, json : boolean) : any
+    public sanitize(obj : any, schema : any, json : boolean = false) : any
     {
         var clean = {};
         var tmp = jQuery.extend(true, {}, obj);
@@ -330,7 +330,8 @@ class Store
     public static datetime (params = {}) {
         return $.extend(true, {
             type: 'datetime',
-            schema: null
+            schema: null,
+            format: 'YYYY-MM-DD HH:mm:ss'
         }, params);
     }
     public static callback(params = {}) {
