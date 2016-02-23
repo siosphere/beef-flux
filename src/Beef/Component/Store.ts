@@ -1,4 +1,3 @@
-/// <reference path="../../../lib/moment.d.ts" />
 /**
  * Store that hooks into actions dispatched by a Dispatcher
  * 

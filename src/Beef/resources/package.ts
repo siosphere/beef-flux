@@ -1,4 +1,3 @@
-/// <reference path="../../../lib/jquery.d.ts" />
 /// <reference path="../Beef.ts" />
 /// <reference path="../Component/BaseApp.ts" />
 /// <reference path="../Component/BaseService.ts" />

@@ -15,6 +15,7 @@ var files = [
 ];
 
 var toCompile = [
+    './src/Beef/resources/dependencies.ts',
     './src/Beef/resources/package.ts',
     './src/test.ts'
 ];
