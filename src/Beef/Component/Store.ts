@@ -368,33 +368,26 @@ class Store
             case 'int':
             case 'integer':
                 return this.sanitizeInteger(obj[field], schema[field]);
-                break;
             case 'float':
             case 'double':
                 return this.sanitizeFloat(obj[field], schema[field]);
-                break;
             case 'string':
             case 'char':
             case 'varchar':
                 return this.sanitizeString(obj[field], schema[field]);
-                break;
             case 'date':
             case 'datetime':
             case 'timestamp':
                 return this.sanitizeDateTime(obj[field], schema[field], json);
-                break;
             case 'bool':
             case 'boolean':
                 return this.sanitizeBoolean(obj[field], schema[field]);
-                break;
             case 'obj':
             case 'object':
                 return this.sanitizeObject(obj[field], schema[field], json);
-                break;
             case 'array':
             case 'collection':
                 return this.sanitizeArray(obj[field], schema[field], json);
-                break;
             default:
                 if(schema[field].sanitize !== 'undefined'){
                     return schema[field].sanitize(obj[field], schema[field]);
