@@ -562,22 +562,11 @@ var Action = (function () {
  *
  * Usage:
  *
- * class TodoActionsClass extends Action {
- *
- *   receiveTodos(todos : any[])
- *   {
- *       return todos;
- *   }
- * };
- *
- * var TodoActions : TodoActionsClass = Actions.create(new TodoActionsClass());
- *
- *
- * Listening on a store:
- *
- * TodoActions._register({
- *     receiveTodos: TodoActions.receiveTodos
- * }, this);
+ * var TodoActions = Actions.create({
+ *      receiveTodos: function(rawTodo : string) {
+ *          return rawTodo;
+ *      });
+ * });
  *
  * Each action should return the value that will be sent to the callbacks
  * listening on this action
@@ -883,3 +872,63 @@ Beef.setup(function () {
     Beef.service(Dispatcher.SERVICE_ID, new Dispatcher());
     Beef.service(RoutingService.SERVICE_ID, new RoutingService());
 });
+var TodoActionsClass = (function (_super) {
+    __extends(TodoActionsClass, _super);
+    function TodoActionsClass() {
+        _super.apply(this, arguments);
+    }
+    TodoActionsClass.prototype.receiveTodos = function (todos) {
+        return todos;
+    };
+    return TodoActionsClass;
+})(Action);
+;
+var TodoActions = Actions.create(new TodoActionsClass());
+var TodoStore = (function (_super) {
+    __extends(TodoStore, _super);
+    function TodoStore() {
+        _super.call(this);
+        TodoActions._register({
+            receiveTodos: TodoActions.receiveTodos
+        }, this);
+    }
+    TodoStore.prototype.getTodos = function () {
+        return this.getRows('todo');
+    };
+    TodoStore.prototype.receiveTodos = function (rawTodos) {
+        var _this = this;
+        rawTodos.forEach(function (rawTodo) {
+            var todo = _this.sanitize(rawTodo, TodoStore.schema.Todo);
+            _this.upsertRow('todo', 'id', todo.id, todo);
+        });
+        this.emit('TodoStore.event.UPDATE');
+    };
+    TodoStore.schema = {
+        Todo: {
+            name: Store.string(),
+            id: Store.int()
+        }
+    };
+    return TodoStore;
+})(Store);
+var todoStore = new TodoStore();
+var AppContainer = (function () {
+    function AppContainer() {
+        todoStore.listen('TodoStore.event.UPDATE', this.onUpdate);
+    }
+    AppContainer.prototype.createTodo = function () {
+        TodoActions.receiveTodos([{
+                name: 'My New Todo',
+                id: 1
+            }]);
+    };
+    AppContainer.prototype.onUpdate = function () {
+        console.log(todoStore.getTodos());
+    };
+    return AppContainer;
+})();
+var App = new AppContainer();
+/// <reference path="../../src/Beef/resources/package.ts" />
+/// <reference path="src/TodoActions.ts" />
+/// <reference path="src/TodoStore.ts" />
+/// <reference path="src/app.ts" /> 

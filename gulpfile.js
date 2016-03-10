@@ -43,3 +43,16 @@ gulp.task('compile', function() {
     .pipe(gulp.dest('./dist/'))
     ;
 });
+
+
+gulp.task('todo', function() {
+    toCompile.push('./examples/todo/package.ts');
+    gulp.src(toCompile)
+    .pipe(ts({
+        sortOutput: true,
+        declarationFiles: true,
+        out: "todos.js"
+    }))
+    .pipe(gulp.dest('./examples/todo/dist/'))
+    ;
+});
