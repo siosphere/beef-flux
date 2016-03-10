@@ -30,7 +30,6 @@ class Action
     _dispatch(actionName : string, fn : (...args) => any, args : any)
     {
         if(typeof this._callbacks[actionName] === 'undefined') {
-            console.log(this, 'no exist', actionName);
             return;
         }
 

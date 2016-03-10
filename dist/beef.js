@@ -547,7 +547,6 @@ var Action = (function () {
      */
     Action.prototype._dispatch = function (actionName, fn, args) {
         if (typeof this._callbacks[actionName] === 'undefined') {
-            console.log(this, 'no exist', actionName);
             return;
         }
         var data = fn.apply(this, args);
@@ -599,7 +598,7 @@ var Actions = (function () {
                     " () { return fn(this, arguments) }; };")())(Function.apply.bind(function (key) {
                     var args = [];
                     for (var i in arguments) {
-                        if (i == 0) {
+                        if (i === "0") {
                             continue;
                         }
                         args.push(arguments[i]);

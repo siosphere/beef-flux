@@ -46,7 +46,7 @@ class Actions
                     
                     var args = [];
                     for(var i in arguments) {
-                        if(i == 0) {
+                        if(i === "0") {
                             continue;
                         }
                         args.push(arguments[i]);
