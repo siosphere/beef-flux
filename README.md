@@ -233,7 +233,7 @@ Todo: {
 }
 ```
 
-If not initial value callback is provided, and the value doesn't exist in the
+If no initial value callback is provided, and the value doesn't exist in the
 object you are sanitizing, it will default to null.
 
 ```
@@ -284,10 +284,10 @@ Todo: {
 }
 ```
 
-Built in validators include:
-**required** the value cannot be undefined, null, or an empty string
-**minLength** the string value length must be greater than this
-**maxLength** the string value length must be less than this
+Built in validators include:  
+**required** the value cannot be undefined, null, or an empty string  
+**minLength** the string value length must be greater than this  
+**maxLength** the string value length must be less than this  
 
 You can do custom validators, by doing a callback function that will receive
 the value of that field, and returning true or false.
