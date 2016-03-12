@@ -12,6 +12,10 @@ class Store
      */
     protected rows : any = {};
     
+    public actions = function() : void {
+        //setup any actions
+    };
+    
     /**
      * When registering a dispatcher, this becomes our callback index used
      * for dependency resolution

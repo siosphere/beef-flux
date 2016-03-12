@@ -19,15 +19,25 @@ class RoutingService
     public routes(routes : any)
     {
         this.routingConfig = new RoutingConfig(routes);
+        
+        return this;
     }
     
     public route (url : string, data : any)
     {
+        var isRoute = this.routingConfig.isRoute(url);
+        if(!isRoute) {
+            url = '/';
+        }
+        
         if(this.routingConfig.isRoute(url)) {
-            this.routingConfig.callRoute(url, data);
+            var response = this.routingConfig.callRoute(url, data);
             this.activeRoute = url;
             this.onRouteFinished();
+            return response;
         }
+        
+        return null;
     }
     
     public doRouting()

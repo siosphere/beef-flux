@@ -12,11 +12,11 @@ class RoutingConfig
     
     public isRoute(url : string)
     {
-        return typeof(this.routes[url]) !== 'undefined';
+        return typeof this.routes[url] !== 'undefined';
     }
     
     public callRoute(url : string, data : any) : any
     {
-        this.routes[url](data);
+        return this.routes[url](data);
     }
 }
