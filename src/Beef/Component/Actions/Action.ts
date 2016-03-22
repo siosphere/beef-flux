@@ -14,7 +14,7 @@ class Action
     {
         for(var key in params)
         {
-            var actionName = params[key].name;
+            var actionName = params[key].name ? params[key].name : params[key].toString().match(/^function\s*([^\s(]+)/)[1];
             if(typeof this._callbacks[actionName] === 'undefined')
             {
                 this._callbacks[actionName] = [];
