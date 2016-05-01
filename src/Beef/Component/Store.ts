@@ -12,6 +12,8 @@ class Store
      */
     protected rows : any = {};
     
+    protected cache: any = {};
+    
     public actions = function() : void {
         //setup any actions
     };
@@ -49,59 +51,53 @@ class Store
     /**
      * Insert a row if it doesn't exist, update it otherwise
      */
-    public upsertRow(modelType : string, keyField : string, keyValue : any, newRow : any, overwrite : boolean = false)
+    public upsertRow(modelType : string, keyValue : any, newRow : any, overwrite : boolean = false)
     {
         var updated : boolean = false;
         
-        if(typeof(this.rows[modelType]) === 'undefined'){
+        if(typeof this.rows[modelType] === 'undefined'){
             this.rows[modelType] = [];
         }
         
         var rows = this.rows[modelType];
-            
+        
         var self = this;
-        rows.forEach(function(row, index){
-            if(typeof(row[keyField]) !== 'undefined' && row[keyField] === keyValue){
-                if(typeof(rows[index]) === 'undefined'){
-                    rows[index] = {};
-                }
-
-                rows[index] = overwrite ? rows[index] = newRow : self.merge(rows[index], newRow);
-                updated = true;
-            }
-        });
-
-        if(!updated){
-            this.rows[modelType].push(newRow);
+        
+        if(!this.inCache(modelType, keyValue)) {
+            this.cache[modelType][keyValue] = newRow;
+            this.rows[modelType].push(this.cache[modelType][keyValue]);
+        } else {
+            this.cache[modelType][keyValue] = overwrite ? newRow : self.merge(this.cache[modelType][keyValue], newRow);
         }
+    }
+    
+    /**
+     * Check if we have a model setup in cache
+     */
+    protected inCache(modelType, keyValue) {
+        if(typeof this.cache[modelType] === 'undefined') {
+            this.cache[modelType] = {};
+        }
+        
+        return typeof this.cache[modelType][keyValue] === 'object';
     }
     
     /**
      * Remove a row
      */
-    public removeRow(modelType : string, keyField : string, keyValue : any)
+    public removeRow(modelType : string, keyValue : any)
     {
-        if(typeof(this.rows[modelType]) === 'undefined'){
+        if(!this.inCache(modelType, keyValue)) {
             return;
         }
-
-        var rows = this.rows[modelType];
-
-        var indexes = [];
-
-        rows.forEach(function(row, index){
-            if(typeof(row[keyField]) !== 'undefined' && row[keyField] == keyValue){
-                indexes.push(index);
-            }
+        
+        this.cache[modelType][keyValue]._deleted = true;
+        
+        this.rows[modelType] = this.rows[modelType].filter(function(row) {
+            return !row._deleted;
         });
-
-        if(indexes.length === 0){
-            return;
-        }
-
-        for(var i = 0; i < indexes.length; i++){
-            this.rows[modelType].splice(indexes[i], 1);
-        }
+        
+        delete this.cache[modelType][keyValue];
     }
     
     /**
