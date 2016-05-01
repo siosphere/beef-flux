@@ -100,6 +100,7 @@ var Store = (function () {
          * Holds all of our rows by modelType
          */
         this.rows = {};
+        this.cache = {};
         this.actions = function () {
             //setup any actions
         };
@@ -131,55 +132,51 @@ var Store = (function () {
     /**
      * Insert a row if it doesn't exist, update it otherwise
      */
-    Store.prototype.upsertRow = function (modelType, keyField, keyValue, newRow, overwrite) {
+    Store.prototype.upsertRow = function (modelType, keyValue, newRow, overwrite) {
         if (overwrite === void 0) { overwrite = false; }
         var updated = false;
-        if (typeof (this.rows[modelType]) === 'undefined') {
+        if (typeof this.rows[modelType] === 'undefined') {
             this.rows[modelType] = [];
         }
         var rows = this.rows[modelType];
         var self = this;
-        rows.forEach(function (row, index) {
-            if (typeof (row[keyField]) !== 'undefined' && row[keyField] === keyValue) {
-                if (typeof (rows[index]) === 'undefined') {
-                    rows[index] = {};
-                }
-                rows[index] = overwrite ? rows[index] = newRow : self.merge(rows[index], newRow);
-                updated = true;
-            }
-        });
-        if (!updated) {
-            this.rows[modelType].push(newRow);
+        if (!this.inCache(modelType, keyValue)) {
+            this.cache[modelType][keyValue] = newRow;
+            this.rows[modelType].push(this.cache[modelType][keyValue]);
         }
+        else {
+            this.cache[modelType][keyValue] = overwrite ? newRow : self.merge(this.cache[modelType][keyValue], newRow);
+        }
+    };
+    /**
+     * Check if we have a model setup in cache
+     */
+    Store.prototype.inCache = function (modelType, keyValue) {
+        if (typeof this.cache[modelType] === 'undefined') {
+            this.cache[modelType] = {};
+        }
+        return typeof this.cache[modelType][keyValue] === 'object';
     };
     /**
      * Remove a row
      */
-    Store.prototype.removeRow = function (modelType, keyField, keyValue) {
-        if (typeof (this.rows[modelType]) === 'undefined') {
+    Store.prototype.removeRow = function (modelType, keyValue) {
+        if (!this.inCache(modelType, keyValue)) {
             return;
         }
-        var rows = this.rows[modelType];
-        var indexes = [];
-        rows.forEach(function (row, index) {
-            if (typeof (row[keyField]) !== 'undefined' && row[keyField] == keyValue) {
-                indexes.push(index);
-            }
+        this.cache[modelType][keyValue]._deleted = true;
+        this.rows[modelType] = this.rows[modelType].filter(function (row) {
+            return !row._deleted;
         });
-        if (indexes.length === 0) {
-            return;
-        }
-        for (var i = 0; i < indexes.length; i++) {
-            this.rows[modelType].splice(indexes[i], 1);
-        }
+        delete this.cache[modelType][keyValue];
     };
     /**
      * Pass in an array of keyValues and remove all rows that match
      */
-    Store.prototype.removeRows = function (modelType, keyField, keyValues) {
+    Store.prototype.removeRows = function (modelType, keyValues) {
         var self = this;
         keyValues.forEach(function (keyValue) {
-            self.removeRow(modelType, keyField, keyValue);
+            self.removeRow(modelType, keyValue);
         });
     };
     /**
@@ -492,14 +489,17 @@ var Store = (function () {
      * Sanitizes a field to a moment object
      */
     Store.prototype.sanitizeDateTime = function (value, schemaConfig, json) {
-        if (moment(value, schemaConfig.format).isValid()) {
+        if (typeof schemaConfig.utc === 'undefined' || schemaConfig.utc) {
+            var momentDate = moment.utc(value, schemaConfig.format);
+        }
+        else {
+            var momentDate = moment(value, schemaConfig.format);
+        }
+        if (momentDate.isValid()) {
             if (json) {
-                return moment(value).utc().format('YYYY-MM-DD hh:mm:ss');
+                return momentDate.utc().format('YYYY-MM-DD hh:mm:ss');
             }
-            if (typeof schemaConfig.utc === 'undefined' || schemaConfig.utc) {
-                return moment.utc(value);
-            }
-            return moment(value);
+            return momentDate;
         }
         throw new Error("Provided value (" + value + ") cannot be sanitized for field (" + schemaConfig.field + "), is not a valid date");
     };
