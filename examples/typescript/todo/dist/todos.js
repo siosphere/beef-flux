@@ -1,8 +1,3 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 /// <reference path="../../../lib/jquery.d.ts" />
 /// <reference path="../../../lib/moment.d.ts" /> 
 /**
@@ -23,49 +18,14 @@ var Beef = (function () {
         this.setupCallbacks.push(callback);
     };
     Beef.start = function () {
-        if (this.started) {
-            return;
-        }
         this.setupCallbacks.forEach(function (callback) {
             callback();
         });
-        this.started = true;
-    };
-    Beef.started = false;
-    Beef.Actions = function () {
-        Beef.start();
-        return {
-            create: function (params) {
-                return Actions.create(params);
-            }
-        };
-    };
-    Beef.Api = function () {
-        Beef.start();
-        return Beef.service(ApiService.SERVICE_ID);
-    };
-    Beef.Dispatcher = function () {
-        Beef.start();
-        return Beef.service(Dispatcher.SERVICE_ID);
-    };
-    Beef.Store = function () {
-        Beef.start();
-        return {
-            create: function (params) {
-                var store = $.extend(true, new Store(), params);
-                store.actions();
-                return store;
-            }
-        };
-    };
-    Beef.Router = function () {
-        Beef.start();
-        return Beef.service(RoutingService.SERVICE_ID);
     };
     Beef.services = {};
     Beef.setupCallbacks = [];
     return Beef;
-}());
+})();
 /**
  * Used to create an application
  * TODO: setup
@@ -78,7 +38,7 @@ var BaseApp = (function () {
     BaseApp.prototype.run = function () {
     };
     return BaseApp;
-}());
+})();
 /**
  * All services should extend from this class
  */
@@ -86,7 +46,7 @@ var BaseService = (function () {
     function BaseService() {
     }
     return BaseService;
-}());
+})();
 /**
  * Store that hooks into actions dispatched by a Dispatcher
  *
@@ -100,9 +60,6 @@ var Store = (function () {
          * Holds all of our rows by modelType
          */
         this.rows = {};
-        this.actions = function () {
-            //setup any actions
-        };
         /**
          * When registering a dispatcher, this becomes our callback index used
          * for dependency resolution
@@ -563,7 +520,7 @@ var Store = (function () {
         return Beef.service(Dispatcher.SERVICE_ID);
     };
     return Store;
-}());
+})();
 /**
  * An action will store callbacks that apply to actionTypes it can dispatch,
  */
@@ -590,6 +547,7 @@ var Action = (function () {
      */
     Action.prototype._dispatch = function (actionName, fn, args) {
         if (typeof this._callbacks[actionName] === 'undefined') {
+            console.log(this, 'no exist', actionName);
             return;
         }
         var data = fn.apply(this, args);
@@ -598,28 +556,17 @@ var Action = (function () {
         });
     };
     return Action;
-}());
+})();
 /**
  * Used to create actions that can be dispatched to stores.
  *
  * Usage:
  *
- * class TodoActionsClass extends Action {
- *
- *   receiveTodos(todos : any[])
- *   {
- *       return todos;
- *   }
- * };
- *
- * var TodoActions : TodoActionsClass = Actions.create(new TodoActionsClass());
- *
- *
- * Listening on a store:
- *
- * TodoActions._register({
- *     receiveTodos: TodoActions.receiveTodos
- * }, this);
+ * var TodoActions = Actions.create({
+ *      receiveTodos: function(rawTodo : string) {
+ *          return rawTodo;
+ *      });
+ * });
  *
  * Each action should return the value that will be sent to the callbacks
  * listening on this action
@@ -641,7 +588,7 @@ var Actions = (function () {
                     " () { return fn(this, arguments) }; };")())(Function.apply.bind(function (key) {
                     var args = [];
                     for (var i in arguments) {
-                        if (i === "0") {
+                        if (i == 0) {
                             continue;
                         }
                         args.push(arguments[i]);
@@ -654,7 +601,7 @@ var Actions = (function () {
     };
     Actions.ignoreFunctions = ['constructor'];
     return Actions;
-}());
+})();
 ;
 /**
  * Holds a dispatcher callback function, with dependencies (array of dispatchIds)
@@ -669,7 +616,7 @@ var DispatcherCallback = (function () {
         this.dispatchId = dispatchId;
     }
     return DispatcherCallback;
-}());
+})();
 ;
 /**
  * The payload that will be sent to the dispatch callback
@@ -680,7 +627,7 @@ var DispatcherPayload = (function () {
         this.data = data;
     }
     return DispatcherPayload;
-}());
+})();
 /**
  * Holds routes (an object with 'url/pattern': function())
  */
@@ -689,13 +636,18 @@ var RoutingConfig = (function () {
         this.routes = routes;
     }
     RoutingConfig.prototype.isRoute = function (url) {
-        return typeof this.routes[url] !== 'undefined';
+        return typeof (this.routes[url]) !== 'undefined';
     };
     RoutingConfig.prototype.callRoute = function (url, data) {
-        return this.routes[url](data);
+        this.routes[url](data);
     };
     return RoutingConfig;
-}());
+})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 /**
  * Wrapper to create a consistent sdk for doing XHR requests. Will
  * automatically replace matching variables in urls that match the pattern.
@@ -778,7 +730,7 @@ var ApiService = (function (_super) {
     };
     ApiService.SERVICE_ID = 'beef.service.api';
     return ApiService;
-}(BaseService));
+})(BaseService);
 /**
  * Used to dispatch messages to any registered listeners
  */
@@ -820,7 +772,7 @@ var Dispatcher = (function (_super) {
     };
     Dispatcher.SERVICE_ID = 'beef.service.dispatcher';
     return Dispatcher;
-}(BaseService));
+})(BaseService);
 /**
  * Will match a given url to a route, and execute a function/callback defined
  * for that route. Will also parse the URL for different parameters and
@@ -833,20 +785,13 @@ var RoutingService = (function () {
     };
     RoutingService.prototype.routes = function (routes) {
         this.routingConfig = new RoutingConfig(routes);
-        return this;
     };
     RoutingService.prototype.route = function (url, data) {
-        var isRoute = this.routingConfig.isRoute(url);
-        if (!isRoute) {
-            url = '/';
-        }
         if (this.routingConfig.isRoute(url)) {
-            var response = this.routingConfig.callRoute(url, data);
+            this.routingConfig.callRoute(url, data);
             this.activeRoute = url;
             this.onRouteFinished();
-            return response;
         }
-        return null;
     };
     RoutingService.prototype.doRouting = function () {
         var matchRoute = '';
@@ -906,7 +851,7 @@ var RoutingService = (function () {
     };
     RoutingService.SERVICE_ID = 'beef.service.routing';
     return RoutingService;
-}());
+})();
 /// <reference path="../Beef.ts" />
 /// <reference path="../Component/BaseApp.ts" />
 /// <reference path="../Component/BaseService.ts" />
@@ -927,3 +872,63 @@ Beef.setup(function () {
     Beef.service(Dispatcher.SERVICE_ID, new Dispatcher());
     Beef.service(RoutingService.SERVICE_ID, new RoutingService());
 });
+var TodoActionsClass = (function (_super) {
+    __extends(TodoActionsClass, _super);
+    function TodoActionsClass() {
+        _super.apply(this, arguments);
+    }
+    TodoActionsClass.prototype.receiveTodos = function (todos) {
+        return todos;
+    };
+    return TodoActionsClass;
+})(Action);
+;
+var TodoActions = Actions.create(new TodoActionsClass());
+var TodoStore = (function (_super) {
+    __extends(TodoStore, _super);
+    function TodoStore() {
+        _super.call(this);
+        TodoActions._register({
+            receiveTodos: TodoActions.receiveTodos
+        }, this);
+    }
+    TodoStore.prototype.getTodos = function () {
+        return this.getRows('todo');
+    };
+    TodoStore.prototype.receiveTodos = function (rawTodos) {
+        var _this = this;
+        rawTodos.forEach(function (rawTodo) {
+            var todo = _this.sanitize(rawTodo, TodoStore.schema.Todo);
+            _this.upsertRow('todo', 'id', todo.id, todo);
+        });
+        this.emit('TodoStore.event.UPDATE');
+    };
+    TodoStore.schema = {
+        Todo: {
+            name: Store.string(),
+            id: Store.int()
+        }
+    };
+    return TodoStore;
+})(Store);
+var todoStore = new TodoStore();
+var AppContainer = (function () {
+    function AppContainer() {
+        todoStore.listen('TodoStore.event.UPDATE', this.onUpdate);
+    }
+    AppContainer.prototype.createTodo = function () {
+        TodoActions.receiveTodos([{
+                name: 'My New Todo',
+                id: 1
+            }]);
+    };
+    AppContainer.prototype.onUpdate = function () {
+        console.log(todoStore.getTodos());
+    };
+    return AppContainer;
+})();
+var App = new AppContainer();
+/// <reference path="../../src/Beef/resources/package.ts" />
+/// <reference path="src/TodoActions.ts" />
+/// <reference path="src/TodoStore.ts" />
+/// <reference path="src/app.ts" /> 

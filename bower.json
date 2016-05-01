@@ -1,0 +1,31 @@
+{
+  "name": "beefjs",
+  "homepage": "https://github.com/siosphere/beefjs",
+  "authors": [
+    "Michael Kramer"
+  ],
+  "description": "",
+  "main": "dist/beef.js",
+  "moduleType": [],
+  "keywords": [
+    "flux",
+    "react",
+    "framework",
+    "react",
+    "flux",
+    "framework"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^2.2.1",
+    "moment": "^2.12.0",
+    "react": "^0.14.7"
+  }
+}
