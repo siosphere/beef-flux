@@ -60,16 +60,17 @@ class Store
         var rows = this.rows[modelType];
             
         var self = this;
-        rows.forEach(function(row, index){
-            if(typeof(row[keyField]) !== 'undefined' && row[keyField] === keyValue){
+        for (var index = 0, row_count = rows.length; index < row_count; index++) {
+            if(rows[index][keyField] === keyValue){
                 if(typeof(rows[index]) === 'undefined'){
                     rows[index] = {};
                 }
 
                 rows[index] = overwrite ? rows[index] = newRow : self.merge(rows[index], newRow);
                 updated = true;
+                break;
             }
-        });
+        }
 
         if(!updated){
             this.rows[modelType].push(newRow);
@@ -466,14 +467,16 @@ class Store
      */
     protected sanitizeDateTime(value : any, schemaConfig : any, json : boolean) : any
     {
-        if(moment(value, schemaConfig.format).isValid()){
+        if(typeof schemaConfig.utc === 'undefined' || schemaConfig.utc){
+            var momentDate = moment.utc(value, schemaConfig.format);
+        } else {
+            var momentDate = moment(value, schemaConfig.format);
+        }
+        if(momentDate.isValid()){
             if(json){
-                return moment(value).utc().format('YYYY-MM-DD hh:mm:ss');
+                return momentDate.utc().format('YYYY-MM-DD hh:mm:ss');
             }
-            if(typeof schemaConfig.utc === 'undefined' || schemaConfig.utc){
-                return moment.utc(value);
-            }
-            return moment(value);
+            return momentDate;
         }
 
         throw new Error("Provided value ("+ value +") cannot be sanitized for field ("+ schemaConfig.field +"), is not a valid date");
