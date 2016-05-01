@@ -60,16 +60,17 @@ class Store
         var rows = this.rows[modelType];
             
         var self = this;
-        rows.forEach(function(row, index){
-            if(typeof(row[keyField]) !== 'undefined' && row[keyField] === keyValue){
+        for (var index = 0, row_count = rows.length; index < row_count; index++) {
+            if(rows[index][keyField] === keyValue){
                 if(typeof(rows[index]) === 'undefined'){
                     rows[index] = {};
                 }
 
                 rows[index] = overwrite ? rows[index] = newRow : self.merge(rows[index], newRow);
                 updated = true;
+                break;
             }
-        });
+        }
 
         if(!updated){
             this.rows[modelType].push(newRow);
