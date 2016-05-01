@@ -467,14 +467,16 @@ class Store
      */
     protected sanitizeDateTime(value : any, schemaConfig : any, json : boolean) : any
     {
-        if(moment(value, schemaConfig.format).isValid()){
+        if(typeof schemaConfig.utc === 'undefined' || schemaConfig.utc){
+            var momentDate = moment.utc(value, schemaConfig.format);
+        } else {
+            var momentDate = moment(value, schemaConfig.format);
+        }
+        if(momentDate.isValid()){
             if(json){
-                return moment(value).utc().format('YYYY-MM-DD hh:mm:ss');
+                return momentDate.utc().format('YYYY-MM-DD hh:mm:ss');
             }
-            if(typeof schemaConfig.utc === 'undefined' || schemaConfig.utc){
-                return moment.utc(value);
-            }
-            return moment(value);
+            return momentDate;
         }
 
         throw new Error("Provided value ("+ value +") cannot be sanitized for field ("+ schemaConfig.field +"), is not a valid date");
