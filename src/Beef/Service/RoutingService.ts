@@ -12,6 +12,8 @@ class RoutingService
     
     protected routeData : any;
     
+    protected lastResponse : any;
+    
     public onRouteFinished() {
         
     }
@@ -40,13 +42,13 @@ class RoutingService
         return null;
     }
     
-    public doRouting()
+    public doRouting(rawHash : string = null)
     {
         var matchRoute = '';
         
         for(var rawRoute in this.routingConfig.routes){
             matchRoute = rawRoute;
-            var rawHash = window.location.hash;
+            rawHash = rawHash === null ? rawHash : window.location.hash;
             if (rawHash.indexOf('?') >= 0) {
                 rawHash = rawHash.substring(0, rawHash.indexOf('?'));
             }
@@ -97,16 +99,14 @@ class RoutingService
             var regex = new RegExp('^#\/' + matchRoute + '$', 'gi');
             if(rawHash.match(regex) !== null){
                 if(this.activeRoute === rawRoute && data === this.routeData){
-                    return; //already active
+                    return this.lastResponse; //already active
                 }
                 this.routeData = data;
                 this.activeRoute = rawRoute;
-                this.route(rawRoute, data);
-                return;
+                return this.lastResponse = this.route(rawRoute, data);
             }
         }
         
-        this.route('/', {}); //default route
-        
+        return this.lastResponse = this.route('/', {}); //default route
     }
 }

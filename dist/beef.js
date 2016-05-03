@@ -578,7 +578,7 @@ var Action = (function () {
      */
     Action.prototype._register = function (params, scope) {
         for (var key in params) {
-            var actionName = params[key].name;
+            var actionName = params[key].name ? params[key].name : params[key].toString().match(/^function\s*([^\s(]+)/)[1];
             if (typeof this._callbacks[actionName] === 'undefined') {
                 this._callbacks[actionName] = [];
             }
@@ -848,11 +848,12 @@ var RoutingService = (function () {
         }
         return null;
     };
-    RoutingService.prototype.doRouting = function () {
+    RoutingService.prototype.doRouting = function (rawHash) {
+        if (rawHash === void 0) { rawHash = null; }
         var matchRoute = '';
         for (var rawRoute in this.routingConfig.routes) {
             matchRoute = rawRoute;
-            var rawHash = window.location.hash;
+            rawHash = rawHash === null ? rawHash : window.location.hash;
             if (rawHash.indexOf('?') >= 0) {
                 rawHash = rawHash.substring(0, rawHash.indexOf('?'));
             }
@@ -894,15 +895,14 @@ var RoutingService = (function () {
             var regex = new RegExp('^#\/' + matchRoute + '$', 'gi');
             if (rawHash.match(regex) !== null) {
                 if (this.activeRoute === rawRoute && data === this.routeData) {
-                    return; //already active
+                    return this.lastResponse; //already active
                 }
                 this.routeData = data;
                 this.activeRoute = rawRoute;
-                this.route(rawRoute, data);
-                return;
+                return this.lastResponse = this.route(rawRoute, data);
             }
         }
-        this.route('/', {}); //default route
+        return this.lastResponse = this.route('/', {}); //default route
     };
     RoutingService.SERVICE_ID = 'beef.service.routing';
     return RoutingService;
