@@ -48,7 +48,7 @@ class RoutingService
         
         for(var rawRoute in this.routingConfig.routes){
             matchRoute = rawRoute;
-            rawHash = rawHash === null ? rawHash : window.location.hash;
+            rawHash = rawHash !== null ? rawHash : window.location.hash;
             if (rawHash.indexOf('?') >= 0) {
                 rawHash = rawHash.substring(0, rawHash.indexOf('?'));
             }
