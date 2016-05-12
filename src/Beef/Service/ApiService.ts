@@ -3,11 +3,11 @@
  * automatically replace matching variables in urls that match the pattern.
  * i.e/ /my/url/{someId}/ { someId: 1 } = /my/url/1/
  */
-class ApiService extends BaseService 
+class ApiService extends BaseService
 {
     public static SERVICE_ID : string = 'beef.service.api';
-    
-    public throttle(func : () => any, wait : number, immediate : boolean) 
+
+    public throttle(func : () => any, wait : number, immediate : boolean)
     {
         var timeout;
         return function() {
@@ -22,7 +22,7 @@ class ApiService extends BaseService
             if (callNow) func.apply(context, args);
         };
     }
-    
+
     public get(url : string, data : any)
     {
         return $.ajax({
@@ -32,7 +32,7 @@ class ApiService extends BaseService
             dataType: 'json'
         });
     }
-    
+
     public post(url : string, data : any)
     {
         return $.ajax({
@@ -42,7 +42,7 @@ class ApiService extends BaseService
             dataType: 'json'
         });
     }
-    
+
     public put(url : string, data : any)
     {
         return $.ajax({
@@ -52,19 +52,19 @@ class ApiService extends BaseService
             dataType: 'json'
         });
     }
-    
-    public 'delete' (url : string, data : any)
+
+    public delete (url : string, data : any)
     {
         return $.ajax({
-            url: this._buildUrl(url, data),
+            url: this._buildUrl(url, data, false),
             data: JSON.stringify(data),
             method: "DELETE",
             dataType: 'json'
         });
     }
-    
-    
-    protected _buildUrl(url : string, data : any, queryString : boolean = true) 
+
+
+    protected _buildUrl(url : string, data : any, queryString : boolean = true)
     {
         //build the url
         for(var i in data){
