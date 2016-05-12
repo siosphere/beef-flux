@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "modules": "requirejs"
+    },
+    "exclude" : [
+        "dist",
+        "examples",
+        "lib",
+        "nbproject",
+        "node_modules"
+    ]
+}

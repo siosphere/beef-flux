@@ -37,7 +37,7 @@ var TodoStore = Beef.Store().create({
              * Sanitize our todo to the schema
              */
             var todo = TodoStore.sanitize(rawTodo, TodoStore.schema.Todo);
-            TodoStore.upsertRow('todo', 'id', todo.id, todo);
+            TodoStore.upsertRow('todo', todo.id, todo);
         });
         
         TodoStore.emit('TodoStore.event.UPDATE');
@@ -64,9 +64,9 @@ var TodoStore = Beef.Store().create({
          */
         Todo: {
             
-            id: Store.int(),
+            id: Beef.Store().int(),
             
-            title: Store.string({
+            title: Beef.Store().string({
                 initial: function() {
                     return '';
                 }

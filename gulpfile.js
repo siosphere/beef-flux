@@ -3,31 +3,39 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var ts = require('gulp-typescript');
 var babel = require('gulp-babel');
+var browserify = require('browserify');
+var source = require('vinyl-source-stream');
+var rename = require("gulp-rename");
 
 var files = [
-    './src/Beef/resources/dependencies.ts',
-    './src/Beef/resources/package.ts',
+    './src/*.ts',
+    './src/**/*.ts',
 ];
 
 gulp.task('default', function(){
     gulp.src(files)
     .pipe(ts({
         sortOutput: true,
-        declarationFiles: true,
-        out: "beef.js"
+        declarationFiles: false,
     }))
-    .pipe(concat('beef.js'))
-    .pipe(gulp.dest('./dist/'));
+    .pipe(gulp.dest('./build/'))
+    ;
+    
+    var bundle = browserify('./build/core/beef.js')
+    .bundle()
+    .pipe(source('beef.js'))
+    .pipe(gulp.dest('./dist/'))
+    ;
+    /*.pipe(concat('beef.js'))
+    .pipe(gulp.dest('./dist/'))
+    ;*/
 });
 
-gulp.task('minify', function(){
-    gulp.src(files)
-    .pipe(ts({
-        sortOutput: true,
-        declarationFiles: true,
-        out: "beef.js"
-    }))
-    .pipe(concat('beef.min.js'))
+gulp.task('minify', ['default'], function(){
+    gulp.src([
+        './dist/beef.js'
+    ])
+    .pipe(rename('beef.min.js'))
     .pipe(uglify())
     .pipe(gulp.dest('./dist/'));
 });
