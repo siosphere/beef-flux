@@ -24,44 +24,42 @@ class ApiServiceClass
         };
     }
     
-    public get(url : string, data : any)
+    public get(url : string, data : any, config : any = {})
     {
-        return $.ajax({
+        return $.ajax(this._buildConfig({
             url: this._buildUrl(url, data),
-            data: JSON.stringify(data),
             method: "GET",
             dataType: 'json'
-        });
+        }, config));
     }
     
-    public post(url : string, data : any)
+    public post(url : string, data : any, config : any = {})
     {
-        return $.ajax({
+        return $.ajax(this._buildConfig({
             url: this._buildUrl(url, data, false),
             data: JSON.stringify(data),
             method: "POST",
             dataType: 'json'
-        });
+        }, config));
     }
     
-    public put(url : string, data : any)
+    public put(url : string, data : any, config : any = {})
     {
-        return $.ajax({
+        return $.ajax(this._buildConfig({
             url: this._buildUrl(url, data, false),
             data: JSON.stringify(data),
             method: "PUT",
             dataType: 'json'
-        });
+        }, config));
     }
     
-    public 'delete' (url : string, data : any)
+    public 'delete' (url : string, data : any, config : any = {})
     {
-        return $.ajax({
+        return $.ajax(this._buildConfig({
             url: this._buildUrl(url, data),
-            data: JSON.stringify(data),
             method: "DELETE",
             dataType: 'json'
-        });
+        }, config));
     }
     
     
@@ -90,6 +88,11 @@ class ApiServiceClass
         }
 
         return url;
+    }
+
+    protected _buildConfig(defaultConfig : any, customConfig : any = {}) : any
+    {
+        return $.extend(true, {}, defaultConfig, customConfig)
     }
 }
 

@@ -25,37 +25,39 @@ var ApiServiceClass = (function () {
                 func.apply(context, args);
         };
     };
-    ApiServiceClass.prototype.get = function (url, data) {
-        return $.ajax({
+    ApiServiceClass.prototype.get = function (url, data, config) {
+        if (config === void 0) { config = {}; }
+        return $.ajax(this._buildConfig({
             url: this._buildUrl(url, data),
-            data: JSON.stringify(data),
             method: "GET",
             dataType: 'json'
-        });
+        }, config));
     };
-    ApiServiceClass.prototype.post = function (url, data) {
-        return $.ajax({
+    ApiServiceClass.prototype.post = function (url, data, config) {
+        if (config === void 0) { config = {}; }
+        return $.ajax(this._buildConfig({
             url: this._buildUrl(url, data, false),
             data: JSON.stringify(data),
             method: "POST",
             dataType: 'json'
-        });
+        }, config));
     };
-    ApiServiceClass.prototype.put = function (url, data) {
-        return $.ajax({
+    ApiServiceClass.prototype.put = function (url, data, config) {
+        if (config === void 0) { config = {}; }
+        return $.ajax(this._buildConfig({
             url: this._buildUrl(url, data, false),
             data: JSON.stringify(data),
             method: "PUT",
             dataType: 'json'
-        });
+        }, config));
     };
-    ApiServiceClass.prototype['delete'] = function (url, data) {
-        return $.ajax({
+    ApiServiceClass.prototype['delete'] = function (url, data, config) {
+        if (config === void 0) { config = {}; }
+        return $.ajax(this._buildConfig({
             url: this._buildUrl(url, data),
-            data: JSON.stringify(data),
             method: "DELETE",
             dataType: 'json'
-        });
+        }, config));
     };
     ApiServiceClass.prototype._buildUrl = function (url, data, queryString) {
         if (queryString === void 0) { queryString = true; }
@@ -78,6 +80,10 @@ var ApiServiceClass = (function () {
             url += i + '=' + data[i];
         }
         return url;
+    };
+    ApiServiceClass.prototype._buildConfig = function (defaultConfig, customConfig) {
+        if (customConfig === void 0) { customConfig = {}; }
+        return $.extend(true, {}, defaultConfig, customConfig);
     };
     return ApiServiceClass;
 }());
