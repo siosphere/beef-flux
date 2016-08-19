@@ -21,7 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/siosphere/beefjs.git"
   },
-  "author": "",
+  "author": "Michael Kramer",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/siosphere/beefjs/issues"
