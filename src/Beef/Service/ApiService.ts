@@ -27,7 +27,6 @@ class ApiService extends BaseService
     {
         return $.ajax({
             url: this._buildUrl(url, data),
-            data: JSON.stringify(data),
             method: "GET",
             dataType: 'json'
         });
@@ -57,7 +56,6 @@ class ApiService extends BaseService
     {
         return $.ajax({
             url: this._buildUrl(url, data),
-            data: JSON.stringify(data),
             method: "DELETE",
             dataType: 'json'
         });

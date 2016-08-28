@@ -725,7 +725,6 @@ var ApiService = (function (_super) {
     ApiService.prototype.get = function (url, data) {
         return $.ajax({
             url: this._buildUrl(url, data),
-            data: JSON.stringify(data),
             method: "GET",
             dataType: 'json'
         });
@@ -749,7 +748,6 @@ var ApiService = (function (_super) {
     ApiService.prototype['delete'] = function (url, data) {
         return $.ajax({
             url: this._buildUrl(url, data),
-            data: JSON.stringify(data),
             method: "DELETE",
             dataType: 'json'
         });
