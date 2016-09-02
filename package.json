@@ -1,0 +1,32 @@
+{
+  "name": "beefjs",
+  "version": "0.9.6",
+  "description": "BeefJS is a Flux framework with Typescript Support, and can also be used standalone without Typescript.",
+  "main": "gulpfile.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/siosphere/beefjs.git"
+  },
+  "keywords": [
+    "flux",
+    "react",
+    "framework"
+  ],
+  "author": "Michael Kramer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/siosphere/beefjs/issues"
+  },
+  "homepage": "https://github.com/siosphere/beefjs#readme",
+  "dependencies": {
+    "jquery": "^2.2.1",
+    "moment": "^2.12.0",
+    "react": "^0.14.7"
+  }
+}
