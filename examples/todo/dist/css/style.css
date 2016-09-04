@@ -1,0 +1,110 @@
+body{
+    background:#111;
+    font-family:'Open sans', sans-serif;
+}
+
+a {
+    color:#f0640f;
+}
+
+.brand-bg{
+    background-color:#f0640f;
+    color:#fff;
+}
+
+.brand-bg a{
+    color:#fff;
+}
+
+.widget-title{
+    box-sizing: border-box;
+    width:100%;
+    padding:10px;
+    text-align: center;
+    border-top-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    position: relative;
+    z-index: 3;
+    margin-bottom:-6px;
+}
+
+.widget-title h3{
+    margin:0;
+    padding:0;
+}
+
+.logo{
+    text-decoration: none;
+    font-size: 36px;
+    font-weight: normal;
+    font-family: 'Roboto Slab', sans-serif;
+    color:#f1f1f1;
+    margin:0;
+    padding:0;
+    padding:4px 20px;
+    border-left:1px solid #666;
+    height:59px;
+    box-sizing: border-box;
+    display: inline-block;
+}
+.logo:hover{
+    text-decoration: none;
+    color:#fff;
+}
+
+.brand-s{
+    font-size: 29px;
+}
+
+.header, .footer{
+    width:100%;
+    background: #212121; /* Old browsers */
+    background: -moz-linear-gradient(top,  #212121 0%, #111111 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#212121), color-stop(100%,#111111)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #212121 0%,#111111 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #212121 0%,#111111 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #212121 0%,#111111 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #212121 0%,#111111 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#212121', endColorstr='#111111',GradientType=0 ); /* IE6-9 */
+
+    box-sizing: border-box;
+    font-family: 'Open sans', sans-serif;
+    font-size: 14px;
+}
+
+.header{
+    position: fixed;
+    top:0;
+    height:59px;
+    z-index: 50;
+}
+
+.header .nav{
+    margin:10px 0px;
+}
+.header .nav a, .sub-header .nav li a{
+    color:#fff;
+}
+
+.header .nav li, .sub-header .nav li{
+    display: inline-block;
+}
+
+.header .nav li a:hover, .sub-header .nav li a:hover{
+    background:none;
+    opacity:0.8;
+}
+
+.middle{
+    background:#eee;
+    width:100%;
+    box-sizing: border-box;
+    padding:20px 0px;
+    margin:60px 0px 0px 0px;
+}
+
+.container {
+    width:100%;
+    max-width: 1100px;
+    margin:0 auto;
+}

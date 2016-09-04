@@ -26,7 +26,6 @@ class AppContainer {
     }
 }
 
-
 var App = new AppContainer();
 
 window['App'] = App

@@ -31,9 +31,6 @@ gulp.task('default', ['compile'], function(){
     .pipe(source('beef.js'))
     .pipe(gulp.dest('./dist/'))
     ;
-    /*.pipe(concat('beef.js'))
-    .pipe(gulp.dest('./dist/'))
-    ;*/
 });
 
 gulp.task('minify', ['default'], function(){
@@ -56,27 +53,25 @@ var bower = function(path)
 };
 
 var Examples = {
-    js: {},
-    typescript: {}
 };
 
-gulp.task('examples', ['minify', 'examples.typescript.todo']);
+gulp.task('examples', ['minify', 'examples.todo']);
 
 // Todo React Example
-Examples.js.typescript = {
+Examples.todo = {
     files: [
         bower('moment/min/moment.min.js'),
         bower('react/react.js'),
         bower('react/react-dom.js'),
         './dist/beef.min.js',
-        './examples/typescript/todo/src/*.ts',
+        './examples/todo/src/*.ts',
     ],
     compiled: 'todo.js',
-    dest: './examples/typescript/todo/dist/'
+    dest: './examples/todo/dist/'
 };
 
-gulp.task('examples.typescript.todo', function() {
-    gulp.src(Examples.js.typescript.files)
+gulp.task('examples.todo', function() {
+    gulp.src(Examples.todo.files)
     .pipe(ts({
         sortOutput: true,
         declarationFiles: false,
@@ -84,15 +79,15 @@ gulp.task('examples.typescript.todo', function() {
         experimentalDecorators: true,
         target: 'ES5'
     }))
-    .pipe(gulp.dest('./build/examples/typescript/todo/'))
+    .pipe(gulp.dest('./build/examples/todo/'))
     ;
 
-    var bundle = browserify('./build/examples/typescript/todo/app.js', {
+    var bundle = browserify('./build/examples/todo/app.js', {
         paths: ['./node_modules', './dist/'],
         ignoreMissing: true
     })
     .bundle()
     .pipe(source('todo-app.js'))
-    .pipe(gulp.dest(Examples.js.typescript.dest))
+    .pipe(gulp.dest(Examples.todo.dest))
     ;
 });
