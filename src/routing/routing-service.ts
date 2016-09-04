@@ -76,7 +76,10 @@ export class RoutingServiceClass
             if(res !== null){
                 var routeParts = rawRoute.split('/');
                 var hashParts = rawHash.split('/');
-                hashParts = hashParts.splice(1, hashParts.length - 1);
+
+                if(hashParts[0].length === 0) { //remove first if route started with a /
+                    hashParts = hashParts.splice(1, hashParts.length - 1);
+                }
 
                 if(hashParts.length !== routeParts.length){
                     continue;

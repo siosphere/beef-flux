@@ -330,7 +330,9 @@ var RoutingServiceClass = (function () {
             if (res !== null) {
                 var routeParts = rawRoute.split('/');
                 var hashParts = rawHash.split('/');
-                hashParts = hashParts.splice(1, hashParts.length - 1);
+                if (hashParts[0].length === 0) {
+                    hashParts = hashParts.splice(1, hashParts.length - 1);
+                }
                 if (hashParts.length !== routeParts.length) {
                     continue;
                 }
