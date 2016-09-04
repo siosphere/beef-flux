@@ -1,6 +1,6 @@
-///<reference path="../../typings/tsd.d.ts" />
-import * as $ from "jquery"
-import * as moment from "moment"
+///<reference path="../../typings/index.d.ts" />
+
+import extend = require('extend')
 
 /**
  * Store that hooks into actions
@@ -16,14 +16,25 @@ class Store
      */
     protected rows : any = {};
     
+    /**
+     *  Cache objects by primary key to speed up upsert lookup time
+     */
     protected cache: any = {};
     
-    public actions = function() : void {
+    /**
+     * This store's action callbacks
+     */
+    public actions = function() : void 
+    {
         //setup any actions
     };
     
-    public static create(params : any) : Store {
-        var store = $.extend(true, new Store(), params);
+    /**
+     * Used to create a store without extending the class
+     */
+    public static create(params : any) : Store 
+    {
+        var store = extend(true, new Store(), params);
         store.actions();
         
         return store;
@@ -34,7 +45,7 @@ class Store
      */
     public listen(event : string, callback : ((...args : any[]) => any))
     {
-        $(window).on(event, callback);
+        window.addEventListener(event, callback)
     }
     
     /**
@@ -42,15 +53,16 @@ class Store
      */
     public ignore(event : string, callback : ((...args : any[]) => any))
     {
-        $(window).off(event, callback);
+        window.removeEventListener(event, callback)
     }
     
     /**
      * Emit an event
      */
-    public emit(event : string, data : any = false)
+    public emit(event : string, data : Object = {})
     {
-         $(window).trigger(event, [data]);
+        let actualEvent = new CustomEvent(event, data)
+        window.dispatchEvent(actualEvent)
     }
     
     /**
@@ -66,20 +78,19 @@ class Store
         
         var rows = this.rows[modelType];
         
-        var self = this;
-
         if(!this.inCache(modelType, keyValue)) {
             this.cache[modelType][keyValue] = newRow;
             this.rows[modelType].push(this.cache[modelType][keyValue]);
         } else {
-            this.cache[modelType][keyValue] = overwrite ? newRow : self.merge(this.cache[modelType][keyValue], newRow);
+            this.cache[modelType][keyValue] = overwrite ? newRow : this.merge(this.cache[modelType][keyValue], newRow);
         }
     }
     
     /**
      * Check if we have a model setup in cache
      */
-    protected inCache(modelType, keyValue) {
+    protected inCache(modelType, keyValue)  : boolean
+    {
         if(typeof this.cache[modelType] === 'undefined') {
             this.cache[modelType] = {};
         }
@@ -108,24 +119,25 @@ class Store
     /**
      * Pass in an array of keyValues and remove all rows that match
      */
-    public removeRows(modelType : string, keyValues : any[]) {
-        var self = this;
-        keyValues.forEach(function(keyValue) {
-            self.removeRow(modelType, keyValue);
+    public removeRows(modelType : string, keyValues : any[]) 
+    {
+        keyValues.forEach((keyValue) => {
+            this.removeRow(modelType, keyValue);
         });
     }
     
     /**
      * Clear our store of the given modelType
      */
-    public clearAll(modelType : string) {
+    public clearAll(modelType : string) 
+    {
         this.rows[modelType] = [];
     }
     
     /**
      * Get rows of the given modelType
      */
-    public getRows(modelType : string, noSlice : boolean = true)
+    public getRows(modelType : string, noSlice : boolean = true) : any[]
     {
         if(typeof(this.rows[modelType]) !== 'undefined'){
             return noSlice ? this.rows[modelType] : this.rows[modelType].slice(0);
@@ -152,7 +164,7 @@ class Store
      * Validate the given object to the given schema, will return an array
      * of errors, or true if valid
      */
-    public validate(obj : any, schema : any) : any
+    public validate(obj : any, schema : any) : any[]|boolean
     {
         var errors : string[] = [];
         
@@ -206,7 +218,7 @@ class Store
     public sanitize(obj : any, schema : any, json : boolean = false) : any
     {
         var clean = {};
-        var tmp = $.extend(true, {}, obj);
+        var tmp = extend(true, {}, obj);
         for(var field in schema){
             clean[field] = this.sanitizeField(field, tmp, schema, json);
         }
@@ -220,8 +232,6 @@ class Store
     public merge(obj1 : any, obj2 : any, depth : number = 1) 
     {
 
-        var self = this;
-
         if(depth === 3){
            return obj2;
         }
@@ -230,7 +240,7 @@ class Store
           try {
             // Property in destination object set; update its value.
             if ( obj2[p].constructor === Object ) {
-              obj1[p] = self.merge(obj1[p], obj2[p], depth + 1);
+              obj1[p] = this.merge(obj1[p], obj2[p], depth + 1);
 
             } else {
               obj1[p] = obj2[p];
@@ -289,57 +299,66 @@ class Store
         });
     }
     
-    public static string(params = {}) {
-        return $.extend(true, {
+    public static string(params = {}) 
+    {
+        return extend(true, {
             type: 'string'
         }, params);
     }
     
-    public static int(params = {}) {
-        return $.extend(true, {
+    public static int(params = {}) 
+    {
+        return extend(true, {
             type: 'int'
         }, params);
     }
     
-    public static double(params = {}) {
-        return $.extend(true, {
+    public static double(params = {}) 
+    {
+        return extend(true, {
             type: 'double'
         }, params);
     }
-    public static bool(params = {}) {
-        return $.extend(true, {
+    public static bool(params = {}) 
+    {
+        return extend(true, {
             type: 'bool'
         }, params);
     }
     
-    public static float(params = {}) {
-        return $.extend(true, {
+    public static float(params = {}) 
+    {
+        return extend(true, {
             type: 'float'
         }, params);
     }
     
-    public static array (params = {}) {
-        return $.extend(true, {
+    public static array (params = {}) 
+    {
+        return extend(true, {
             type: 'array',
             schema: null
         }, params);
     }
-    public static object (params = {}) {
-        return $.extend(true, {
+    public static object (params = {}) 
+    {
+        return extend(true, {
             type: 'object',
             schema: null
         }, params);
     }
     
-    public static datetime (params = {}) {
-        return $.extend(true, {
+    public static datetime (params = {}) 
+    {
+        return extend(true, {
             type: 'datetime',
             schema: null,
             format: 'YYYY-MM-DD HH:mm:ss'
         }, params);
     }
-    public static callback(params = {}) {
-        return $.extend(true, {
+    public static callback(params = {}) 
+    {
+        return extend(true, {
             type: 'callback',
             schema: null
         }, params);
@@ -541,10 +560,9 @@ class Store
             return []; //empty array
         }
 
-        var $me = this;
 
-        return value.map(function(v){
-            return $me.sanitize(v, schemaConfig.schema(), json);
+        return value.map((v) => {
+            return this.sanitize(v, schemaConfig.schema(), json);
         });
     }
 }

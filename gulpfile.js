@@ -2,7 +2,6 @@ var gulp = require('gulp');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var ts = require('gulp-typescript');
-var babel = require('gulp-babel');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var rename = require("gulp-rename");
@@ -12,16 +11,22 @@ var files = [
     './src/**/*.ts',
 ];
 
-gulp.task('default', function(){
-    gulp.src(files)
+gulp.task('compile', function() {
+    var tsResult = gulp.src(files)
     .pipe(ts({
         sortOutput: true,
-        declarationFiles: false,
+        declarationFiles: true,
+        experimentalDecorators: true,
+        target: 'ES5'
     }))
-    .pipe(gulp.dest('./build/'))
-    ;
+
+    tsResult.js.pipe(gulp.dest('./build/'))
+    tsResult.dts.pipe(gulp.dest('./dist/typings/'))
+})
+
+gulp.task('default', ['compile'], function(){
     
-    var bundle = browserify('./build/core/beef.js')
+    var bundle = browserify('./build/core/beef.js', { standalone: 'beef' })
     .bundle()
     .pipe(source('beef.js'))
     .pipe(gulp.dest('./dist/'))
@@ -55,29 +60,39 @@ var Examples = {
     typescript: {}
 };
 
-gulp.task('examples', ['minify', 'examples.js.todoReact']);
+gulp.task('examples', ['minify', 'examples.typescript.todo']);
 
 // Todo React Example
-Examples.js.todoReact = {
+Examples.js.typescript = {
     files: [
-        bower('jquery/dist/jquery.min.js'),
         bower('moment/min/moment.min.js'),
         bower('react/react.js'),
         bower('react/react-dom.js'),
         './dist/beef.min.js',
-        './examples/js/todo-react/src/js/**/*',
-        './examples/js/todo-react/src/jsx/**/*'
+        './examples/typescript/todo/src/*.ts',
     ],
     compiled: 'todo.js',
-    dest: './examples/js/todo-react/dist/'
+    dest: './examples/typescript/todo/dist/'
 };
 
-gulp.task('examples.js.todoReact', function() {
-    gulp.src(Examples.js.todoReact.files)
-    .pipe(babel({
-        presets: ['react']
+gulp.task('examples.typescript.todo', function() {
+    gulp.src(Examples.js.typescript.files)
+    .pipe(ts({
+        sortOutput: true,
+        declarationFiles: false,
+        rootDir: './build/',
+        experimentalDecorators: true,
+        target: 'ES5'
     }))
-    .pipe(concat(Examples.js.todoReact.compiled))
-    .pipe(gulp.dest(Examples.js.todoReact.dest))
+    .pipe(gulp.dest('./build/examples/typescript/todo/'))
+    ;
+
+    var bundle = browserify('./build/examples/typescript/todo/app.js', {
+        paths: ['./node_modules', './dist/'],
+        ignoreMissing: true
+    })
+    .bundle()
+    .pipe(source('todo-app.js'))
+    .pipe(gulp.dest(Examples.js.typescript.dest))
     ;
 });

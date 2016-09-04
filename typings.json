@@ -1,0 +1,11 @@
+{
+  "name": "beefjs",
+  "dependencies": {
+    "extend": "registry:npm/extend#1.0.0+20160723033700",
+    "reqwest": "github:nozzlegear/reqwest.d.ts"
+  },
+  "globalDependencies": {
+    "jquery": "registry:dt/jquery#1.10.0+20160704162008",
+    "moment": "registry:dt/moment#2.11.1+20160829143156"
+  }
+}

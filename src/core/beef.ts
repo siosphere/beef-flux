@@ -1,39 +1,21 @@
-
-import * as $ from "jquery"
+import {ApiService, ApiServiceClass} from "../api/api-service"
 import {Actions} from "../actions/actions"
-import {ApiService} from "../api/api-service"
-import {RoutingService} from "../routing/routing-service"
+import {Action} from "../actions/component/action"
+import {RoutingConfig} from "../routing/component/config"
+import {sanitize} from "../routing/decorators/route-decorator"
+import {RoutingService, RoutingServiceClass} from "../routing/routing-service"
 import {Store} from "../store/store"
+import {Schema} from "../store/store-decorator"
 
-/**
- * Handles our services, our initial setup of services, and starts the 
- * framework
- */
-class Beef {
-    
-    protected static started : boolean = false;
-    
-    protected static store : Store = null;
-    
-    protected static Actions = function() {
-        return {
-            create: function(params) {
-                return Actions.create(params);
-            }
-        };
-    }
-    
-    protected static Api = function() {
-        return ApiService;
-    }
-    
-    protected static Store = function() {
-        return Store;
-    }
-    
-    protected static Router = function() {
-        return RoutingService;
-    }
+export = {
+    ApiService,
+    ApiServiceClass,
+    Actions,
+    Action,
+    RoutingConfig,
+    sanitize,
+    RoutingService,
+    RoutingServiceClass,
+    Store,
+    Schema
 }
-
-window['Beef'] = Beef;

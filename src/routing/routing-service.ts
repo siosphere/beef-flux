@@ -6,7 +6,7 @@ import {RoutingConfig} from "./component/config"
  * for that route. Will also parse the URL for different parameters and
  * pass that into the callback if found
  */
-class RoutingServiceClass 
+export class RoutingServiceClass 
 {
     protected routingConfig : RoutingConfig;
     

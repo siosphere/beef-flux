@@ -1,21 +1,29 @@
 {
   "name": "beefjs",
-  "version": "0.9.3",
+  "version": "11.0.1",
   "description": "BeefJS is a Flux framework with Typescript Support, and can also be used standalone without Typescript.",
-  "main": "gulpfile.js",
+  "main": "dist/beef.js",
   "directories": {
     "example": "examples"
   },
   "dependencies": {
+    "extend": "^3.0.0",
+    "reqwest": "^2.0.5"
   },
   "devDependencies": {
-    "gulp-typescript": "^2.13.4",
+    "browserify": "^13.1.0",
+    "gulp-typescript": "^2.13.6",
     "jest-cli": "^14.1.0",
     "moment": "^2.13.0",
-    "react": "^15.0.2"
+    "react": "^15.0.2",
+    "gulp-babel": "^6.1.2",
+    "gulp-concat": "^2.6.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^2.0.0",
+    "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
-     "test": "jest"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -26,5 +34,14 @@
   "bugs": {
     "url": "https://github.com/siosphere/beefjs/issues"
   },
-  "homepage": "https://github.com/siosphere/beefjs#readme"
+  "homepage": "https://github.com/siosphere/beefjs#readme",
+  "jest": {
+    "scriptPreprocessor": "<rootDir>/pre.js",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "testRegex": "/__tests__/.*\\.(ts|tsx|js)$"
+  }
 }

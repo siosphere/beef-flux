@@ -1,19 +1,11 @@
 "use strict"
-
 jest.unmock('../../build/api/api-service');
-jest.mock('jquery')
-
-const ACTUAL_JQUERY = require.requireActual('jquery')
 
 describe('api-service', () => {
 
     const Api = require('../../build/api/api-service')
 
-    const $ = require('jquery')
-
-    $.extend.mockImplementation((deep, configA, configB) => {
-        return ACTUAL_JQUERY.extend(deep, configA, configB)
-    })
+    const reqwest = require('reqwest')
 
     it('Api GET', () => {
 
@@ -22,10 +14,9 @@ describe('api-service', () => {
         };
 
         Api.ApiService.get("test", queryData)
-        expect($.ajax).toBeCalledWith({
+        expect(reqwest).toBeCalledWith({
             url: "test?foo=bar",
-            method: "GET",
-            dataType: "json"
+            method: "get"
         });
     })
 
@@ -35,11 +26,11 @@ describe('api-service', () => {
         }
 
         Api.ApiService.post("test", postData)
-        expect($.ajax).toBeCalledWith({
+        expect(reqwest).toBeCalledWith({
             url: "test",
             data: JSON.stringify(postData),
-            method: "POST",
-            dataType: "json"
+            method: "post",
+            contentType: 'application/json'
         });
     })
 
@@ -49,11 +40,11 @@ describe('api-service', () => {
         }
 
         Api.ApiService.put("test", putData)
-        expect($.ajax).toBeCalledWith({
+        expect(reqwest).toBeCalledWith({
             url: "test",
             data: JSON.stringify(putData),
-            method: "PUT",
-            dataType: "json"
+            method: "put",
+            contentType: 'application/json'
         });
     })
 
@@ -63,10 +54,9 @@ describe('api-service', () => {
         }
 
         Api.ApiService.delete("test", deleteData)
-        expect($.ajax).toBeCalledWith({
+        expect(reqwest).toBeCalledWith({
             url: "test?foo=bar",
-            method: "DELETE",
-            dataType: "json"
+            method: "delete"
         });
     })
 })

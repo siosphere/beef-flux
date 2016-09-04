@@ -1,12 +1,14 @@
-///<reference path="../../typings/tsd.d.ts" />
-import * as $ from "jquery";
+///<reference path="../../typings/index.d.ts" />
+import * as reqwest from "reqwest"
+import { ReqwestOptions } from "reqwest"
+import extend = require('extend')
 
 /**
  * Wrapper to create a consistent sdk for doing XHR requests. Will
  * automatically replace matching variables in urls that match the pattern.
  * i.e/ /my/url/{someId}/ { someId: 1 } = /my/url/1/
  */
-class ApiServiceClass
+export class ApiServiceClass
 {   
     public throttle(func : () => any, wait : number, immediate : boolean) 
     {
@@ -24,51 +26,47 @@ class ApiServiceClass
         };
     }
     
-    public get(url : string, data : any, config : any = {})
+    public get(url : string, data : any, config : ReqwestOptions = null)
     {
-        return $.ajax(this._buildConfig({
+        return reqwest(this._buildConfig({
             url: this._buildUrl(url, data),
-            method: "GET",
-            dataType: 'json'
-        }, config));
+            method: 'get'
+        }, config))
     }
     
-    public post(url : string, data : any, config : any = {})
+    public post(url : string, data : any, config : ReqwestOptions = null)
     {
-        return $.ajax(this._buildConfig({
+        return reqwest(this._buildConfig({
             url: this._buildUrl(url, data, false),
+            method: 'post',
             data: JSON.stringify(data),
-            method: "POST",
-            dataType: 'json'
-        }, config));
+            contentType: 'application/json'
+        }, config))
     }
     
-    public put(url : string, data : any, config : any = {})
+    public put(url : string, data : any, config : ReqwestOptions = null)
     {
-        return $.ajax(this._buildConfig({
+        return reqwest(this._buildConfig({
             url: this._buildUrl(url, data, false),
+            method: 'put',
             data: JSON.stringify(data),
-            method: "PUT",
-            dataType: 'json'
-        }, config));
+            contentType: 'application/json'
+        }, config))
     }
     
-    public 'delete' (url : string, data : any, config : any = {})
+    public ['delete'](url : string, data : any, config : ReqwestOptions = null)
     {
-        return $.ajax(this._buildConfig({
+        return reqwest(this._buildConfig({
             url: this._buildUrl(url, data),
-            method: "DELETE",
-            dataType: 'json'
-        }, config));
+            method: 'delete'
+        }, config))
     }
     
     
     protected _buildUrl(url : string, data : any, queryString : boolean = true) 
     {
         //build the url
-        for(var i in data){
-            //check if URL requires data, and if provided, replace in URL.
-
+        for(var i in data) {
             if(url.indexOf('{'+i+'}') !== -1){
                 url = url.replace('{'+i+'}', data[i]);
                 continue;
@@ -92,7 +90,11 @@ class ApiServiceClass
 
     protected _buildConfig(defaultConfig : any, customConfig : any = {}) : any
     {
-        return $.extend(true, {}, defaultConfig, customConfig)
+        if(customConfig === null) {
+            return defaultConfig
+        }
+
+        return extend(true, {}, defaultConfig, customConfig)
     }
 }
 

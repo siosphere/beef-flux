@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
-        "modules": "requirejs"
+        "modules": "requirejs",
+        "experimentalDecorators": true
     },
     "exclude" : [
         "dist",
@@ -8,5 +9,7 @@
         "lib",
         "nbproject",
         "node_modules"
-    ]
+    ],
+    "rootDir": "build/",
+    "experimentalDecorators": true
 }

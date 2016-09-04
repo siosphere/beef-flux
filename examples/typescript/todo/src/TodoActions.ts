@@ -1,5 +1,8 @@
+/// <reference path="../../../../dist/typings/index.d.ts" />
 
-class TodoActionsClass extends Action {
+import beef = require('beef')
+
+class TodoActionsClass extends beef.Action {
     
     receiveTodos(todos : any[])
     {
@@ -7,4 +10,4 @@ class TodoActionsClass extends Action {
     }
 };
 
-var TodoActions : TodoActionsClass = Actions.create(new TodoActionsClass());
+export const TodoActions : TodoActionsClass = beef.Actions.create(new TodoActionsClass());

@@ -1,4 +1,13 @@
-class TodoStore extends Store
+/// <reference path="../../../../dist/typings/index.d.ts" />
+
+import beef = require('beef')
+
+
+import {Todo} from "./Todo"
+
+import {TodoActions} from "./TodoActions"
+
+class TodoStoreClass extends beef.Store
 {
     constructor()
     {
@@ -10,25 +19,24 @@ class TodoStore extends Store
 
     }
     
-    public getTodos() : any[]
+    public getTodos() : Todo[]
     {
         return this.getRows('todo');
     }
     
     public receiveTodos(rawTodos : any[]) {
         rawTodos.forEach((rawTodo : any) => {
-            var todo : any = this.sanitize(rawTodo, TodoStore.schema.Todo);
-            this.upsertRow('todo', 'id', todo.id, todo);
+            var todo : any = this.sanitize(rawTodo, Todo.schema);
+            this.upsertRow('todo', 'id', new Todo(todo));
         })
 
         this.emit('TodoStore.event.UPDATE');
     }
-
-    public static schema : any = {
-        Todo: {
-            name: Store.string(),
-            id: Store.int()
-        }
-    }
 }
-var todoStore = new TodoStore();
+
+const  TodoStore = new TodoStoreClass();
+
+export {
+    TodoStoreClass,
+    TodoStore
+}
