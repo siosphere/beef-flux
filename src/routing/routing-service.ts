@@ -113,7 +113,7 @@ export class RoutingServiceClass
             }
             
             matchRoute = matchRoute.replace('+', '\\+');
-            var regex = new RegExp('^#\/' + matchRoute + '$', 'gi');
+            var regex = new RegExp('^[#\/]*' + matchRoute + '$', 'gi');
             if(rawHash.match(regex) !== null){
                 if(this.activeRoute === rawRoute && data === this.routeData){
                     return; //already active
