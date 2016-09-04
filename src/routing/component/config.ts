@@ -19,6 +19,11 @@ class RoutingConfig
     {
         return this.routes[url](data);
     }
+
+    public handleRequest(url : string, request : any, data : any)
+    {
+        return this.routes[url](request, data);
+    }
 }
 
 export

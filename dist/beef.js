@@ -232,6 +232,9 @@ var RoutingConfig = (function () {
     RoutingConfig.prototype.callRoute = function (url, data) {
         return this.routes[url](data);
     };
+    RoutingConfig.prototype.handleRequest = function (url, request, data) {
+        return this.routes[url](request, data);
+    };
     return RoutingConfig;
 }());
 exports.RoutingConfig = RoutingConfig;
@@ -293,6 +296,19 @@ var RoutingServiceClass = (function () {
         }
         if (this.routingConfig.isRoute(url)) {
             var response = this.routingConfig.callRoute(url, data);
+            this.activeRoute = url;
+            this.onRouteFinished();
+            return response;
+        }
+        return null;
+    };
+    RoutingServiceClass.prototype.handleRequest = function (url, request, data) {
+        var isRoute = this.routingConfig.isRoute(url);
+        if (!isRoute) {
+            url = 'default:/';
+        }
+        if (this.routingConfig.isRoute(url)) {
+            var response = this.routingConfig.handleRequest(url, request, data);
             this.activeRoute = url;
             this.onRouteFinished();
             return response;

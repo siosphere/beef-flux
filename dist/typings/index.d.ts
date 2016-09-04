@@ -222,4 +222,31 @@ declare module 'beef'
         uuid: (config?: any) => any;
     };
 
+    /**
+     * Will match a given url to a route, and execute a function/callback defined
+     * for that route. Will also parse the URL for different parameters and
+     * pass that into the callback if found
+     */
+    export class RoutingServiceClass {
+        protected routingConfig: RoutingConfig;
+        protected activeRoute: string;
+        protected routeData: any;
+        onRouteFinished(): void;
+        routes(routes: any): this;
+        route(url: string, data: any): any;
+        handleRequest(url: string, request: any, data: any): any;
+        doRouting(): void;
+    }
+    export let RoutingService: RoutingServiceClass;
+
+    /**
+     * Holds routes (an object with 'url/pattern': function())
+     */
+    export class RoutingConfig {
+        routes: any;
+        constructor(routes: any);
+        isRoute(url: string): boolean;
+        callRoute(url: string, data: any): any;
+        handleRequest(url: string, request: any, data: any): any;
+    }
 }

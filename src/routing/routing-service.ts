@@ -41,6 +41,23 @@ export class RoutingServiceClass
         
         return null;
     }
+
+    public handleRequest (url : string, request : any, data : any)
+    {
+        var isRoute = this.routingConfig.isRoute(url);
+        if(!isRoute) {
+            url = 'default:/';
+        }
+        
+        if(this.routingConfig.isRoute(url)) {
+            var response = this.routingConfig.handleRequest(url, request, data);
+            this.activeRoute = url;
+            this.onRouteFinished();
+            return response;
+        }
+        
+        return null;
+    }
     
     public doRouting()
     {
