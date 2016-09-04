@@ -315,12 +315,13 @@ var RoutingServiceClass = (function () {
         }
         return null;
     };
-    RoutingServiceClass.prototype.doRouting = function (request) {
+    RoutingServiceClass.prototype.doRouting = function (url, request) {
+        if (url === void 0) { url = null; }
         if (request === void 0) { request = null; }
         var matchRoute = '';
         for (var rawRoute in this.routingConfig.routes) {
             matchRoute = rawRoute;
-            var rawHash = request ? request.url : window.location.hash;
+            var rawHash = url ? url : window.location.hash;
             if (rawHash.indexOf('?') >= 0) {
                 rawHash = rawHash.substring(0, rawHash.indexOf('?'));
             }
