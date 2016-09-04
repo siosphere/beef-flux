@@ -59,7 +59,7 @@ export class RoutingServiceClass
         return null;
     }
     
-    public doRouting()
+    public doRouting(request : any = null)
     {
         var matchRoute = '';
         
@@ -120,13 +120,19 @@ export class RoutingServiceClass
                 }
                 this.routeData = data;
                 this.activeRoute = rawRoute;
-                this.route(rawRoute, data);
-                return;
+                if(request) {
+                    return this.handleRequest(rawRoute, request, data)
+                }
+
+                return this.route(rawRoute, data)
             }
         }
         
-        this.route('/', {}); //default route
-        
+        if(request) {
+            return this.handleRequest('default:/', request, {})
+        }
+
+        return this.route('/', {}); //default route
     }
 }
 

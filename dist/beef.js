@@ -315,7 +315,8 @@ var RoutingServiceClass = (function () {
         }
         return null;
     };
-    RoutingServiceClass.prototype.doRouting = function () {
+    RoutingServiceClass.prototype.doRouting = function (request) {
+        if (request === void 0) { request = null; }
         var matchRoute = '';
         for (var rawRoute in this.routingConfig.routes) {
             matchRoute = rawRoute;
@@ -365,11 +366,16 @@ var RoutingServiceClass = (function () {
                 }
                 this.routeData = data;
                 this.activeRoute = rawRoute;
-                this.route(rawRoute, data);
-                return;
+                if (request) {
+                    return this.handleRequest(rawRoute, request, data);
+                }
+                return this.route(rawRoute, data);
             }
         }
-        this.route('/', {}); //default route
+        if (request) {
+            return this.handleRequest('default:/', request, {});
+        }
+        return this.route('/', {}); //default route
     };
     return RoutingServiceClass;
 }());
