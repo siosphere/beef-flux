@@ -234,7 +234,7 @@ declare module 'beef'
         onRouteFinished(): void;
         routes(routes: any): this;
         route(url: string, data: any): any;
-        handleRequest(url: string, request: any, data: any): any;
+        handleRequest(url: string, request: any, response: any, data: any): any;
         doRouting(url?: string, request?: any): any;
     }
     export let RoutingService: RoutingServiceClass;
@@ -247,6 +247,6 @@ declare module 'beef'
         constructor(routes: any);
         isRoute(url: string): boolean;
         callRoute(url: string, data: any): any;
-        handleRequest(url: string, request: any, data: any): any;
+        handleRequest(url: string, request: any, response: any, data: any): any;
     }
 }

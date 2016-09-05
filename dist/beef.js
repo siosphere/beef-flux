@@ -232,8 +232,8 @@ var RoutingConfig = (function () {
     RoutingConfig.prototype.callRoute = function (url, data) {
         return this.routes[url](data);
     };
-    RoutingConfig.prototype.handleRequest = function (url, request, data) {
-        return this.routes[url](request, data);
+    RoutingConfig.prototype.handleRequest = function (url, request, response, data) {
+        return this.routes[url](request, response, data);
     };
     return RoutingConfig;
 }());
@@ -302,22 +302,23 @@ var RoutingServiceClass = (function () {
         }
         return null;
     };
-    RoutingServiceClass.prototype.handleRequest = function (url, request, data) {
+    RoutingServiceClass.prototype.handleRequest = function (url, request, response, data) {
         var isRoute = this.routingConfig.isRoute(url);
         if (!isRoute) {
             url = 'default:/';
         }
         if (this.routingConfig.isRoute(url)) {
-            var response = this.routingConfig.handleRequest(url, request, data);
+            var response = this.routingConfig.handleRequest(url, request, response, data);
             this.activeRoute = url;
             this.onRouteFinished();
             return response;
         }
         return null;
     };
-    RoutingServiceClass.prototype.doRouting = function (url, request) {
+    RoutingServiceClass.prototype.doRouting = function (url, request, response) {
         if (url === void 0) { url = null; }
         if (request === void 0) { request = null; }
+        if (response === void 0) { response = null; }
         var matchRoute = '';
         for (var rawRoute in this.routingConfig.routes) {
             matchRoute = rawRoute;
@@ -370,13 +371,13 @@ var RoutingServiceClass = (function () {
                 this.routeData = data;
                 this.activeRoute = rawRoute;
                 if (request) {
-                    return this.handleRequest(rawRoute, request, data);
+                    return this.handleRequest(rawRoute, request, response, data);
                 }
                 return this.route(rawRoute, data);
             }
         }
         if (request) {
-            return this.handleRequest('default:/', request, {});
+            return this.handleRequest('default:/', request, response, {});
         }
         return this.route('/', {}); //default route
     };

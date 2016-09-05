@@ -20,9 +20,9 @@ class RoutingConfig
         return this.routes[url](data);
     }
 
-    public handleRequest(url : string, request : any, data : any)
+    public handleRequest(url : string, request : any, response : any, data : any)
     {
-        return this.routes[url](request, data);
+        return this.routes[url](request, response, data);
     }
 }
 

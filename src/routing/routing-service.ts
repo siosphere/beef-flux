@@ -42,7 +42,7 @@ export class RoutingServiceClass
         return null;
     }
 
-    public handleRequest (url : string, request : any, data : any)
+    public handleRequest (url : string, request : any, response : any, data : any)
     {
         var isRoute = this.routingConfig.isRoute(url);
         if(!isRoute) {
@@ -50,7 +50,7 @@ export class RoutingServiceClass
         }
         
         if(this.routingConfig.isRoute(url)) {
-            var response = this.routingConfig.handleRequest(url, request, data);
+            var response = this.routingConfig.handleRequest(url, request, response, data);
             this.activeRoute = url;
             this.onRouteFinished();
             return response;
@@ -59,7 +59,7 @@ export class RoutingServiceClass
         return null;
     }
     
-    public doRouting(url : string = null, request : any = null)
+    public doRouting(url : string = null, request : any = null, response : any = null)
     {
         var matchRoute = '';
         
@@ -124,7 +124,7 @@ export class RoutingServiceClass
                 this.routeData = data;
                 this.activeRoute = rawRoute;
                 if(request) {
-                    return this.handleRequest(rawRoute, request, data)
+                    return this.handleRequest(rawRoute, request, response, data)
                 }
 
                 return this.route(rawRoute, data)
@@ -132,7 +132,7 @@ export class RoutingServiceClass
         }
 
         if(request) {
-            return this.handleRequest('default:/', request, {})
+            return this.handleRequest('default:/', request, response, {})
         }
 
         return this.route('/', {}); //default route
