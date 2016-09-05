@@ -235,7 +235,7 @@ declare module 'beef'
         routes(routes: any): this;
         route(url: string, data: any): any;
         handleRequest(url: string, request: any, response: any, data: any): any;
-        doRouting(url?: string, request?: any): any;
+        doRouting(url?: string, request?: any, response?: any): any;
     }
     export let RoutingService: RoutingServiceClass;
 
