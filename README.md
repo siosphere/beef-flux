@@ -3,44 +3,138 @@ BeefJS is a Flux framework with Typescript Support, and can also be used standal
 
 It contains a URL Router, Data Store, Action Class, and an API Wrapper around jQuery to simplify and standardize API calls.
 
-# Non-Typescript Setup
+# Usage
 
 # Routing
-Routes are setup in a very simple way. Using a Javascript object, the keys 
-become the routes, and the values are functions that will be executed if that
-route matches.
+Routing can be used as both client-side routing as well as server-side routing. It supports passing in url parameters, sanitizing params, and support
+for HTTP method matching
 
-The keys can also be parameterized urls using {someName}, for example:
+## Client routes
 ```
-Beef.Router().routes({
-    'todo/{todoId}': function(data) {
-        console.log('Viewing todo', data.todoId);
-    },
-    'todos': function() {
-        console.log('Viewing all todos');
+import * as Beef = require('beef')
+
+let RoutingService = Beef.RoutingService
+
+class RouteDefinitions
+{
+    ['/some/awesome/route']() => 
+    {
+        //do some action
     }
-});
+
+    ['/user/{userId}'](data) => 
+    {
+        //do some action
+        console.log(data.userId)
+    }
+
+}
+
+RoutingService.routes(new RouteDefinitions())
+
+```
+Beef allows you to define how your routes are handled. They can be handled via full url resolution, hash resolution, etc
+
+```
+//listen on hash changes
+window.addEventListener('hashchange', () => {
+    RoutingService.doRouting(window.location.hash)
+})
+
+//listen to html5 state change
+window.addEventListener('onpopstate', () => {
+    RoutingService.doRouting(window.location.href)
+})
 ```
 
-You can pass in a url directory into the router like:
+Beef's route decorators allow you to sanitize URL parameters
 ```
-var url = 'todo/123';
+import * as Beef = require('beef')
 
-Beef.Router().route(url);
-```
-Or you can let the router automatically read it from the url hash by calling
-doRouting.
+let RoutingService = Beef.RoutingService
 
-```
-$(window).on('hashchange', Router.doRouting);
-```
+class RouteDefinitions
+{
+    @Beef.sanitize({
+        type: 'int'
+    })
+    ['/user/{userId}'](data) => 
+    {
+        console.log(typeof data.userId) // integer
+    }
 
-## Inside a React App
-The Beef.Router.route(url) will return the value of the matched route function,
+}
+```
+## Server routes
+Similar to client routes, server routes are setup in classes much the same, and are matched in a similar way, with the exception that they contain 
+HTTP methods during the match as well.
+```
+import connect = require('connect')
+import http = require('http')
+import beef = require('beef')
+
+let RoutingService = beef.RoutingService
+let server = connect()
+
+class ApiRouteDefinitions
+{
+    ['GET:/api/v1/todos'](request)
+    {
+        return {
+            statusCode: 200,
+            content: 'Test'
+        }
+    }
+    
+    ['POST:/api/v1/todos'](request)
+    {
+        return {
+            statusCode: 200,
+            content: 'Test'
+        }
+    }
+}
+
+RoutingService.routes(new ApiRouteDefinitions())
+
+server.use((request, response, next) => {
+    let method = request.method
+    let url = request.url
+    let route = `${method}:${url}`
+    let routingResponse = RoutingService.doRouting(route, request)
+    response.statusCode = routingResponse.statusCode
+    response.end(routingResponse.content)
+    next()
+})
+
+http.createServer(server).listen(3000)
+```
+## Routing Inside a React App
+The RoutingService will return the value of the matched route function,
 which allows you to use it easily within a react app, and have the different 
 matched routes, return different React Components.
 
 ```
+
+import * as Beef = require('beef')
+
+let RoutingService = Beef.RoutingService
+
+class RouteDefinitions
+{
+    ['/']() => 
+    {
+        return <Homepage />
+    }
+
+    ['/about']() => 
+    {
+        return <AboutUs />
+    }
+}
+
+RoutingService.routes(new RouteDefinitions())
+
 var AppContainer = React.createClass({
     getInitialState: function() {
         return {
@@ -49,19 +143,11 @@ var AppContainer = React.createClass({
     },
     componentWillMount: function() {
         window.addEventListener("hashchange", this.onHashChange, false);
-        this.setupRoutes();
-    },
-    setupRoutes: function() {
-        Beef.Router().routes({
-            '/': function() {
-                return (<Homepage />);
-            }
-        });
     },
     render: function() {
         //By default the url contains the # symbol, let's remove it
         var url = this.state.url.length > 0 ? this.state.url.substr(1) : '/';
-        return Beef.Router().route(url);
+        return RoutingService.doRouting(url);
     },
     
     onHashChange: function() {
@@ -70,38 +156,35 @@ var AppContainer = React.createClass({
         });
     }
 });
+
+ReactDOM.render(<AppContainer />, document.body)
+
 ```
 
 # Api Calls
-jQuery does a great job of abstracting away a lot of the complexities with doing
-XHR requests. However, their implementation isn't standard across every HTTP 
-verb.
-
-The Beef API Service makes it so that every call is standard, 
+Beef API Service provides a common wrapper around reqwest, making it so that every call is standard, and supports parameter replacement in the URL
 ```
-Beef.Api().{verb}(url, data).success().error();
-```
-Where verb is a valid HTTP verb (get, post, put, delete)
+import * as Beef = require('beef')
+let ApiService = Beef.ApiService
 
+let url = "/api/v1/users/{userId}";
+let data = {
+    userId: 1,
+    foo: 'bar'
+}
+
+ApiService.get(url, data).then(success, error) // url = /api/v1/users/1?foo=bar
+ApiService.post(url, data).then(success, error) // url = /api/v1/users/1, data = JSON.stringify({foo: 'bar'})
+ApiService.put(url, data).then(success, error) // url = /api/v1/users/1, data = JSON.stringify({foo: 'bar'})
+ApiService.delete(url, data).then(success, error) // url = /api/v1/users/1?foo=bar
+
+```
 It will also automatically replace variables in the URL that are surrounded
-by curly braces, for example:
-```
-Beef.Api().get('/api/todos/{todoId}', {
-    todoId: 123
-});
-```
-
-This will do a GET request to /api/todos/123
-
-This simplifies you from having to do odd concatenations (no more, '/api/todos/' + todo.id)
+by curly braces.
 
 For verbs that support a request body, the data that doesn't match a url token, 
-will be sent in the body. For all other verbs, it will be added to the query
-string.
-
-```
-Beef.Api().get('/my/url', {userId: 1}); //final url would be /my/url?userId=1
-```
+will be sent in the body as a JSON encoded string. 
+For all other verbs, it will be added to the query string.
 
 # Store
 Beef's Stores hold all the data in your application. A store can hold different
@@ -111,17 +194,23 @@ break up your app.
 Stores also can subscribe to dispatched messages from Actions.
 
 ```
+import * as Beef = require('beef')
+import {TodoActions} from "./todo-actions"
+import {Todo} from "./todo"
+
 /**
  * Stores hold the data for our application, sanitize it, and listen for
  * actions to happen. 
  */
-var TodoStore = Beef.Store().create({
-    
+class TodoStoreClass extends Beef.Store 
+{
     /**
      * Setting up our action listeners,
      */
-    actions: function() {
-        
+    constructor()
+    {
+        super()
+
         /**
          * For each ActionClass, we can register several callbacks.
          * The "key" is the function on our store we want to be called, when
@@ -143,91 +232,111 @@ var TodoStore = Beef.Store().create({
      * Receive an array of todos, upsert them, and then emit an event
      * saying we changed
      */
-    receiveTodos: function(rawTodos) {
+    receiveTodos(rawTodos)
+    {
         
-        rawTodos.forEach(function(rawTodo) {
+        rawTodos.forEach((rawTodo) => {
             /**
              * Sanitize our todo to the schema
              */
-            var todo = TodoStore.sanitize(rawTodo, TodoStore.schema.Todo);
-            TodoStore.upsertRow('todo', 'id', todo.id, todo);
+            var todo = this.sanitize(rawTodo, Todo.schema);
+            this.upsertRow('todo', 'id', todo);
         });
         
-        TodoStore.emit('TodoStore.event.UPDATE');
+        this.emit(TodoEvents.UPDATE);
     },
     
     /**
      * Get all the todos our store contains
      */
-    getTodos: function()
+    getTodos()
     {
-        return TodoStore.getRows('todo');
+        return this.getRows('todo');
     },
-    
-    /**
-     * Hold the schemas for the various data we may contain
-     */
-    schema: {
-        
-        /**
-         * A simple todo with nothing but an id that must be an integer,
-         * and a title that must be a string, and by default is empty.
-         * 
-         * If no "initial" callback is set, the field will default to null
-         */
-        Todo: {
-            
-            id: Store.int(),
-            
-            title: Store.string({
-                initial: function() {
-                    return '';
-                }
-            })
-        }
-    }
-    
 });
+
+export class TodoEvents
+{
+    public static UPDATE = 'TodoEvents.UPDATE'
+}
+
+export const TodoStore = new TodoStoreClass()
 ```
+## Store Items
+Items in a store can be anything, in the example above we are using a strict typed object with a specific schema.
+```
+import * as Beef = require('beef')
+
+export class Todo
+{
+    public static schema = {}
+
+    @Beef.Schema.int()
+    id : number
+
+    @Beef.Schema.string({
+        initial: () => { return '' }
+    })
+    name : string
+
+    @Beef.Schema.boolean({
+        initial: () => { return false }
+    })
+    completed : boolean
+}
+```
+The decorator will automatically populate the schema object, and when passed through the store's sanitize function, will make sure all fields are setup properly
 
 ## Rows
 upsertRow allows you to update a row if it exists already, or insert a new one.
 
-You give it a modelType, a primary key, a primary key value, and then the object
-you want to insert, or update to.
+You give it a modelType, a primary key, and then the object
+you want to insert, or update.
 
 Updates are merge, and not replace. To do a replace, you would need to remove 
 the existing row, and then upsert the new row.
 
 ```
-TodoStore.upsertRow('todo', 'id', 1, {
+import {TodoStore} from "./todo-store"
+
+TodoStore.upsertRow('todo', 'id', {
     id: 1,
     title: 'My Title'
 });
 
-store.getRows('todos'); //[{id: 1, title: 'My Title'}]
+TodoStore.getRows('todo'); //[{id: 1, title: 'My Title'}]
 
-var byTitle = TodoStore.getRows('todos').sort(TodoStore.sortBy('name', 'ASC'));
+var byTitle = TodoStore.getRows('todo').sort(TodoStore.sortBy('name', 'ASC'));
 
 ```
 
 ## Schema
 
-Beef Stores support create a schema to sanitize and/or validate a javascript
+Beef Stores support creating a schema to sanitize and/or validate a javascript
 object against.
 
 Each Schema is a javascript object, where the keys are the keys in the object,
 and the values are a configuration object explaining how that key should be
 validated, or sanitized.
 
-Beef contains some helper functions to abstract some of it away, but without 
-the helper functions schemas are setup like:
+Beef ships with decorators to aid in the creation of schema's, but the resulting schema
+looks like:
+
 ```
 Todo: {
     id: {
-        type: 'int',
+        type: 'int'
+    },
+    name: {
+        type: 'string',
         initial: function() {
-            return 0;
+            return ''
+        }
+    },
+    completed: {
+        type: 'boolean',
+        initial: function() {
+            return false
         }
     }
 }
@@ -236,15 +345,44 @@ Todo: {
 If no initial value callback is provided, and the value doesn't exist in the
 object you are sanitizing, it will default to null.
 
+You can use helper functions, or decorators to build your schemas
 ```
-Todo: {  
-    id: Store.int(),
+import * as Beef = require('beef')
 
-    title: Store.string({
+//helper functions
+let TodoSchema = {  
+    id: Beef.Store.int(),
+
+    name: Beef.Store.string({
         initial: function() {
             return '';
         }
+    }),
+
+    completed: Beef.Store.boolean({
+        initial: function() {
+            return false;
+        }
     })
+}
+
+//decorators
+class Todo
+{
+    public static schema = {}
+
+    @Beef.Schema.int()
+    id : number
+
+    @Beef.Schema.string({
+        initial: () => { return '' }
+    })
+    name : string
+
+    @Beef.Schema.boolean({
+        initial: () => { return false }
+    })
+    completed : boolean
 }
 ```
 
@@ -252,13 +390,18 @@ Schemas also allow you to validate sub objects, or an array against a given
 schema.
 
 ```
-Todo: {
-    user: Store.object({
-        schema: function()
-        {
-            return TodoStore.schema.User;
+import * as Beef = require('beef')
+import {Todo} from "./todo"
+
+class User
+{
+    public static schema = {}
+    @Beef.Schema.object({
+        schema: () => {
+            return Todo.schema
         }
     })
+    todos : Todo[]
 }
 ```
 
@@ -269,41 +412,47 @@ schema be null.
 You an also add validation to the schema, which when passed through the 
 validator will return the object, or an array of errors if it isn't valid.
 ```
-Todo: {
-    title: Store.string(),
-    desc: Store.string({
+class Todo
+{
+    public static schema = {}
+
+    @Beef.Schema.string({
+        initial: () => { return '' },
         validation: {
             minLength: 5,
             maxLength: 10,
             required: true,
-            isNotLoremIpsum: function(value) {
-                return value !== 'Lorem Ipsum';
+            isNotLoremIpsum: (value) => {
+                return value !== "Lorem Ipsum"
             }
         }
     })
+    name : string
 }
 ```
 
-Built in validators include:  
+Built in validators include:
 **required** the value cannot be undefined, null, or an empty string  
 **minLength** the string value length must be greater than this  
 **maxLength** the string value length must be less than this  
 
 You can do custom validators, by doing a callback function that will receive
-the value of that field, and returning true or false.
+the value of that field, and return true or false.
 
 ## Events
 Stores can emit any events they choose, which can be listened on from your app,
 or in the case of React, within your components
 
 ```
-TodoStore.listen('TodoStore.UPDATE', function(){
-    console.log('todos updated', TodoStore.getTodos());
+import {TodoStore, TodoEvents} from "./todo-store"
+
+TodoStore.listen(TodoEvents.UPDATE, () => {
+    console.log('todos updated', TodoStore.getRows('todo));
 });
 ```
 You can also turn off the listeners by using .ignore
 ```
-TodoStore.ignore('TodoStore.UPDATE', myCallback);
+TodoStore.ignore(TodoEvents.UPDATE, myCallback);
 ```
 
 # Actions
@@ -318,168 +467,51 @@ unnecessary.
 In Beef, you define an action class, which will contain available methods a 
 store can listen on, and available methods you can call.
 ```
-var TodoActions = Beef.Actions().create({
-    
+class TodoActionsClass extends Beef.Actions
+{
     /**
      * We are receiving an array of todos
-     * @param array rawTodos
-     * @returns array
      */
-    receiveTodos: function(rawTodos) {
-        return rawTodos;
+    receiveTodos(rawTodos) 
+    {
+        return rawTodos
     }
     
-});
+}
+
+export const TodoActions = Beef.Actions.create(new TodoActionsClass())
 ```
 
-When the store listens on the action, it's callback will receive the results
+When the store listens on the action, the store callback will receive the results
 of the action. For the most part, most actions will just return an object
 with the data they received.
 
 On the store side, you can then register a callback for that specific action.
 ```
-TodoActions._register({    
-    /**
-     * When TodoActions.receiveTodos is called, update our todos
-     */
-    receiveTodos: TodoActions.receiveTodos
-}, this);
+import {TodoActions} from "./todo-actions"
+
+class TodoStore extends Beef.Store
+{
+    constructor()
+    {
+        super()
+        TodoActions._register({    
+            /**
+            * When TodoActions.receiveTodos is called, update our todos
+            */
+            receiveTodos: TodoActions.receiveTodos
+        }, this);
+    }
+
+    receiveTodos(rawTodos)
+    {
+        console.log('got raw todos', rawTodos)
+    }
+}
+
 ```
 
 The key is the function on our store we want to be called, when the referenced
 action happens. Calling TodoActions.receiveTodos([]), will dispatch the message 
-and the store's "receiveTodos" method will be called with the results (an empty
+and the store's "receiveTodos" method with the results (an empty
 array)
-
-# Dispatcher
-Beef also contains a traditional flux dispatcher if so required.
-
-```
-Beef.Dispatcher().register(function(payload) {
-    switch(payload.type) {
-        case 'Todo.actions.receiveTodos':
-            TodoStore.receiveTodos(payload.data);
-        break;
-});
-
-Beef.Dispatcher().dispatch('Todo.actions.receiveTodos', []);
-```
-
-# Typescript
-
-# Store - using TypeScript
-```
-class MyStore extends Store {
-    constructor() {
-        
-    }
-}
-
-var store = new MyStore();
-```
-
-## Schema - using TypeScript
-```
-class MyStore extends Store {
-    public createTodo(title : string, description : string) {
-        return this.sanitize({
-            title: title,
-            desc: description
-        }, MyStore.schema.Todo);
-    }
-
-    public static schema : any = {
-        Todo: {
-            title: {
-                type: 'string'
-            },
-            desc: {
-                type: 'string'
-            }
-        }
-    }
-}
-```
-### Validation - using TypeScript
-```
-class MyStore extends Store {
-    public createTodo(title : string, description : string) {
-        return this.sanitize({
-            title: title,
-            desc: description
-        }, MyStore.schema.Todo);
-    }
-
-    public static schema : any = {
-        Todo: {
-            title: {
-                type: 'string'
-            },
-            desc: {
-                type: 'string',
-                validation: {
-                    minLength: 5,
-                    maxLength: 10,
-                    required: true,
-                    isNotLoremIpsum: function(value) {
-                        return value !== 'Lorem Ipsum';
-                    }
-                }
-            }
-        }
-    }
-}
-```
-
-## Events - TypeScript
-```
-class MyStore extends Store {
-    public createTodo(title : string, description : string) {
-        this.emit(MyStore.events.UPDATE);
-    }
-
-    public static events : any = {
-        UPDATE: 'MyStore.events.UPDATE'
-    }
-}
-
-var onUpdate = function() {
-   console.log('updated');
-};
-
-store.listen(MyStore.events.UPDATE, onUpdate);
-store.ignore(MyStore.events.UPDATE, onUpdate);
-```
-
-# Actions - TypeScript
-```
-class TodoActionsClass extends Action {
-    
-    receiveTodos(todos : any[])
-    {
-        return todos;
-    }
-};
-
-var TodoActions : TodoActionsClass = Actions.create(new TodoActionsClass());
-```
-
-# Dispatcher - TypeScript
-Beef also contains a traditional flux dispatcher if so required.
-
-```
-Dispatcher.register(function(payload : DispatcherPayload) {
-    var event = payload.event;
-    var data = payload.data;
-    switch(event) {
-        case 'SOME_ACTION':
-            console.log('SOME_ACTION took place', data.some);
-            break;
-    }
-}, []);
-```
-```
-Dispatcher.dispatch('SOME_ACTION', {
-    some: 'data'
-});
-```
