@@ -26,7 +26,7 @@ class ApiService extends BaseService
     public get(url : string, data : any)
     {
         return $.ajax({
-            url: this._buildUrl(url, data),
+            url: this.buildUrl(url, data),
             method: "GET",
             dataType: 'json'
         });
@@ -35,7 +35,7 @@ class ApiService extends BaseService
     public post(url : string, data : any)
     {
         return $.ajax({
-            url: this._buildUrl(url, data, false),
+            url: this.buildUrl(url, data, false),
             data: JSON.stringify(data),
             method: "POST",
             dataType: 'json'
@@ -45,7 +45,7 @@ class ApiService extends BaseService
     public put(url : string, data : any)
     {
         return $.ajax({
-            url: this._buildUrl(url, data, false),
+            url: this.buildUrl(url, data, false),
             data: JSON.stringify(data),
             method: "PUT",
             dataType: 'json'
@@ -55,14 +55,14 @@ class ApiService extends BaseService
     public 'delete' (url : string, data : any)
     {
         return $.ajax({
-            url: this._buildUrl(url, data),
+            url: this.buildUrl(url, data),
             method: "DELETE",
             dataType: 'json'
         });
     }
     
     
-    protected _buildUrl(url : string, data : any, queryString : boolean = true) 
+    public buildUrl(url : string, data : any, queryString : boolean = true) 
     {
         //build the url
         for(var i in data){

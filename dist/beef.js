@@ -724,14 +724,14 @@ var ApiService = (function (_super) {
     };
     ApiService.prototype.get = function (url, data) {
         return $.ajax({
-            url: this._buildUrl(url, data),
+            url: this.buildUrl(url, data),
             method: "GET",
             dataType: 'json'
         });
     };
     ApiService.prototype.post = function (url, data) {
         return $.ajax({
-            url: this._buildUrl(url, data, false),
+            url: this.buildUrl(url, data, false),
             data: JSON.stringify(data),
             method: "POST",
             dataType: 'json'
@@ -739,7 +739,7 @@ var ApiService = (function (_super) {
     };
     ApiService.prototype.put = function (url, data) {
         return $.ajax({
-            url: this._buildUrl(url, data, false),
+            url: this.buildUrl(url, data, false),
             data: JSON.stringify(data),
             method: "PUT",
             dataType: 'json'
@@ -747,12 +747,12 @@ var ApiService = (function (_super) {
     };
     ApiService.prototype['delete'] = function (url, data) {
         return $.ajax({
-            url: this._buildUrl(url, data),
+            url: this.buildUrl(url, data),
             method: "DELETE",
             dataType: 'json'
         });
     };
-    ApiService.prototype._buildUrl = function (url, data, queryString) {
+    ApiService.prototype.buildUrl = function (url, data, queryString) {
         if (queryString === void 0) { queryString = true; }
         //build the url
         for (var i in data) {
