@@ -27,14 +27,11 @@ class Store<T>
      * notified, and sent the new state, and old state
      */
     protected listeners : ((...any) => any)[] = []
-    
+
     /**
-     * This store's action callbacks
+     * Whether or not we are in debug mode
      */
-    public actions = function() : void 
-    {
-        //setup any actions
-    };
+    protected debug : boolean = false
     
     /**
      * Listen on a given event
@@ -61,8 +58,9 @@ class Store<T>
     public stateChange(newState : T) 
     {
         let oldState = _.cloneDeep(this.state)
-        //TODO: add flag to save state history, and number to save etc...
-        this.stateHistory.push(oldState)
+        if(this.debug) {
+            this.stateHistory.push(oldState)
+        }
         this.state = newState
         this.notify(oldState)
     }
@@ -74,6 +72,10 @@ class Store<T>
 
     protected notify(oldState : T)
     {
+        if(this.debug) {
+            console.debug('Store state changed, notifying ' + this.listeners.length + ' listener(s) of change', 'Old State', oldState, 'New State', this.state)
+        }
+
         this.listeners.forEach((listener) => {
             listener(this.state, oldState)
         })
@@ -84,11 +86,11 @@ class Store<T>
      */
     public upsertItem(modelArray : any[], keyValue : any, newItem : any, overwrite : boolean = false) : boolean
     {
-        var updated : boolean = false;
+        var updated : boolean = false
         
         if(typeof modelArray === 'undefined' || !Array.isArray(modelArray)) {
             console.warn('Non array passed in as modelArray')
-            modelArray = [];
+            modelArray = []
         }
 
         if(typeof newItem !== 'object') {
@@ -117,6 +119,7 @@ class Store<T>
             let existingItem = modelArray[existing]
             modelArray[existing] = overwrite ? newItem : this.merge(existingItem, newItem)
         }
+
         return true
     }
     
@@ -147,8 +150,8 @@ class Store<T>
     public removeItems(modelArray : any[], keyValues : any[]) 
     {
         keyValues.forEach((keyValue) => {
-            this.removeItem(modelArray, keyValue);
-        });
+            this.removeItem(modelArray, keyValue)
+        })
     }
     
     /**
@@ -156,13 +159,14 @@ class Store<T>
      */
     public sanitizeAndValidate(obj : any, schema : any)
     {
-        var model = this.sanitize(obj, schema, false);
-        var validation = this.validate(model, schema);
-        if(validation === true){
-            return model;
+        var model = this.sanitize(obj, schema, false)
+        var validation = this.validate(model, schema)
+
+        if(validation === true) {
+            return model
         }
         
-        return validation;
+        return validation
     }
     
     /**
@@ -171,49 +175,49 @@ class Store<T>
      */
     public validate(obj : any, schema : any) : any[]|boolean
     {
-        var errors : string[] = [];
+        var errors : string[] = []
         
         for(var field in schema) {
-            if(typeof(schema[field].validation) !== 'undefined'){
+            if(typeof(schema[field].validation) !== 'undefined') {
                 for(var validation in schema[field].validation) {
                     if(errors.length > 0) {
-                        break;
+                        break
                     }
-                    var value = obj[field];
+                    var value = obj[field]
                     
-                    var label = schema[field].label ? schema[field].label : field;
+                    var label = schema[field].label ? schema[field].label : field
                     
                     switch(validation) {
                         case 'required':
-                            if(typeof(value) === 'undefined' || value === null || value === ''){
-                                errors.push(label + ' is required');
+                            if(typeof(value) === 'undefined' || value === null || value === '') {
+                                errors.push(label + ' is required')
                             }
-                        break;
+                        break
                         case 'minLength':
-                            if(value.length < schema[field].validation[validation]){
-                                errors.push(label + ' must be at least ' + schema[field].validation[validation] + ' characters');
+                            if(value.length < schema[field].validation[validation]) {
+                                errors.push(label + ' must be at least ' + schema[field].validation[validation] + ' characters')
                             }
-                        break;
+                        break
                         case 'maxLength':
-                            if(value.length > schema[field].validation[validation]){
-                                errors.push(label + ' must be at under ' + schema[field].validation[validation] + ' characters');
+                            if(value.length > schema[field].validation[validation]) {
+                                errors.push(label + ' must be at under ' + schema[field].validation[validation] + ' characters')
                             }
-                        break;
+                        break
                         default:
-                            if(typeof(schema[field].validation[validation]) === 'function'){
-                                var results = schema[field].validation[validation](value);
-                                if(results !== true){
-                                    errors.concat(results);
+                            if(typeof(schema[field].validation[validation]) === 'function') {
+                                var results = schema[field].validation[validation](value)
+                                if(results !== true) {
+                                    errors.concat(results)
                                 }
                             }
-                        break;
+                        break
                         
                     }
                 }
             }
         }
         
-        return errors.length > 0 ? errors : true;
+        return errors.length > 0 ? errors : true
     }
     
     /**
@@ -222,23 +226,23 @@ class Store<T>
      */
     public sanitize(obj : any, schema : any, json : boolean = false) : any
     {
-        var clean = {};
-        var tmp = extend(true, {}, obj);
-        for(var field in schema){
-            clean[field] = this.sanitizeField(field, tmp, schema, json);
+        var clean = {}
+        var tmp = extend(true, {}, obj)
+        for(var field in schema) {
+            clean[field] = this.sanitizeField(field, tmp, schema, json)
         }
             
-        return clean;
+        return clean
     }
     
     /**
-     * Merge objects together to a given depth
+     * Merge objects together
      */
     public merge(obj1 : any, obj2 : any) 
     {
-
         _.merge(obj1, obj2)
-        return obj1;
+
+        return obj1
     }
     
     /**
@@ -246,24 +250,24 @@ class Store<T>
      */
     public sortBy(key : string, dir : string = 'desc')
     {
-        return function(a, b){
+        return (a, b) => {
 
-            if((b[key] && !a[key]) || (b[key] && a[key] && b[key] > a[key])){
-                return dir.toLowerCase() === 'desc' ? 1 : -1;
+            if((b[key] && !a[key]) || (b[key] && a[key] && b[key] > a[key])) {
+                return dir.toLowerCase() === 'desc' ? 1 : -1
             }
 
-            if((!b[key] && a[key]) || (b[key] && a[key] && b[key] < a[key])){
-                return dir.toLowerCase() === 'desc' ? -1 : 1;
+            if((!b[key] && a[key]) || (b[key] && a[key] && b[key] < a[key])) {
+                return dir.toLowerCase() === 'desc' ? -1 : 1
             }
 
-            if(b[key] && a[key] && b[key] == a[key]){
-                return 0;
+            if(b[key] && a[key] && b[key] == a[key]) {
+                return 0
             }
 
-            if(b[key] && !a[key]){
-                return 0;
+            if(b[key] && !a[key]) {
+                return 0
             }
-        };
+        }
     }
     
     /**
@@ -271,7 +275,7 @@ class Store<T>
      */
     public money(value : number)
     {
-        return value.toFixed(2);
+        return value.toFixed(2)
     }
     
     /**
@@ -279,44 +283,45 @@ class Store<T>
      */
     public uuid()
     {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-            return v.toString(16);
-        });
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            let r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8)
+
+            return v.toString(16)
+        })
     }
     
     public static string(params = {}) 
     {
         return extend(true, {
             type: 'string'
-        }, params);
+        }, params)
     }
     
     public static int(params = {}) 
     {
         return extend(true, {
             type: 'int'
-        }, params);
+        }, params)
     }
     
     public static double(params = {}) 
     {
         return extend(true, {
             type: 'double'
-        }, params);
+        }, params)
     }
     public static bool(params = {}) 
     {
         return extend(true, {
             type: 'bool'
-        }, params);
+        }, params)
     }
     
     public static float(params = {}) 
     {
         return extend(true, {
             type: 'float'
-        }, params);
+        }, params)
     }
     
     public static array (params = {}) 
@@ -324,14 +329,14 @@ class Store<T>
         return extend(true, {
             type: 'array',
             schema: null
-        }, params);
+        }, params)
     }
     public static object (params = {}) 
     {
         return extend(true, {
             type: 'object',
             schema: null
-        }, params);
+        }, params)
     }
     
     public static datetime (params = {}) 
@@ -340,14 +345,14 @@ class Store<T>
             type: 'datetime',
             schema: null,
             format: 'YYYY-MM-DD HH:mm:ss'
-        }, params);
+        }, params)
     }
     public static callback(params = {}) 
     {
         return extend(true, {
             type: 'callback',
             schema: null
-        }, params);
+        }, params)
     }
     
     /**
@@ -355,54 +360,54 @@ class Store<T>
      */
     protected sanitizeField(field : string, obj : any, schema : any, json : boolean)
     {
-        if(schema[field].type === 'function'){
-            return schema[field].value; //return function
+        if(schema[field].type === 'function') {
+            return schema[field].value //return function
         }
 
-        if(typeof(obj[field]) === 'undefined'){
+        if(typeof(obj[field]) === 'undefined') {
             //see if schema has a default
-            if(typeof(schema[field]['initial']) !== 'undefined'){
-                obj[field] = schema[field]['initial']();
+            if(typeof(schema[field]['initial']) !== 'undefined') {
+                obj[field] = schema[field]['initial']()
             } else {
-                obj[field] = null;
+                obj[field] = null
             }
         }
-        var type = schema[field]['type'];
-        if(obj[field] === null && type !== 'obj' && type !== 'object'){
-            return null;
+        var type = schema[field]['type']
+        if(obj[field] === null && type !== 'obj' && type !== 'object') {
+            return null
         }
 
-        schema[field].field = field;
+        schema[field].field = field
 
-        switch(type){
+        switch(type) {
             case 'int':
             case 'integer':
-                return this.sanitizeInteger(obj[field], schema[field]);
+                return this.sanitizeInteger(obj[field], schema[field])
             case 'float':
             case 'double':
-                return this.sanitizeFloat(obj[field], schema[field]);
+                return this.sanitizeFloat(obj[field], schema[field])
             case 'string':
             case 'char':
             case 'varchar':
-                return this.sanitizeString(obj[field], schema[field]);
+                return this.sanitizeString(obj[field], schema[field])
             case 'date':
             case 'datetime':
             case 'timestamp':
-                return this.sanitizeDateTime(obj[field], schema[field], json);
+                return this.sanitizeDateTime(obj[field], schema[field], json)
             case 'bool':
             case 'boolean':
-                return this.sanitizeBoolean(obj[field], schema[field]);
+                return this.sanitizeBoolean(obj[field], schema[field])
             case 'obj':
             case 'object':
-                return this.sanitizeObject(obj[field], schema[field], json);
+                return this.sanitizeObject(obj[field], schema[field], json)
             case 'array':
             case 'collection':
-                return this.sanitizeArray(obj[field], schema[field], json);
+                return this.sanitizeArray(obj[field], schema[field], json)
             default:
-                if(schema[field].sanitize !== 'undefined'){
-                    return schema[field].sanitize(obj[field], schema[field]);
+                if(schema[field].sanitize !== 'undefined') {
+                    return schema[field].sanitize(obj[field], schema[field])
                 }
-                break;
+                break
         }
     }
     
@@ -411,27 +416,27 @@ class Store<T>
      */
     protected sanitizeInteger(value : any, schemaConfig : any)
     {
-        if(typeof value === 'string'){
-                value = value.replace(/[a-zA-Z]+/gi, '');
-            if(value.length === 0){
-                return value = '';
+        if(typeof value === 'string') {
+            value = value.replace(/[a-zA-Z]+/gi, '')
+            if(value.length === 0) {
+                return value = ''
             }
         }
 
-        value = parseInt(value);
+        value = parseInt(value)
 
-        if(typeof(schemaConfig.min) !== 'undefined' && value < schemaConfig.min){
-            throw new Error('Provided value cannot be sanitized, value is below minimum integer allowed');
+        if(typeof(schemaConfig.min) !== 'undefined' && value < schemaConfig.min) {
+            throw new Error('Provided value cannot be sanitized, value is below minimum integer allowed')
         }
-        if(typeof(schemaConfig.max) !== 'undefined' && value > schemaConfig.max){
-            throw new Error('Provided value cannot be sanitized, value is greater than maximum integer allowed');
-        }
-
-        if(isNaN(value)){
-            return value = '';
+        if(typeof(schemaConfig.max) !== 'undefined' && value > schemaConfig.max) {
+            throw new Error('Provided value cannot be sanitized, value is greater than maximum integer allowed')
         }
 
-        return value;
+        if(isNaN(value)) {
+            return value = ''
+        }
+
+        return value
     }
     
     /**
@@ -439,15 +444,16 @@ class Store<T>
      */
     protected sanitizeFloat(value : any, schemaConfig : any)
     {
-        value = parseFloat(value);
-        if(typeof(schemaConfig.min) !== 'undefined' && value < schemaConfig.min){
-            throw new Error('Provided value cannot be sanitized, value is below minimum float allowed');
-        }
-        if(typeof(schemaConfig.max) !== 'undefined' && value > schemaConfig.max){
-            throw new Error('Provided value cannot be sanitized, value is greater than maximum float allowed');
+        value = parseFloat(value)
+        if(typeof(schemaConfig.min) !== 'undefined' && value < schemaConfig.min) {
+            throw new Error('Provided value cannot be sanitized, value is below minimum float allowed')
         }
 
-        return value;
+        if(typeof(schemaConfig.max) !== 'undefined' && value > schemaConfig.max) {
+            throw new Error('Provided value cannot be sanitized, value is greater than maximum float allowed')
+        }
+
+        return value
     }
     
     /**
@@ -455,16 +461,18 @@ class Store<T>
      */
     protected sanitizeString(value : any, schemaConfig : any)
     {
-        value = String(value);
-        if(typeof(schemaConfig.minLength) !== 'undefined' && value.length < schemaConfig.minLength){
-            throw new Error('Provided value cannot be sanitized, string length is below minimum allowed');
+        value = String(value)
+        if(typeof(schemaConfig.minLength) !== 'undefined' && value.length < schemaConfig.minLength) {
+            throw new Error('Provided value cannot be sanitized, string length is below minimum allowed')
         }
-        if(typeof(schemaConfig.maxLength) !== 'undefined' && value.length > schemaConfig.maxLength){
+
+        if(typeof(schemaConfig.maxLength) !== 'undefined' && value.length > schemaConfig.maxLength) {
             //truncate and do a warning
-            console.warn('Value was truncated during sanitation');
-            value = value.substr(0, schemaConfig.maxLength);
+            console.warn('Value was truncated during sanitization')
+            value = value.substr(0, schemaConfig.maxLength)
         }
-        return value;
+
+        return value
     }
     
     /**
@@ -472,19 +480,21 @@ class Store<T>
      */
     protected sanitizeDateTime(value : any, schemaConfig : any, json : boolean) : any
     {
-        if(typeof schemaConfig.utc === 'undefined' || schemaConfig.utc){
-            var momentDate = moment.utc(value, schemaConfig.format);
+        if(typeof schemaConfig.utc === 'undefined' || schemaConfig.utc) {
+            var momentDate = moment.utc(value, schemaConfig.format)
         } else {
-            var momentDate = moment(value, schemaConfig.format);
-        }
-        if(momentDate.isValid()){
-            if(json){
-                return momentDate.utc().format('YYYY-MM-DD hh:mm:ss');
-            }
-            return momentDate;
+            var momentDate = moment(value, schemaConfig.format)
         }
 
-        throw new Error("Provided value ("+ value +") cannot be sanitized for field ("+ schemaConfig.field +"), is not a valid date");
+        if(momentDate.isValid()) {
+            if(json) {
+                return momentDate.utc().format('YYYY-MM-DD hh:mm:ss')
+            }
+
+            return momentDate
+        }
+
+        throw new Error("Provided value ("+ value +") cannot be sanitized for field ("+ schemaConfig.field +"), is not a valid date")
     }
     
     /**
@@ -492,25 +502,30 @@ class Store<T>
      */
     protected sanitizeBoolean(value : any, schemaConfig : any)
     {
-        if(value === false || value === true){
-            return value;
-        }
-        if(typeof(value) == 'string'){
-            if(value.toLowerCase().trim() === 'false'){
-                return false;
-            }
-            if(value.toLowerCase().trim() === 'true'){
-                return true;
-            }
-        }
-        if(parseInt(value) === 0){
-            return false;
-        }
-        if(parseInt(value) === 1){
-            return true;
+        if(value === false || value === true) {
+            return value
         }
 
-        throw new Error('Provided value cannot be santized, is not a valid boolean');
+        if(typeof(value) == 'string') {
+
+            if(value.toLowerCase().trim() === 'false') {
+                return false
+            }
+
+            if(value.toLowerCase().trim() === 'true') {
+                return true
+            }
+        }
+
+        if(parseInt(value) === 0) {
+            return false
+        }
+
+        if(parseInt(value) === 1) {
+            return true
+        }
+
+        throw new Error('Provided value cannot be santized, is not a valid boolean')
     }
     
     /**
@@ -518,19 +533,19 @@ class Store<T>
      */
     protected sanitizeObject(value : any, schemaConfig : any, json : boolean)
     {
-        if(typeof(schemaConfig.schema) === 'undefined'){
-            throw new Error('Provided value cannot be santized, no reference schema provided for field type of object');
+        if(typeof(schemaConfig.schema) === 'undefined') {
+            throw new Error('Provided value cannot be santized, no reference schema provided for field type of object')
         }
 
-        if(schemaConfig.schema === null){
-            return value;
+        if(schemaConfig.schema === null) {
+            return value
         }
 
-        if(value === null){
-            return null;
+        if(value === null) {
+            return null
         }
 
-        return this.sanitize(value, schemaConfig.schema(), json);
+        return this.sanitize(value, schemaConfig.schema(), json)
     }
     
     /**
@@ -538,18 +553,18 @@ class Store<T>
      */
     protected sanitizeArray(value : any, schemaConfig : any, json : boolean)
     {
-        if(typeof(schemaConfig.schema) === 'undefined' || schemaConfig.schema === null || schemaConfig.schema === false){
-            return value;
+        if(typeof(schemaConfig.schema) === 'undefined' || schemaConfig.schema === null || schemaConfig.schema === false) {
+            return value
         }
 
-        if(typeof(value.length) === 'undefined'){
-            return []; //empty array
+        if(typeof(value.length) === 'undefined') {
+            return [] //empty array
         }
 
 
         return value.map((v) => {
-            return this.sanitize(v, schemaConfig.schema(), json);
-        });
+            return this.sanitize(v, schemaConfig.schema(), json)
+        })
     }
 }
 
