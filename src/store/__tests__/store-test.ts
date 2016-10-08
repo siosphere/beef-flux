@@ -2,6 +2,7 @@
 jest.unmock('../store')
 jest.unmock('lodash')
 jest.unmock('extend')
+
 import Store from '../store'
 
 interface TestStoreState
@@ -33,9 +34,10 @@ class TestStoreClass extends Store<TestStoreState>
             title: title
         }
 
-        this.stateChange(this.receiveItems([item]))
+        this.receiveItems([item])
     }
 
+    @Store.triggerState()
     receiveItems(items)
     {
         let newState = this.newState()
@@ -59,7 +61,7 @@ describe('store', () => {
         expect(TestStore.state).toEqual(defaultState)
     })
     
-    let currentState = null
+    /*let currentState = null
 
     const listener = jest.fn()
 
@@ -85,5 +87,5 @@ describe('store', () => {
 
     it('should match our updated state', () => {
         expect(TestStore.state).toEqual(stateTwo)
-    })
+    })*/
 })

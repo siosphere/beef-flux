@@ -401,6 +401,15 @@ var Store = (function () {
         this.removeItem = this.removeItem.bind(this);
         this.removeItems = this.removeItems.bind(this);
     }
+    Store.triggerState = function () {
+        return function (target, propertyKey, descriptor) {
+            var originalFunction = target[propertyKey];
+            descriptor.value = function () {
+                return this.stateChange(originalFunction.apply(this, arguments));
+            };
+            descriptor.value.bind(target);
+        };
+    };
     /**
      * Listen on a given event
      */

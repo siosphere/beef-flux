@@ -31,9 +31,10 @@ class TodoStoreClass extends beef.Store<TodoState>
 
     public createTodo(rawTodo : any)
     {
-        this.stateChange(this.receiveTodos([rawTodo]))
+        this.receiveTodos([rawTodo])
     }
 
+    @beef.Store.triggerState()
     protected receiveTodos(rawTodos : any[]) {
         let newState = this.newState()
 

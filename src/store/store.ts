@@ -33,6 +33,20 @@ class Store<T>
      */
     public debug : boolean = false
 
+    public static triggerState() {
+        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+            let originalFunction = target[propertyKey];
+            let replaceFunction = function() {
+                return this.stateChange(originalFunction.apply(this, arguments))
+            }
+            if(typeof descriptor !== 'undefined') {
+                descriptor.value = replaceFunction.bind(target)
+            } else {
+                target[propertyKey] = replaceFunction.bind(target)
+            }
+        }
+    }
+
     constructor()
     {
         this.listen = this.listen.bind(this)

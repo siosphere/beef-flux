@@ -35,7 +35,7 @@ gulp.task('default', ['compile'], function(){
 });
 
 gulp.task('minify', ['default'], function(){
-    gulp.src([
+    return gulp.src([
         './dist/beef.js'
     ])
     .pipe(rename('beef.min.js'))
@@ -83,7 +83,7 @@ gulp.task('examples.todo', function() {
     .pipe(gulp.dest('./build/examples/todo/'))
     ;
 
-    var bundle = browserify('./build/examples/todo/app.js', {
+    return browserify('./build/examples/todo/app.js', {
         paths: ['./node_modules', './dist/'],
         ignoreMissing: true
     })

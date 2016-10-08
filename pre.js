@@ -8,6 +8,7 @@ module.exports = {
             {
                 module: tsc.ModuleKind.CommonJS,
                 jsx: tsc.JsxEmit.React,
+                experimentalDecorators: true
             },
             path,
             []

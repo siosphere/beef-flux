@@ -45,6 +45,10 @@ declare module 'beef'
          * This store's action callbacks
          */
         actions: () => void;
+
+        debug: boolean;
+        static triggerState(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
+        constructor();
         /**
          * Listen on a given event
          */

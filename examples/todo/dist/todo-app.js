@@ -58,6 +58,12 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var beef = require('beef');
 var Todo_1 = require("./Todo");
 var TodoStoreClass = (function (_super) {
@@ -75,7 +81,7 @@ var TodoStoreClass = (function (_super) {
         return this.state.todos;
     };
     TodoStoreClass.prototype.createTodo = function (rawTodo) {
-        this.stateChange(this.receiveTodos([rawTodo]));
+        this.receiveTodos([rawTodo]);
     };
     TodoStoreClass.prototype.receiveTodos = function (rawTodos) {
         var _this = this;
@@ -86,6 +92,9 @@ var TodoStoreClass = (function (_super) {
         });
         return newState;
     };
+    __decorate([
+        beef.Store.triggerState()
+    ], TodoStoreClass.prototype, "receiveTodos", null);
     return TodoStoreClass;
 }(beef.Store));
 exports.TodoStoreClass = TodoStoreClass;
@@ -511,17 +520,35 @@ var Store = (function () {
          */
         this.listeners = [];
         /**
-         * This store's action callbacks
+         * Whether or not we are in debug mode
          */
-        this.actions = function () {
-            //setup any actions
-        };
+        this.debug = false;
+        this.listen = this.listen.bind(this);
+        this.ignore = this.ignore.bind(this);
+        this.stateChange = this.stateChange.bind(this);
+        this.newState = this.newState.bind(this);
+        this.notify = this.notify.bind(this);
+        this.upsertItem = this.upsertItem.bind(this);
+        this.removeItem = this.removeItem.bind(this);
+        this.removeItems = this.removeItems.bind(this);
     }
+    Store.triggerState = function () {
+        return function (target, propertyKey, descriptor) {
+            var originalFunction = target[propertyKey];
+            descriptor.value = function () {
+                return this.stateChange(originalFunction.apply(this, arguments));
+            };
+            descriptor.value.bind(target);
+        };
+    };
     /**
      * Listen on a given event
      */
     Store.prototype.listen = function (callback) {
         this.listeners.push(callback);
+    };
+    Store.prototype.getState = function () {
+        return this.state;
     };
     /**
      * Ignore an event we are listening on
@@ -536,8 +563,9 @@ var Store = (function () {
     };
     Store.prototype.stateChange = function (newState) {
         var oldState = _.cloneDeep(this.state);
-        //TODO: add flag to save state history, and number to save etc...
-        this.stateHistory.push(oldState);
+        if (this.debug) {
+            this.stateHistory.push(oldState);
+        }
         this.state = newState;
         this.notify(oldState);
     };
@@ -546,6 +574,9 @@ var Store = (function () {
     };
     Store.prototype.notify = function (oldState) {
         var _this = this;
+        if (this.debug) {
+            console.debug('Store state changed, notifying ' + this.listeners.length + ' listener(s) of change', 'Old State', oldState, 'New State', this.state);
+        }
         this.listeners.forEach(function (listener) {
             listener(_this.state, oldState);
         });
@@ -681,7 +712,7 @@ var Store = (function () {
         return clean;
     };
     /**
-     * Merge objects together to a given depth
+     * Merge objects together
      */
     Store.prototype.merge = function (obj1, obj2) {
         _.merge(obj1, obj2);
@@ -878,7 +909,7 @@ var Store = (function () {
         }
         if (typeof (schemaConfig.maxLength) !== 'undefined' && value.length > schemaConfig.maxLength) {
             //truncate and do a warning
-            console.warn('Value was truncated during sanitation');
+            console.warn('Value was truncated during sanitization');
             value = value.substr(0, schemaConfig.maxLength);
         }
         return value;
