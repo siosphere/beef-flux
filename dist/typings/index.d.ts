@@ -47,12 +47,13 @@ declare module 'beef'
         actions: () => void;
 
         debug: boolean;
-        static triggerState(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
+        static triggerState(actionName: string): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
         constructor();
         /**
          * Listen on a given event
          */
         listen(callback: ((...args: any[]) => any)): void;
+        action(actionName: string, ...args: any[]): void;
         /**
          * Ignore an event we are listening on
          */

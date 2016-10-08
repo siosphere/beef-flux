@@ -10,6 +10,8 @@ interface TestStoreState
     items : any[]
 }
 
+const RECEIVE_ITEM = 'RECEIVE_ITEM'
+
 class TestStoreClass extends Store<TestStoreState>
 {
     public listeners
@@ -34,10 +36,10 @@ class TestStoreClass extends Store<TestStoreState>
             title: title
         }
 
-        this.receiveItems([item])
+        this.action(RECEIVE_ITEM, [item])
     }
 
-    @Store.triggerState()
+    @Store.triggerState(RECEIVE_ITEM)
     receiveItems(items)
     {
         let newState = this.newState()

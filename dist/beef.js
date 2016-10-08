@@ -135,6 +135,37 @@ var RoutingConfig = (function () {
 exports.RoutingConfig = RoutingConfig;
 
 },{}],4:[function(require,module,exports){
+"use strict";
+var sanitizeField = function (value, sanitizeConfig) {
+    switch (sanitizeConfig.type) {
+        case 'int':
+        case 'integer':
+            return parseInt(value);
+        case 'float':
+            return parseFloat(value);
+        case 'string':
+            return "" + value;
+        case "bool":
+        case "boolean":
+            return typeof value !== 'undefined' &&
+                (value === true || (typeof value === 'string' && value.toLowerCase() === 'yes') || value === 1 || value === "1") ? true : false;
+    }
+};
+var sanitize = function (value) {
+    return function (target, propertyKey, descriptor) {
+        var routeMethod = target[propertyKey];
+        descriptor.value = function (data) {
+            var sanitized = data;
+            for (var key in sanitized) {
+                if (typeof value[key] !== 'undefined') {
+                    sanitized[key] = sanitizeField(sanitized[key], value[key]);
+                }
+            }
+            return routeMethod.apply(target, [sanitized]);
+        };
+    };
+};
+exports.sanitize = sanitize;
 
 },{}],5:[function(require,module,exports){
 "use strict";
@@ -369,12 +400,13 @@ var Store = (function () {
         this.upsertItem = this.upsertItem.bind(this);
         this.removeItem = this.removeItem.bind(this);
         this.removeItems = this.removeItems.bind(this);
+        this.action = this.action.bind(this);
     }
-    Store.triggerState = function () {
+    Store.triggerState = function (actionName) {
         return function (target, propertyKey, descriptor) {
             var originalFunction = target[propertyKey];
             var replaceFunction = function () {
-                return this.stateChange(originalFunction.apply(this, arguments));
+                return this.stateChange(actionName, originalFunction.apply(this, arguments));
             };
             if (typeof descriptor !== 'undefined') {
                 descriptor.value = replaceFunction.bind(target);
@@ -382,6 +414,10 @@ var Store = (function () {
             else {
                 target[propertyKey] = replaceFunction.bind(target);
             }
+            if (typeof target.actionListeners === 'undefined') {
+                target.actionListeners = {};
+            }
+            target.actionListeners[actionName] = replaceFunction;
         };
     };
     /**
@@ -392,6 +428,20 @@ var Store = (function () {
     };
     Store.prototype.getState = function () {
         return this.state;
+    };
+    Store.prototype.action = function (actionName) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        if (this.debug) {
+            console.debug('Dispatching action', actionName, args);
+        }
+        if (typeof this.actionListeners[actionName] === 'undefined') {
+            console.warn('No action is registered for', actionName);
+            return false;
+        }
+        return this.actionListeners[actionName].apply(this, args);
     };
     /**
      * Ignore an event we are listening on
@@ -404,10 +454,13 @@ var Store = (function () {
         }
         return false;
     };
-    Store.prototype.stateChange = function (newState) {
+    Store.prototype.stateChange = function (actionName, newState) {
         var oldState = _.cloneDeep(this.state);
         if (this.debug) {
-            this.stateHistory.push(oldState);
+            this.stateHistory.push({
+                actionName: actionName,
+                state: oldState
+            });
         }
         this.state = newState;
         this.notify(oldState);
@@ -835,8 +888,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Store;
 
 },{"extend":9,"lodash":10}],8:[function(require,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],9:[function(require,module,exports){
+
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;

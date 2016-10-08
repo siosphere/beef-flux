@@ -3,6 +3,8 @@
 import beef = require('beef')
 import Todo from "./Todo"
 
+const RECEIVE_TODO = 'RECEIVE_TODO'
+
 interface TodoState
 {
     todos: Todo[]
@@ -31,13 +33,13 @@ class TodoStoreClass extends beef.Store<TodoState>
 
     public createTodo(rawTodo : any)
     {
-        this.receiveTodos([rawTodo])
+        this.action(RECEIVE_TODO, [rawTodo])
+        //this.receiveTodos([rawTodo])
     }
 
-    @beef.Store.triggerState()
+    @beef.Store.triggerState(RECEIVE_TODO)
     protected receiveTodos(rawTodos : any[]) {
         let newState = this.newState()
-
 
         rawTodos.forEach((rawTodo : any) => {
             var todo : any = new Todo(this.sanitize(rawTodo, Todo.schema));
@@ -49,6 +51,7 @@ class TodoStoreClass extends beef.Store<TodoState>
 }
 
 const TodoStore = new TodoStoreClass();
+
 
 export {
     TodoStoreClass,

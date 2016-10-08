@@ -3,6 +3,12 @@
 import extend = require('extend')
 import _ = require('lodash')
 
+export interface StateHistory<T>
+{
+    actionName : string
+    state : T
+}
+
 /**
  * Store that hooks into actions
  * 
@@ -20,7 +26,7 @@ class Store<T>
     /**
      *  If state history is enabled, all state changes are saved here
      */
-    protected stateHistory : T[] = []
+    protected stateHistory : StateHistory<T>[] = []
     
     /**
      * Hold our listeners, whenever the store's state changes, they will be
@@ -28,22 +34,31 @@ class Store<T>
      */
     protected listeners : ((...any) => any)[] = []
 
+    protected actionListeners : any
+
     /**
      * Whether or not we are in debug mode
      */
     public debug : boolean = false
 
-    public static triggerState() {
+    public static triggerState(actionName : string) 
+    {
         return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-            let originalFunction = target[propertyKey];
+            let originalFunction = target[propertyKey]
             let replaceFunction = function() {
-                return this.stateChange(originalFunction.apply(this, arguments))
+                return this.stateChange(actionName, originalFunction.apply(this, arguments))
             }
             if(typeof descriptor !== 'undefined') {
                 descriptor.value = replaceFunction.bind(target)
             } else {
                 target[propertyKey] = replaceFunction.bind(target)
             }
+
+            if(typeof target.actionListeners === 'undefined') {
+                target.actionListeners = {}
+            }
+
+            target.actionListeners[actionName] = replaceFunction
         }
     }
 
@@ -57,6 +72,7 @@ class Store<T>
         this.upsertItem = this.upsertItem.bind(this)
         this.removeItem = this.removeItem.bind(this)
         this.removeItems = this.removeItems.bind(this)
+        this.action = this.action.bind(this)
     }
     
     /**
@@ -71,7 +87,21 @@ class Store<T>
     {
         return this.state
     }
-    
+
+    public action(actionName : string, ...args : any[])
+    {
+        if(this.debug) {
+            console.debug('Dispatching action', actionName, args)
+        }
+
+        if(typeof this.actionListeners[actionName] === 'undefined') {
+            console.warn('No action is registered for', actionName)
+            return false
+        }
+
+        return this.actionListeners[actionName].apply(this, args)
+    }
+
     /**
      * Ignore an event we are listening on
      */
@@ -86,15 +116,18 @@ class Store<T>
         return false
     }
 
-    public stateChange(newState : T) 
+    public stateChange(actionName : string, newState : T) 
     {
         let oldState = _.cloneDeep(this.state)
         if(this.debug) {
-            this.stateHistory.push(oldState)
+            this.stateHistory.push({
+                actionName: actionName,
+                state: oldState
+            })
         }
         this.state = newState
         this.notify(oldState)
-        
+
         return newState
     }
 
