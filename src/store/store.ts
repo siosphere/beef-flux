@@ -32,6 +32,18 @@ class Store<T>
      * Whether or not we are in debug mode
      */
     public debug : boolean = false
+
+    constructor()
+    {
+        this.listen = this.listen.bind(this)
+        this.ignore = this.ignore.bind(this)
+        this.stateChange = this.stateChange.bind(this)
+        this.newState = this.newState.bind(this)
+        this.notify = this.notify.bind(this)
+        this.upsertItem = this.upsertItem.bind(this)
+        this.removeItem = this.removeItem.bind(this)
+        this.removeItems = this.removeItems.bind(this)
+    }
     
     /**
      * Listen on a given event
@@ -39,6 +51,11 @@ class Store<T>
     public listen(callback : ((...args : any[]) => any))
     {
         this.listeners.push(callback)
+    }
+
+    public getState() : T
+    {
+        return this.state
     }
     
     /**
