@@ -266,37 +266,6 @@ var RoutingConfig = (function () {
 exports.RoutingConfig = RoutingConfig;
 
 },{}],4:[function(require,module,exports){
-"use strict";
-var sanitizeField = function (value, sanitizeConfig) {
-    switch (sanitizeConfig.type) {
-        case 'int':
-        case 'integer':
-            return parseInt(value);
-        case 'float':
-            return parseFloat(value);
-        case 'string':
-            return "" + value;
-        case "bool":
-        case "boolean":
-            return typeof value !== 'undefined' &&
-                (value === true || (typeof value === 'string' && value.toLowerCase() === 'yes') || value === 1 || value === "1") ? true : false;
-    }
-};
-var sanitize = function (value) {
-    return function (target, propertyKey, descriptor) {
-        var routeMethod = target[propertyKey];
-        descriptor.value = function (data) {
-            var sanitized = data;
-            for (var key in sanitized) {
-                if (typeof value[key] !== 'undefined') {
-                    sanitized[key] = sanitizeField(sanitized[key], value[key]);
-                }
-            }
-            return routeMethod.apply(target, [sanitized]);
-        };
-    };
-};
-exports.sanitize = sanitize;
 
 },{}],5:[function(require,module,exports){
 "use strict";
@@ -535,10 +504,15 @@ var Store = (function () {
     Store.triggerState = function () {
         return function (target, propertyKey, descriptor) {
             var originalFunction = target[propertyKey];
-            descriptor.value = function () {
+            var replaceFunction = function () {
                 return this.stateChange(originalFunction.apply(this, arguments));
             };
-            descriptor.value.bind(target);
+            if (typeof descriptor !== 'undefined') {
+                descriptor.value = replaceFunction.bind(target);
+            }
+            else {
+                target[propertyKey] = replaceFunction.bind(target);
+            }
         };
     };
     /**
@@ -568,6 +542,7 @@ var Store = (function () {
         }
         this.state = newState;
         this.notify(oldState);
+        return newState;
     };
     Store.prototype.newState = function () {
         return _.cloneDeep(this.state);
@@ -991,8 +966,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Store;
 
 },{"extend":9,"lodash":10}],8:[function(require,module,exports){
-
-},{}],9:[function(require,module,exports){
+arguments[4][4][0].apply(exports,arguments)
+},{"dup":4}],9:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;

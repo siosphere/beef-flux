@@ -94,6 +94,8 @@ class Store<T>
         }
         this.state = newState
         this.notify(oldState)
+        
+        return newState
     }
 
     public newState() : T
