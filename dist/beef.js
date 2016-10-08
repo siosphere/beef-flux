@@ -389,17 +389,26 @@ var Store = (function () {
          */
         this.listeners = [];
         /**
-         * This store's action callbacks
+         * Whether or not we are in debug mode
          */
-        this.actions = function () {
-            //setup any actions
-        };
+        this.debug = false;
+        this.listen = this.listen.bind(this);
+        this.ignore = this.ignore.bind(this);
+        this.stateChange = this.stateChange.bind(this);
+        this.newState = this.newState.bind(this);
+        this.notify = this.notify.bind(this);
+        this.upsertItem = this.upsertItem.bind(this);
+        this.removeItem = this.removeItem.bind(this);
+        this.removeItems = this.removeItems.bind(this);
     }
     /**
      * Listen on a given event
      */
     Store.prototype.listen = function (callback) {
         this.listeners.push(callback);
+    };
+    Store.prototype.getState = function () {
+        return this.state;
     };
     /**
      * Ignore an event we are listening on
@@ -414,8 +423,9 @@ var Store = (function () {
     };
     Store.prototype.stateChange = function (newState) {
         var oldState = _.cloneDeep(this.state);
-        //TODO: add flag to save state history, and number to save etc...
-        this.stateHistory.push(oldState);
+        if (this.debug) {
+            this.stateHistory.push(oldState);
+        }
         this.state = newState;
         this.notify(oldState);
     };
@@ -424,6 +434,9 @@ var Store = (function () {
     };
     Store.prototype.notify = function (oldState) {
         var _this = this;
+        if (this.debug) {
+            console.debug('Store state changed, notifying ' + this.listeners.length + ' listener(s) of change', 'Old State', oldState, 'New State', this.state);
+        }
         this.listeners.forEach(function (listener) {
             listener(_this.state, oldState);
         });
@@ -559,7 +572,7 @@ var Store = (function () {
         return clean;
     };
     /**
-     * Merge objects together to a given depth
+     * Merge objects together
      */
     Store.prototype.merge = function (obj1, obj2) {
         _.merge(obj1, obj2);
@@ -756,7 +769,7 @@ var Store = (function () {
         }
         if (typeof (schemaConfig.maxLength) !== 'undefined' && value.length > schemaConfig.maxLength) {
             //truncate and do a warning
-            console.warn('Value was truncated during sanitation');
+            console.warn('Value was truncated during sanitization');
             value = value.substr(0, schemaConfig.maxLength);
         }
         return value;

@@ -9,6 +9,7 @@ var rename = require("gulp-rename");
 var files = [
     './src/*.ts',
     './src/**/*.ts',
+    '!./src/**/__tests__/**'
 ];
 
 gulp.task('compile', function() {
