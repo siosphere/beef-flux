@@ -1,4 +1,4 @@
-import {Store} from "./store"
+import Store from "./store"
 
 /**
  * This is used to build a schema from a typescript class without having to

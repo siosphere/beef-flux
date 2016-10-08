@@ -1,6 +1,7 @@
 ///<reference path="../../typings/index.d.ts" />
 
 import extend = require('extend')
+import _ = require('lodash')
 
 /**
  * Store that hooks into actions
@@ -9,17 +10,23 @@ import extend = require('extend')
  * anything that pulls data from the DataStore cannot modify it and should treat
  * it as immutable
  */
-class Store
+class Store<T>
 {
     /**
-     * Holds all of our rows by modelType
+     * Holds our state
      */
-    protected rows : any = {};
+    protected state : T = null
+
+    /**
+     *  If state history is enabled, all state changes are saved here
+     */
+    protected stateHistory : T[] = []
     
     /**
-     *  Cache objects by primary key to speed up upsert lookup time
+     * Hold our listeners, whenever the store's state changes, they will be
+     * notified, and sent the new state, and old state
      */
-    protected cache: any = {};
+    protected listeners : ((...any) => any)[] = []
     
     /**
      * This store's action callbacks
@@ -30,120 +37,118 @@ class Store
     };
     
     /**
-     * Used to create a store without extending the class
-     */
-    public static create(params : any) : Store 
-    {
-        var store = extend(true, new Store(), params);
-        store.actions();
-        
-        return store;
-    }
-    
-    /**
      * Listen on a given event
      */
-    public listen(event : string, callback : ((...args : any[]) => any))
+    public listen(callback : ((...args : any[]) => any))
     {
-        window.addEventListener(event, callback)
+        this.listeners.push(callback)
     }
     
     /**
      * Ignore an event we are listening on
      */
-    public ignore(event : string, callback : ((...args : any[]) => any))
+    public ignore(callback : ((...args : any[]) => any)) : boolean
     {
-        window.removeEventListener(event, callback)
+        let index = this.listeners.indexOf(callback)
+        if(index >= 0) {
+            this.listeners.splice(index, 1)
+            return true
+        }
+
+        return false
+    }
+
+    public stateChange(newState : T) 
+    {
+        let oldState = _.cloneDeep(this.state)
+        //TODO: add flag to save state history, and number to save etc...
+        this.stateHistory.push(oldState)
+        this.state = newState
+        this.notify(oldState)
+    }
+
+    public newState() : T
+    {
+        return _.cloneDeep(this.state)
+    }
+
+    protected notify(oldState : T)
+    {
+        this.listeners.forEach((listener) => {
+            listener(this.state, oldState)
+        })
     }
     
     /**
-     * Emit an event
+     * Insert an item into the given modelArray, update it if it already exists
      */
-    public emit(event : string, data : Object = {})
-    {
-        let actualEvent = new CustomEvent(event, data)
-        window.dispatchEvent(actualEvent)
-    }
-    
-    /**
-     * Insert a row if it doesn't exist, update it otherwise
-     */
-    public upsertRow(modelType : string, keyValue : any, newRow : any, overwrite : boolean = false)
+    public upsertItem(modelArray : any[], keyValue : any, newItem : any, overwrite : boolean = false) : boolean
     {
         var updated : boolean = false;
         
-        if(typeof this.rows[modelType] === 'undefined'){
-            this.rows[modelType] = [];
-        }
-        
-        var rows = this.rows[modelType];
-        
-        if(!this.inCache(modelType, keyValue)) {
-            this.cache[modelType][keyValue] = newRow;
-            this.rows[modelType].push(this.cache[modelType][keyValue]);
-        } else {
-            this.cache[modelType][keyValue] = overwrite ? newRow : this.merge(this.cache[modelType][keyValue], newRow);
-        }
-    }
-    
-    /**
-     * Check if we have a model setup in cache
-     */
-    protected inCache(modelType, keyValue)  : boolean
-    {
-        if(typeof this.cache[modelType] === 'undefined') {
-            this.cache[modelType] = {};
-        }
-        
-        return typeof this.cache[modelType][keyValue] === 'object';
-    }
-    
-    /**
-     * Remove a row
-     */
-    public removeRow(modelType : string, keyValue : any)
-    {
-        if(!this.inCache(modelType, keyValue)) {
-            return;
-        }
-        
-        this.cache[modelType][keyValue]._deleted = true;
-        
-        this.rows[modelType] = this.rows[modelType].filter(function(row) {
-            return !row._deleted;
-        });
-        
-        delete this.cache[modelType][keyValue];
-    }
-    
-    /**
-     * Pass in an array of keyValues and remove all rows that match
-     */
-    public removeRows(modelType : string, keyValues : any[]) 
-    {
-        keyValues.forEach((keyValue) => {
-            this.removeRow(modelType, keyValue);
-        });
-    }
-    
-    /**
-     * Clear our store of the given modelType
-     */
-    public clearAll(modelType : string) 
-    {
-        this.rows[modelType] = [];
-    }
-    
-    /**
-     * Get rows of the given modelType
-     */
-    public getRows(modelType : string, noSlice : boolean = true) : any[]
-    {
-        if(typeof(this.rows[modelType]) !== 'undefined'){
-            return noSlice ? this.rows[modelType] : this.rows[modelType].slice(0);
+        if(typeof modelArray === 'undefined' || !Array.isArray(modelArray)) {
+            console.warn('Non array passed in as modelArray')
+            modelArray = [];
         }
 
-        return [];
+        if(typeof newItem !== 'object') {
+            console.warn('Upserted item must be an object', typeof newItem, 'given')
+            return false
+        }
+
+        if(typeof newItem['__bID'] !== 'undefined' && newItem['__bID'] !== keyValue) {
+            console.warn('Upserted item does not match the keyValue passed in', newItem['__bID'], '!=', keyValue)
+            return false
+        }
+
+        let existing = null
+        for(var i = 0; i < modelArray.length; i++) {
+            let item = modelArray[i]
+            if(item['__bID'] === keyValue) {
+                existing = i
+                break
+            }
+        }
+        
+        if(existing === null) {
+            newItem['__bID'] = keyValue
+            modelArray.push(newItem)
+        } else {
+            let existingItem = modelArray[existing]
+            modelArray[existing] = overwrite ? newItem : this.merge(existingItem, newItem)
+        }
+        return true
+    }
+    
+    /**
+     * Remove an item from a modelArray
+     */
+    public removeItem(modelArray : any[], keyValue : any) : any[]|boolean
+    {
+        let existing = null
+        for(var i = 0; i < modelArray.length; i++) {
+            let item = modelArray[i]
+            if(item['__bID'] === keyValue) {
+                existing = i
+                break
+            }
+        }
+
+        if(existing === null) {
+            return false
+        }
+        
+        return modelArray.splice(existing, 1)
+    }
+    
+    /**
+     * Pass in an array of keyValues and remove all items that match
+     */
+    public removeItems(modelArray : any[], keyValues : any[]) 
+    {
+        keyValues.forEach((keyValue) => {
+            this.removeItem(modelArray, keyValue);
+        });
     }
     
     /**
@@ -229,29 +234,10 @@ class Store
     /**
      * Merge objects together to a given depth
      */
-    public merge(obj1 : any, obj2 : any, depth : number = 1) 
+    public merge(obj1 : any, obj2 : any) 
     {
 
-        if(depth === 3){
-           return obj2;
-        }
-
-        for (var p in obj2) {
-          try {
-            // Property in destination object set; update its value.
-            if ( obj2[p].constructor === Object ) {
-              obj1[p] = this.merge(obj1[p], obj2[p], depth + 1);
-
-            } else {
-              obj1[p] = obj2[p];
-            }
-
-          } catch(e) {
-            // Property in destination object not set; create it and set its value.
-            obj1[p] = obj2[p];
-          }
-        }
-
+        _.merge(obj1, obj2)
         return obj1;
     }
     
@@ -567,8 +553,4 @@ class Store
     }
 }
 
-
-export
-{
-    Store
-}
+export default Store

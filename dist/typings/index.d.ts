@@ -1,3 +1,5 @@
+/// <reference path="../../typings/index.d.ts" />
+
 declare module 'beef'
 {
     import * as reqwest from "reqwest";
@@ -17,81 +19,55 @@ declare module 'beef'
         protected _buildConfig(defaultConfig: any, customConfig?: any): any;
     }
     export let ApiService: ApiServiceClass;
-    export class Actions {
-        static ignoreFunctions: string[];
-        /**
-         * Create the action
-         */
-        static create(params: any): any;
-    }
 
-    export class Action {
-        protected _callbacks: any;
+    /**
+     * Store that hooks into actions
+     *
+     * Store holds all data and is the only class that should modify the data,
+     * anything that pulls data from the DataStore cannot modify it and should treat
+     * it as immutable
+     */
+    class Store<T> {
         /**
-         * Register functions to actions we may contain,
-         * Params should be an object where the "key" is the function that should
-         * be called on "scope" when the params[key] action takes place
+         * Holds our state
          */
-        _register(params: any, scope: any): void;
+        protected state: T;
         /**
-         * Internal function used to dispatch a message when an action is called
+         *  If state history is enabled, all state changes are saved here
          */
-        _dispatch(actionName: string, fn: (...args) => any, args: any): void;
-    }
-
-    class Store {
+        protected stateHistory: T[];
         /**
-         * Holds all of our rows by modelType
+         * Hold our listeners, whenever the store's state changes, they will be
+         * notified, and sent the new state, and old state
          */
-        protected rows: any;
-        /**
-         *  Cache objects by primary key to speed up upsert lookup time
-         */
-        protected cache: any;
+        protected listeners: ((...any) => any)[];
         /**
          * This store's action callbacks
          */
         actions: () => void;
         /**
-         * Used to create a store without extending the class
-         */
-        static create(params: any): Store;
-        /**
          * Listen on a given event
          */
-        listen(event: string, callback: ((...args: any[]) => any)): void;
+        listen(callback: ((...args: any[]) => any)): void;
         /**
          * Ignore an event we are listening on
          */
-        ignore(event: string, callback: ((...args: any[]) => any)): void;
+        ignore(callback: ((...args: any[]) => any)): boolean;
+        stateChange(newState: T): void;
+        newState(): T;
+        protected notify(oldState: T): void;
         /**
-         * Emit an event
+         * Insert an item into the given modelArray, update it if it already exists
          */
-        emit(event: string, data?: any): void;
+        upsertItem(modelArray: any[], keyValue: any, newItem: any, overwrite?: boolean): boolean;
         /**
-         * Insert a row if it doesn't exist, update it otherwise
+         * Remove an item from a modelArray
          */
-        upsertRow(modelType: string, keyValue: any, newRow: any, overwrite?: boolean): void;
+        removeItem(modelArray: any[], keyValue: any): any[] | boolean;
         /**
-         * Check if we have a model setup in cache
+         * Pass in an array of keyValues and remove all items that match
          */
-        protected inCache(modelType: any, keyValue: any): boolean;
-        /**
-         * Remove a row
-         */
-        removeRow(modelType: string, keyValue: any): void;
-        /**
-         * Pass in an array of keyValues and remove all rows that match
-         */
-        removeRows(modelType: string, keyValues: any[]): void;
-        /**
-         * Clear our store of the given modelType
-         */
-        clearAll(modelType: string): void;
-        /**
-         * Get rows of the given modelType
-         */
-        getRows(modelType: string, noSlice?: boolean): any[];
+        removeItems(modelArray: any[], keyValues: any[]): void;
         /**
          * Sanitize and valide the given object to the given schema
          */
@@ -109,7 +85,7 @@ declare module 'beef'
         /**
          * Merge objects together to a given depth
          */
-        merge(obj1: any, obj2: any, depth?: number): any;
+        merge(obj1: any, obj2: any): any;
         /**
          * Creates a filter sort callback to sort by a given key
          */

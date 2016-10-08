@@ -1,7 +1,7 @@
-/// <reference path="../../../../dist/typings/index.d.ts" />
+/// <reference path="../../../dist/typings/index.d.ts" />
 
 import beef = require('beef')
-import {Todo} from "./Todo"
+import Todo from "./Todo"
 
 let Api = beef.ApiService
 

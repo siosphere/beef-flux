@@ -1,42 +1,56 @@
-/// <reference path="../../../../dist/typings/index.d.ts" />
+/// <reference path="../../../dist/typings/index.d.ts" />
 
 import beef = require('beef')
+import Todo from "./Todo"
 
+interface TodoState
+{
+    todos: Todo[]
+}
 
-import {Todo} from "./Todo"
-
-import {TodoActions} from "./TodoActions"
-
-class TodoStoreClass extends beef.Store
+class TodoStoreClass extends beef.Store<TodoState>
 {
     constructor()
     {
         super();
 
-        TodoActions._register({
-            receiveTodos: TodoActions.receiveTodos
-        }, this);
+        this.state = {
+            todos: []
+        }
+
+        this.createTodo = this.createTodo.bind(this)
+        this.receiveTodos = this.receiveTodos.bind(this)
+        this.getTodos = this.getTodos.bind(this)
 
     }
     
     public getTodos() : Todo[]
     {
-        return this.getRows('todo');
+        return this.state.todos
     }
-    
-    public receiveTodos(rawTodos : any[]) {
+
+    public createTodo(rawTodo : any)
+    {
+        this.stateChange(this.receiveTodos([rawTodo]))
+    }
+
+    protected receiveTodos(rawTodos : any[]) {
+        let newState = this.newState()
+
+
         rawTodos.forEach((rawTodo : any) => {
-            var todo : any = this.sanitize(rawTodo, Todo.schema);
-            this.upsertRow('todo', 'id', new Todo(todo));
+            var todo : any = new Todo(this.sanitize(rawTodo, Todo.schema));
+            this.upsertItem(newState.todos, todo.id, todo);
         })
 
-        this.emit('TodoStore.event.UPDATE');
+        return newState
     }
 }
 
-const  TodoStore = new TodoStoreClass();
+const TodoStore = new TodoStoreClass();
 
 export {
     TodoStoreClass,
-    TodoStore
+    TodoStore,
+    TodoState
 }

@@ -1,8 +1,8 @@
-/// <reference path="../../../../dist/typings/index.d.ts" />
+/// <reference path="../../../dist/typings/index.d.ts" />
 
 import beef = require('beef')
 
-export class Todo
+class Todo
 {
     public static schema : any = {}
 
@@ -17,7 +17,9 @@ export class Todo
     constructor(properties : any = {})
     {
         for(var key in properties) {
-            this[key] = properties
+            this[key] = properties[key]
         }
     }
 }
+
+export default Todo

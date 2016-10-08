@@ -1,28 +1,27 @@
-import {TodoActions} from "./TodoActions"
-import {TodoStore} from "./TodoStore"
+import {TodoStore, TodoState} from "./TodoStore"
 import {TodoApi} from "./TodoApi"
-import {Todo} from "./Todo"
+import Todo from "./Todo"
 
 class AppContainer {
     
     constructor()
     {
-        TodoStore.listen('TodoStore.event.UPDATE', this.onUpdate);
+        TodoStore.listen(this.onUpdate);
     }
     
     createTodo() {
-        TodoActions.receiveTodos([{
+        TodoStore.createTodo({
             name: 'My New Todo'
-        }]);
+        });
     }
 
     saveTodo(todo : Todo) {
         TodoApi.saveTodo(todo)
     }
     
-    onUpdate() {
-        console.log(TodoStore.getTodos())
-        TodoApi.saveTodo(TodoStore.getTodos()[TodoStore.getTodos().length - 1])
+    onUpdate(newState : TodoState) {
+        console.log('we are updating!')
+        TodoApi.saveTodo(newState.todos[newState.todos.length - 1])
     }
 }
 
