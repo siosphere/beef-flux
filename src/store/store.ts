@@ -31,7 +31,7 @@ class Store<T>
     /**
      * Whether or not we are in debug mode
      */
-    protected debug : boolean = false
+    public debug : boolean = false
     
     /**
      * Listen on a given event
