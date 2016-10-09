@@ -1,7 +1,7 @@
 import {TodoStore, TodoState} from "./TodoStore"
 import {TodoApi} from "./TodoApi"
 import Todo from "./Todo"
-import {createTodo} from "./TodoActions"
+import {RECEIVE_TODOS} from "./TodoActions"
 
 class AppContainer {
     
@@ -11,9 +11,10 @@ class AppContainer {
     }
     
     createTodo() {
-        createTodo({
+        RECEIVE_TODOS([{
+            id: 1,
             name: 'My New Todo'
-        });
+        }]);
     }
 
     saveTodo(todo : Todo) {

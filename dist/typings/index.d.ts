@@ -4,6 +4,9 @@ declare module 'beef'
 {
     import * as reqwest from "reqwest";
     import { ReqwestOptions } from "reqwest";
+
+    export const Action: (actionName: string, cb: any) => () => void;
+
     /**
      * Wrapper to create a consistent sdk for doing XHR requests. Will
      * automatically replace matching variables in urls that match the pattern.

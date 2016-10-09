@@ -2,6 +2,7 @@
 
 import extend = require('extend')
 import _ = require('lodash')
+import Action from '../action/action'
 
 export interface StateHistory<T>
 {
@@ -40,27 +41,6 @@ class Store<T>
      * Whether or not we are in debug mode
      */
     public debug : boolean = false
-
-    public static triggerState(actionName : string) 
-    {
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-            let originalFunction = target[propertyKey]
-            let replaceFunction = function() {
-                return this.stateChange(actionName, originalFunction.apply(this, arguments))
-            }
-            if(typeof descriptor !== 'undefined') {
-                descriptor.value = replaceFunction.bind(target)
-            } else {
-                target[propertyKey] = replaceFunction.bind(target)
-            }
-
-            if(typeof target.actionListeners === 'undefined') {
-                target.actionListeners = {}
-            }
-
-            target.actionListeners[actionName] = replaceFunction
-        }
-    }
 
     constructor()
     {

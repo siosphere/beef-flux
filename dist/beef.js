@@ -1,5 +1,29 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.beef = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
+var Action = function (actionName, cb) {
+    var storeCallbacks = [];
+    var actionFunction = function () {
+        var results = cb.apply(this, arguments);
+        storeCallbacks.forEach(function (storeInfo) {
+            var store = storeInfo.store;
+            var cb = store[storeInfo.cb];
+            store.stateChange(actionName, cb(results));
+        });
+    };
+    actionFunction['ACTION_NAME'] = actionName;
+    actionFunction['bind'] = function (store, cb) {
+        storeCallbacks.push({
+            store: store,
+            cb: cb
+        });
+    };
+    return actionFunction;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = Action;
+
+},{}],2:[function(require,module,exports){
+"use strict";
 ///<reference path="../../typings/index.d.ts" />
 var reqwest = require("reqwest");
 var extend = require('extend');
@@ -93,7 +117,7 @@ exports.ApiServiceClass = ApiServiceClass;
 var ApiService = new ApiServiceClass();
 exports.ApiService = ApiService;
 
-},{"extend":9,"reqwest":11}],2:[function(require,module,exports){
+},{"extend":10,"reqwest":12}],3:[function(require,module,exports){
 "use strict";
 var api_service_1 = require("../api/api-service");
 var config_1 = require("../routing/component/config");
@@ -101,7 +125,9 @@ var route_decorator_1 = require("../routing/decorators/route-decorator");
 var routing_service_1 = require("../routing/routing-service");
 var store_1 = require("../store/store");
 var store_decorator_1 = require("../store/store-decorator");
+var action_1 = require("../action/action");
 module.exports = {
+    Action: action_1.default,
     ApiService: api_service_1.ApiService,
     ApiServiceClass: api_service_1.ApiServiceClass,
     RoutingConfig: config_1.RoutingConfig,
@@ -112,7 +138,7 @@ module.exports = {
     Schema: store_decorator_1.Schema
 };
 
-},{"../api/api-service":1,"../routing/component/config":3,"../routing/decorators/route-decorator":4,"../routing/routing-service":5,"../store/store":7,"../store/store-decorator":6}],3:[function(require,module,exports){
+},{"../action/action":1,"../api/api-service":2,"../routing/component/config":4,"../routing/decorators/route-decorator":5,"../routing/routing-service":6,"../store/store":8,"../store/store-decorator":7}],4:[function(require,module,exports){
 "use strict";
 /**
  * Holds routes (an object with 'url/pattern': function())
@@ -134,9 +160,40 @@ var RoutingConfig = (function () {
 }());
 exports.RoutingConfig = RoutingConfig;
 
-},{}],4:[function(require,module,exports){
-
 },{}],5:[function(require,module,exports){
+"use strict";
+var sanitizeField = function (value, sanitizeConfig) {
+    switch (sanitizeConfig.type) {
+        case 'int':
+        case 'integer':
+            return parseInt(value);
+        case 'float':
+            return parseFloat(value);
+        case 'string':
+            return "" + value;
+        case "bool":
+        case "boolean":
+            return typeof value !== 'undefined' &&
+                (value === true || (typeof value === 'string' && value.toLowerCase() === 'yes') || value === 1 || value === "1") ? true : false;
+    }
+};
+var sanitize = function (value) {
+    return function (target, propertyKey, descriptor) {
+        var routeMethod = target[propertyKey];
+        descriptor.value = function (data) {
+            var sanitized = data;
+            for (var key in sanitized) {
+                if (typeof value[key] !== 'undefined') {
+                    sanitized[key] = sanitizeField(sanitized[key], value[key]);
+                }
+            }
+            return routeMethod.apply(target, [sanitized]);
+        };
+    };
+};
+exports.sanitize = sanitize;
+
+},{}],6:[function(require,module,exports){
 "use strict";
 var config_1 = require("./component/config");
 /**
@@ -251,7 +308,7 @@ exports.RoutingServiceClass = RoutingServiceClass;
 var RoutingService = new RoutingServiceClass();
 exports.RoutingService = RoutingService;
 
-},{"./component/config":3}],6:[function(require,module,exports){
+},{"./component/config":4}],7:[function(require,module,exports){
 "use strict";
 var store_1 = require("./store");
 /**
@@ -330,7 +387,7 @@ var uuid = function () {
     });
 };
 
-},{"./store":7}],7:[function(require,module,exports){
+},{"./store":8}],8:[function(require,module,exports){
 ///<reference path="../../typings/index.d.ts" />
 "use strict";
 var extend = require('extend');
@@ -371,24 +428,6 @@ var Store = (function () {
         this.removeItems = this.removeItems.bind(this);
         this.action = this.action.bind(this);
     }
-    Store.triggerState = function (actionName) {
-        return function (target, propertyKey, descriptor) {
-            var originalFunction = target[propertyKey];
-            var replaceFunction = function () {
-                return this.stateChange(actionName, originalFunction.apply(this, arguments));
-            };
-            if (typeof descriptor !== 'undefined') {
-                descriptor.value = replaceFunction.bind(target);
-            }
-            else {
-                target[propertyKey] = replaceFunction.bind(target);
-            }
-            if (typeof target.actionListeners === 'undefined') {
-                target.actionListeners = {};
-            }
-            target.actionListeners[actionName] = replaceFunction;
-        };
-    };
     /**
      * Listen on a given event
      */
@@ -856,9 +895,9 @@ var Store = (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Store;
 
-},{"extend":9,"lodash":10}],8:[function(require,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],9:[function(require,module,exports){
+},{"extend":10,"lodash":11}],9:[function(require,module,exports){
+
+},{}],10:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -946,7 +985,7 @@ module.exports = function extend() {
 };
 
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -17932,7 +17971,7 @@ module.exports = function extend() {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /*!
   * Reqwest! A general purpose XHR connection manager
   * license MIT (c) Dustin Diaz 2015
@@ -18564,5 +18603,5 @@ module.exports = function extend() {
   return reqwest
 });
 
-},{"xhr2":8}]},{},[2])(2)
+},{"xhr2":9}]},{},[3])(3)
 });
