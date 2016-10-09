@@ -1,6 +1,7 @@
 import {TodoStore, TodoState} from "./TodoStore"
 import {TodoApi} from "./TodoApi"
 import Todo from "./Todo"
+import {createTodo} from "./TodoActions"
 
 class AppContainer {
     
@@ -10,7 +11,7 @@ class AppContainer {
     }
     
     createTodo() {
-        TodoStore.createTodo({
+        createTodo({
             name: 'My New Todo'
         });
     }

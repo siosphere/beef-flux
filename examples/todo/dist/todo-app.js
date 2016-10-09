@@ -29,7 +29,15 @@ var Todo = (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Todo;
 
-},{"beef":5}],2:[function(require,module,exports){
+},{"beef":6}],2:[function(require,module,exports){
+"use strict";
+var TodoStore_1 = require("./TodoStore");
+var createTodo = function (rawTodo) {
+    TodoStore_1.TodoStore.action(TodoStore_1.RECEIVE_TODO, [rawTodo]);
+};
+exports.createTodo = createTodo;
+
+},{"./TodoStore":4}],3:[function(require,module,exports){
 /// <reference path="../../../dist/typings/index.d.ts" />
 "use strict";
 var beef = require('beef');
@@ -50,7 +58,7 @@ var TodoApi = (function () {
 }());
 exports.TodoApi = TodoApi;
 
-},{"beef":5}],3:[function(require,module,exports){
+},{"beef":6}],4:[function(require,module,exports){
 /// <reference path="../../../dist/typings/index.d.ts" />
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
@@ -67,6 +75,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var beef = require('beef');
 var Todo_1 = require("./Todo");
 var RECEIVE_TODO = 'RECEIVE_TODO';
+exports.RECEIVE_TODO = RECEIVE_TODO;
 var TodoStoreClass = (function (_super) {
     __extends(TodoStoreClass, _super);
     function TodoStoreClass() {
@@ -74,16 +83,11 @@ var TodoStoreClass = (function (_super) {
         this.state = {
             todos: []
         };
-        this.createTodo = this.createTodo.bind(this);
         this.receiveTodos = this.receiveTodos.bind(this);
         this.getTodos = this.getTodos.bind(this);
     }
     TodoStoreClass.prototype.getTodos = function () {
         return this.state.todos;
-    };
-    TodoStoreClass.prototype.createTodo = function (rawTodo) {
-        this.action(RECEIVE_TODO, [rawTodo]);
-        //this.receiveTodos([rawTodo])
     };
     TodoStoreClass.prototype.receiveTodos = function (rawTodos) {
         var _this = this;
@@ -103,16 +107,17 @@ exports.TodoStoreClass = TodoStoreClass;
 var TodoStore = new TodoStoreClass();
 exports.TodoStore = TodoStore;
 
-},{"./Todo":1,"beef":5}],4:[function(require,module,exports){
+},{"./Todo":1,"beef":6}],5:[function(require,module,exports){
 "use strict";
 var TodoStore_1 = require("./TodoStore");
 var TodoApi_1 = require("./TodoApi");
+var TodoActions_1 = require("./TodoActions");
 var AppContainer = (function () {
     function AppContainer() {
         TodoStore_1.TodoStore.listen(this.onUpdate);
     }
     AppContainer.prototype.createTodo = function () {
-        TodoStore_1.TodoStore.createTodo({
+        TodoActions_1.createTodo({
             name: 'My New Todo'
         });
     };
@@ -129,7 +134,7 @@ var App = new AppContainer();
 window['App'] = App;
 console.log('starting up our app!');
 
-},{"./TodoApi":2,"./TodoStore":3}],5:[function(require,module,exports){
+},{"./TodoActions":2,"./TodoApi":3,"./TodoStore":4}],6:[function(require,module,exports){
 (function (global){
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.beef = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
@@ -268,37 +273,6 @@ var RoutingConfig = (function () {
 exports.RoutingConfig = RoutingConfig;
 
 },{}],4:[function(require,module,exports){
-"use strict";
-var sanitizeField = function (value, sanitizeConfig) {
-    switch (sanitizeConfig.type) {
-        case 'int':
-        case 'integer':
-            return parseInt(value);
-        case 'float':
-            return parseFloat(value);
-        case 'string':
-            return "" + value;
-        case "bool":
-        case "boolean":
-            return typeof value !== 'undefined' &&
-                (value === true || (typeof value === 'string' && value.toLowerCase() === 'yes') || value === 1 || value === "1") ? true : false;
-    }
-};
-var sanitize = function (value) {
-    return function (target, propertyKey, descriptor) {
-        var routeMethod = target[propertyKey];
-        descriptor.value = function (data) {
-            var sanitized = data;
-            for (var key in sanitized) {
-                if (typeof value[key] !== 'undefined') {
-                    sanitized[key] = sanitizeField(sanitized[key], value[key]);
-                }
-            }
-            return routeMethod.apply(target, [sanitized]);
-        };
-    };
-};
-exports.sanitize = sanitize;
 
 },{}],5:[function(require,module,exports){
 "use strict";
@@ -1021,8 +995,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Store;
 
 },{"extend":9,"lodash":10}],8:[function(require,module,exports){
-
-},{}],9:[function(require,module,exports){
+arguments[4][4][0].apply(exports,arguments)
+},{"dup":4}],9:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -18731,9 +18705,9 @@ module.exports = function extend() {
 },{"xhr2":8}]},{},[2])(2)
 });
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../api/api-service":undefined,"../routing/component/config":undefined,"../routing/decorators/route-decorator":undefined,"../routing/routing-service":undefined,"../store/store":undefined,"../store/store-decorator":undefined,"./component/config":undefined,"./store":undefined,"extend":7,"lodash":8,"reqwest":9,"xhr2":undefined}],6:[function(require,module,exports){
+},{"../api/api-service":undefined,"../routing/component/config":undefined,"../routing/decorators/route-decorator":undefined,"../routing/routing-service":undefined,"../store/store":undefined,"../store/store-decorator":undefined,"./component/config":undefined,"./store":undefined,"extend":8,"lodash":9,"reqwest":10,"xhr2":undefined}],7:[function(require,module,exports){
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -18821,7 +18795,7 @@ module.exports = function extend() {
 };
 
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -35807,7 +35781,7 @@ module.exports = function extend() {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /*!
   * Reqwest! A general purpose XHR connection manager
   * license MIT (c) Dustin Diaz 2015
@@ -36439,4 +36413,4 @@ module.exports = function extend() {
   return reqwest
 });
 
-},{"xhr2":6}]},{},[4]);
+},{"xhr2":7}]},{},[5]);

@@ -20,7 +20,6 @@ class TodoStoreClass extends beef.Store<TodoState>
             todos: []
         }
 
-        this.createTodo = this.createTodo.bind(this)
         this.receiveTodos = this.receiveTodos.bind(this)
         this.getTodos = this.getTodos.bind(this)
 
@@ -29,12 +28,6 @@ class TodoStoreClass extends beef.Store<TodoState>
     public getTodos() : Todo[]
     {
         return this.state.todos
-    }
-
-    public createTodo(rawTodo : any)
-    {
-        this.action(RECEIVE_TODO, [rawTodo])
-        //this.receiveTodos([rawTodo])
     }
 
     @beef.Store.triggerState(RECEIVE_TODO)
@@ -56,5 +49,6 @@ const TodoStore = new TodoStoreClass();
 export {
     TodoStoreClass,
     TodoStore,
-    TodoState
+    TodoState,
+    RECEIVE_TODO
 }
