@@ -17,7 +17,11 @@ var TodoStoreClass = (function (_super) {
         };
         this.receiveTodos = this.receiveTodos.bind(this);
         this.getTodos = this.getTodos.bind(this);
-        TodoActions_1.RECEIVE_TODOS.bind(this, 'receiveTodos');
+        beef.Actions.register((_a = {},
+            _a[TodoActions_1.RECEIVE_TODOS] = this.receiveTodos,
+            _a
+        ), this);
+        var _a;
     }
     TodoStoreClass.prototype.getTodos = function () {
         return this.state.todos;

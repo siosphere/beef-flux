@@ -2,7 +2,6 @@
 
 import extend = require('extend')
 import _ = require('lodash')
-import Action from '../action/action'
 
 export interface StateHistory<T>
 {
@@ -35,8 +34,6 @@ class Store<T>
      */
     protected listeners : ((...any) => any)[] = []
 
-    protected actionListeners : any
-
     /**
      * Whether or not we are in debug mode
      */
@@ -52,7 +49,6 @@ class Store<T>
         this.upsertItem = this.upsertItem.bind(this)
         this.removeItem = this.removeItem.bind(this)
         this.removeItems = this.removeItems.bind(this)
-        this.action = this.action.bind(this)
     }
     
     /**
@@ -66,20 +62,6 @@ class Store<T>
     public getState() : T
     {
         return this.state
-    }
-
-    public action(actionName : string, ...args : any[])
-    {
-        if(this.debug) {
-            console.debug('Dispatching action', actionName, args)
-        }
-
-        if(typeof this.actionListeners[actionName] === 'undefined') {
-            console.warn('No action is registered for', actionName)
-            return false
-        }
-
-        return this.actionListeners[actionName].apply(this, args)
     }
 
     /**

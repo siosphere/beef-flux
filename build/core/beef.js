@@ -5,9 +5,9 @@ var route_decorator_1 = require("../routing/decorators/route-decorator");
 var routing_service_1 = require("../routing/routing-service");
 var store_1 = require("../store/store");
 var store_decorator_1 = require("../store/store-decorator");
-var action_1 = require("../action/action");
+var actions_1 = require("../action/actions");
 module.exports = {
-    Action: action_1.default,
+    Actions: actions_1.default,
     ApiService: api_service_1.ApiService,
     ApiServiceClass: api_service_1.ApiServiceClass,
     RoutingConfig: config_1.RoutingConfig,

@@ -2,7 +2,6 @@
 
 import beef = require('beef')
 import Todo from "./Todo"
-
 import {RECEIVE_TODOS} from './TodoActions'
 
 interface TodoState
@@ -23,8 +22,9 @@ class TodoStoreClass extends beef.Store<TodoState>
         this.receiveTodos = this.receiveTodos.bind(this)
         this.getTodos = this.getTodos.bind(this)
 
-        RECEIVE_TODOS.bind(this, 'receiveTodos')
-
+        beef.Actions.register<TodoState>({
+            [RECEIVE_TODOS]: this.receiveTodos
+        }, this)
     }
     
     public getTodos() : Todo[]

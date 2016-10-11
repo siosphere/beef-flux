@@ -3,7 +3,14 @@ declare module 'beef'
     import * as reqwest from "reqwest";
     import { ReqwestOptions } from "reqwest";
 
-    export const Action: (actionName: string, cb: any) => () => void;
+    export class ActionsClass {
+        actions: any;
+        constructor();
+        define(actionName: any, cb: any): () => void;
+        dispatch(actionName: string, data: any): void;
+        register<T>(actionData: any, store: Store<T>): void;
+    }
+    export const Actions: ActionsClass;
 
     /**
      * Wrapper to create a consistent sdk for doing XHR requests. Will
@@ -21,6 +28,11 @@ declare module 'beef'
     }
     export let ApiService: ApiServiceClass;
 
+    export interface StateHistory<T> {
+        actionName: string;
+        state: T;
+    }
+
     /**
      * Store that hooks into actions
      *
@@ -29,145 +41,142 @@ declare module 'beef'
      * it as immutable
      */
     class Store<T> {
-        /**
-         * Holds our state
-         */
-        protected state: T;
-        /**
-         *  If state history is enabled, all state changes are saved here
-         */
-        protected stateHistory: T[];
-        /**
-         * Hold our listeners, whenever the store's state changes, they will be
-         * notified, and sent the new state, and old state
-         */
-        protected listeners: ((...any) => any)[];
-        /**
-         * This store's action callbacks
-         */
-        actions: () => void;
-
-        debug: boolean;
-        static triggerState(actionName: string): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-        constructor();
-        /**
-         * Listen on a given event
-         */
-        listen(callback: ((...args: any[]) => any)): void;
-        action(actionName: string, ...args: any[]): void;
-        /**
-         * Ignore an event we are listening on
-         */
-        ignore(callback: ((...args: any[]) => any)): boolean;
-        stateChange(newState: T): void;
-        newState(): T;
-        protected notify(oldState: T): void;
-        /**
-         * Insert an item into the given modelArray, update it if it already exists
-         */
-        upsertItem(modelArray: any[], keyValue: any, newItem: any, overwrite?: boolean): boolean;
-        /**
-         * Remove an item from a modelArray
-         */
-        removeItem(modelArray: any[], keyValue: any): any[] | boolean;
-        /**
-         * Pass in an array of keyValues and remove all items that match
-         */
-        removeItems(modelArray: any[], keyValues: any[]): void;
-        /**
-         * Sanitize and valide the given object to the given schema
-         */
-        sanitizeAndValidate(obj: any, schema: any): any;
-        /**
-         * Validate the given object to the given schema, will return an array
-         * of errors, or true if valid
-         */
-        validate(obj: any, schema: any): any[] | boolean;
-        /**
-         * Sanitize the given object to a schema, also an optional parameter if
-         * you are sending the object as JSON, to format datetimes properly
-         */
-        sanitize(obj: any, schema: any, json?: boolean): any;
-        /**
-         * Merge objects together to a given depth
-         */
-        merge(obj1: any, obj2: any): any;
-        /**
-         * Creates a filter sort callback to sort by a given key
-         */
-        sortBy(key: string, dir?: string): (a: any, b: any) => number;
-        /**
-         * Formats a given number to two decimal places
-         */
-        money(value: number): string;
-        /**
-         * Generates a UUID
-         */
-        uuid(): string;
-        static string(params?: {}): {
-            type: string;
-        };
-        static int(params?: {}): {
-            type: string;
-        };
-        static double(params?: {}): {
-            type: string;
-        };
-        static bool(params?: {}): {
-            type: string;
-        };
-        static float(params?: {}): {
-            type: string;
-        };
-        static array(params?: {}): {
-            type: string;
-            schema: any;
-        };
-        static object(params?: {}): {
-            type: string;
-            schema: any;
-        };
-        static datetime(params?: {}): {
-            type: string;
-            schema: any;
-            format: string;
-        };
-        static callback(params?: {}): {
-            type: string;
-            schema: any;
-        };
-        /**
-         * Sanitizes a field on an object to the given schema
-         */
-        protected sanitizeField(field: string, obj: any, schema: any, json: boolean): any;
-        /**
-         * Sanitizes a field to an integer
-         */
-        protected sanitizeInteger(value: any, schemaConfig: any): any;
-        /**
-         * Sanitizes a field to a float
-         */
-        protected sanitizeFloat(value: any, schemaConfig: any): any;
-        /**
-         * Sanitizes a field to a string
-         */
-        protected sanitizeString(value: any, schemaConfig: any): any;
-        /**
-         * Sanitizes a field to a moment object
-         */
-        protected sanitizeDateTime(value: any, schemaConfig: any, json: boolean): any;
-        /**
-         * Sanitizes a field to boolean
-         */
-        protected sanitizeBoolean(value: any, schemaConfig: any): any;
-        /**
-         * Sanitizes an object
-         */
-        protected sanitizeObject(value: any, schemaConfig: any, json: boolean): any;
-        /**
-         * Sanitizes an array of objects
-         */
-        protected sanitizeArray(value: any, schemaConfig: any, json: boolean): any;
+            /**
+     * Holds our state
+     */
+    protected state: T;
+    /**
+     *  If state history is enabled, all state changes are saved here
+     */
+    protected stateHistory: StateHistory<T>[];
+    /**
+     * Hold our listeners, whenever the store's state changes, they will be
+     * notified, and sent the new state, and old state
+     */
+    protected listeners: ((...any) => any)[];
+    /**
+     * Whether or not we are in debug mode
+     */
+    debug: boolean;
+    constructor();
+    /**
+     * Listen on a given event
+     */
+    listen(callback: ((...args: any[]) => any)): void;
+    getState(): T;
+    /**
+     * Ignore an event we are listening on
+     */
+    ignore(callback: ((...args: any[]) => any)): boolean;
+    stateChange(actionName: string, newState: T): T;
+    newState(): T;
+    protected notify(oldState: T): void;
+    /**
+     * Insert an item into the given modelArray, update it if it already exists
+     */
+    upsertItem(modelArray: any[], keyValue: any, newItem: any, overwrite?: boolean): boolean;
+    /**
+     * Remove an item from a modelArray
+     */
+    removeItem(modelArray: any[], keyValue: any): any[] | boolean;
+    /**
+     * Pass in an array of keyValues and remove all items that match
+     */
+    removeItems(modelArray: any[], keyValues: any[]): void;
+    /**
+     * Sanitize and valide the given object to the given schema
+     */
+    sanitizeAndValidate(obj: any, schema: any): any;
+    /**
+     * Validate the given object to the given schema, will return an array
+     * of errors, or true if valid
+     */
+    validate(obj: any, schema: any): any[] | boolean;
+    /**
+     * Sanitize the given object to a schema, also an optional parameter if
+     * you are sending the object as JSON, to format datetimes properly
+     */
+    sanitize(obj: any, schema: any, json?: boolean): any;
+    /**
+     * Merge objects together
+     */
+    merge(obj1: any, obj2: any): any;
+    /**
+     * Creates a filter sort callback to sort by a given key
+     */
+    sortBy(key: string, dir?: string): (a: any, b: any) => number;
+    /**
+     * Formats a given number to two decimal places
+     */
+    money(value: number): string;
+    /**
+     * Generates a UUID
+     */
+    uuid(): string;
+    static string(params?: {}): {
+        type: string;
+    };
+    static int(params?: {}): {
+        type: string;
+    };
+    static double(params?: {}): {
+        type: string;
+    };
+    static bool(params?: {}): {
+        type: string;
+    };
+    static float(params?: {}): {
+        type: string;
+    };
+    static array(params?: {}): {
+        type: string;
+        schema: any;
+    };
+    static object(params?: {}): {
+        type: string;
+        schema: any;
+    };
+    static datetime(params?: {}): {
+        type: string;
+        schema: any;
+        format: string;
+    };
+    static callback(params?: {}): {
+        type: string;
+        schema: any;
+    };
+    /**
+     * Sanitizes a field on an object to the given schema
+     */
+    protected sanitizeField(field: string, obj: any, schema: any, json: boolean): any;
+    /**
+     * Sanitizes a field to an integer
+     */
+    protected sanitizeInteger(value: any, schemaConfig: any): any;
+    /**
+     * Sanitizes a field to a float
+     */
+    protected sanitizeFloat(value: any, schemaConfig: any): any;
+    /**
+     * Sanitizes a field to a string
+     */
+    protected sanitizeString(value: any, schemaConfig: any): any;
+    /**
+     * Sanitizes a field to a moment object
+     */
+    protected sanitizeDateTime(value: any, schemaConfig: any, json: boolean): any;
+    /**
+     * Sanitizes a field to boolean
+     */
+    protected sanitizeBoolean(value: any, schemaConfig: any): any;
+    /**
+     * Sanitizes an object
+     */
+    protected sanitizeObject(value: any, schemaConfig: any, json: boolean): any;
+    /**
+     * Sanitizes an array of objects
+     */
+    protected sanitizeArray(value: any, schemaConfig: any, json: boolean): any;
     }
 
     /**

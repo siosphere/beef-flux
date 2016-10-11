@@ -1,17 +1,17 @@
 "use strict"
 jest.unmock('../store')
-jest.unmock('../../action/action')
+jest.unmock('../../action/actions')
 jest.unmock('lodash')
 jest.unmock('extend')
 
 import Store from '../store'
-import Action from '../../action/action'
+import Actions from '../../action/actions'
 interface TestStoreState
 {
     items : any[]
 }
 
-const RECEIVE_ITEMS = Action('RECEIVE_ITEMS', (rawItems : any[]) => {
+const RECEIVE_ITEMS : any = Actions.define('RECEIVE_ITEMS', (rawItems : any[]) => {
     return rawItems
 })
 
@@ -30,7 +30,9 @@ class TestStoreClass extends Store<TestStoreState>
 
         this.createItem = this.createItem.bind(this)
         this.receiveItems = this.receiveItems.bind(this)
-        RECEIVE_ITEMS.bind(this, 'receiveItems')
+        Actions.register<TestStoreState>({
+            [RECEIVE_ITEMS]: this.receiveItems
+        }, this)
     }
 
     createItem(id : number, title : string)

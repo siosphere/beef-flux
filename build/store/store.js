@@ -36,7 +36,6 @@ var Store = (function () {
         this.upsertItem = this.upsertItem.bind(this);
         this.removeItem = this.removeItem.bind(this);
         this.removeItems = this.removeItems.bind(this);
-        this.action = this.action.bind(this);
     }
     /**
      * Listen on a given event
@@ -46,20 +45,6 @@ var Store = (function () {
     };
     Store.prototype.getState = function () {
         return this.state;
-    };
-    Store.prototype.action = function (actionName) {
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
-        }
-        if (this.debug) {
-            console.debug('Dispatching action', actionName, args);
-        }
-        if (typeof this.actionListeners[actionName] === 'undefined') {
-            console.warn('No action is registered for', actionName);
-            return false;
-        }
-        return this.actionListeners[actionName].apply(this, args);
     };
     /**
      * Ignore an event we are listening on

@@ -1,32 +1,60 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.beef = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
-var Action = function (actionName, cb) {
-    var storeCallbacks = [];
-    var actionFunction = function () {
-        var results = cb.apply(this, arguments);
-        storeCallbacks.forEach(function (storeInfo) {
+var ActionsClass = (function () {
+    function ActionsClass() {
+        this.actions = {};
+        this.define = this.define.bind(this);
+        this.dispatch = this.dispatch.bind(this);
+        this.register = this.register.bind(this);
+    }
+    ActionsClass.prototype.define = function (actionName, cb) {
+        console.log('attempting to define action', actionName);
+        if (typeof this.actions[actionName] !== 'undefined') {
+            console.warn('Action with name ' + actionName + ' was already defined, and is now being overwritten');
+        }
+        this.actions[actionName] = {
+            cb: cb,
+            stores: []
+        };
+        var override = function () {
+            this.dispatch(actionName, arguments);
+        };
+        override = override.bind(this);
+        override.toString = function () {
+            return actionName;
+        };
+        return override;
+    };
+    ActionsClass.prototype.dispatch = function (actionName, data) {
+        if (typeof this.actions[actionName] === 'undefined') {
+            console.warn('Attempting to call non registered action: ' + actionName);
+        }
+        var cb = this.actions[actionName].cb;
+        var results = cb.apply(null, data);
+        this.actions[actionName].stores.forEach(function (storeInfo) {
             var store = storeInfo.store;
-            var cb = store[storeInfo.cb];
-            if (store.debug) {
-                console.log('dispatching action', {
-                    action: actionName,
-                    data: results
-                });
-            }
+            var cb = storeInfo.cb;
             store.stateChange(actionName, cb(results));
         });
     };
-    actionFunction['ACTION_NAME'] = actionName;
-    actionFunction['bind'] = function (store, cb) {
-        storeCallbacks.push({
-            store: store,
-            cb: cb
-        });
+    ActionsClass.prototype.register = function (actionData, store) {
+        for (var actionName in actionData) {
+            if (typeof this.actions[actionName] === 'undefined') {
+                console.warn('Store attempting to register missing action: ' + actionName);
+                continue;
+            }
+            this.actions[actionName].stores.push({
+                store: store,
+                cb: actionData[actionName]
+            });
+        }
     };
-    return actionFunction;
-};
+    return ActionsClass;
+}());
+exports.ActionsClass = ActionsClass;
+var Actions = new ActionsClass();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Action;
+exports.default = Actions;
 
 },{}],2:[function(require,module,exports){
 "use strict";
@@ -131,9 +159,9 @@ var route_decorator_1 = require("../routing/decorators/route-decorator");
 var routing_service_1 = require("../routing/routing-service");
 var store_1 = require("../store/store");
 var store_decorator_1 = require("../store/store-decorator");
-var action_1 = require("../action/action");
+var actions_1 = require("../action/actions");
 module.exports = {
-    Action: action_1.default,
+    Actions: actions_1.default,
     ApiService: api_service_1.ApiService,
     ApiServiceClass: api_service_1.ApiServiceClass,
     RoutingConfig: config_1.RoutingConfig,
@@ -144,7 +172,7 @@ module.exports = {
     Schema: store_decorator_1.Schema
 };
 
-},{"../action/action":1,"../api/api-service":2,"../routing/component/config":4,"../routing/decorators/route-decorator":5,"../routing/routing-service":6,"../store/store":8,"../store/store-decorator":7}],4:[function(require,module,exports){
+},{"../action/actions":1,"../api/api-service":2,"../routing/component/config":4,"../routing/decorators/route-decorator":5,"../routing/routing-service":6,"../store/store":8,"../store/store-decorator":7}],4:[function(require,module,exports){
 "use strict";
 /**
  * Holds routes (an object with 'url/pattern': function())
@@ -432,7 +460,6 @@ var Store = (function () {
         this.upsertItem = this.upsertItem.bind(this);
         this.removeItem = this.removeItem.bind(this);
         this.removeItems = this.removeItems.bind(this);
-        this.action = this.action.bind(this);
     }
     /**
      * Listen on a given event
@@ -442,20 +469,6 @@ var Store = (function () {
     };
     Store.prototype.getState = function () {
         return this.state;
-    };
-    Store.prototype.action = function (actionName) {
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
-        }
-        if (this.debug) {
-            console.debug('Dispatching action', actionName, args);
-        }
-        if (typeof this.actionListeners[actionName] === 'undefined') {
-            console.warn('No action is registered for', actionName);
-            return false;
-        }
-        return this.actionListeners[actionName].apply(this, args);
     };
     /**
      * Ignore an event we are listening on

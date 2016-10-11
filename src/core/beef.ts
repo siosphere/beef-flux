@@ -4,10 +4,10 @@ import {sanitize} from "../routing/decorators/route-decorator"
 import {RoutingService, RoutingServiceClass} from "../routing/routing-service"
 import Store from "../store/store"
 import {Schema} from "../store/store-decorator"
-import Action from "../action/action"
+import Actions, {ActionsClass} from "../action/actions"
 
 export = {
-    Action,
+    Actions,
     ApiService,
     ApiServiceClass,
     RoutingConfig,

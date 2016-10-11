@@ -33,9 +33,11 @@ exports.default = Todo;
 /// <reference path="../../../dist/typings/index.d.ts" />
 "use strict";
 var beef = require('beef');
-exports.RECEIVE_TODOS = beef.Action('RECEIVE_TODOS', function (rawTodos) {
+var RECEIVE_TODOS = beef.Actions.define('RECEIVE_TODOS', function (rawTodos) {
     return rawTodos;
 });
+exports.RECEIVE_TODOS = RECEIVE_TODOS;
+console.log('INCLUDED TODO ACTIONS');
 
 },{"beef":6}],3:[function(require,module,exports){
 /// <reference path="../../../dist/typings/index.d.ts" />
@@ -78,7 +80,11 @@ var TodoStoreClass = (function (_super) {
         };
         this.receiveTodos = this.receiveTodos.bind(this);
         this.getTodos = this.getTodos.bind(this);
-        TodoActions_1.RECEIVE_TODOS.bind(this, 'receiveTodos');
+        beef.Actions.register((_a = {},
+            _a[TodoActions_1.RECEIVE_TODOS] = this.receiveTodos,
+            _a
+        ), this);
+        var _a;
     }
     TodoStoreClass.prototype.getTodos = function () {
         return this.state.todos;
@@ -100,6 +106,7 @@ exports.TodoStore = TodoStore;
 
 },{"./Todo":1,"./TodoActions":2,"beef":6}],5:[function(require,module,exports){
 "use strict";
+/// <reference path="../../../typings/index.d.ts" />
 var TodoStore_1 = require("./TodoStore");
 var TodoApi_1 = require("./TodoApi");
 var TodoActions_1 = require("./TodoActions");
@@ -130,27 +137,61 @@ console.log('starting up our app!');
 (function (global){
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.beef = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
-var Action = function (actionName, cb) {
-    var storeCallbacks = [];
-    var actionFunction = function () {
-        var results = cb.apply(this, arguments);
-        storeCallbacks.forEach(function (storeInfo) {
+var ActionsClass = (function () {
+    function ActionsClass() {
+        this.actions = {};
+        this.define = this.define.bind(this);
+        this.dispatch = this.dispatch.bind(this);
+        this.register = this.register.bind(this);
+    }
+    ActionsClass.prototype.define = function (actionName, cb) {
+        console.log('attempting to define action', actionName);
+        if (typeof this.actions[actionName] !== 'undefined') {
+            console.warn('Action with name ' + actionName + ' was already defined, and is now being overwritten');
+        }
+        this.actions[actionName] = {
+            cb: cb,
+            stores: []
+        };
+        var override = function () {
+            this.dispatch(actionName, arguments);
+        };
+        override = override.bind(this);
+        override.toString = function () {
+            return actionName;
+        };
+        return override;
+    };
+    ActionsClass.prototype.dispatch = function (actionName, data) {
+        if (typeof this.actions[actionName] === 'undefined') {
+            console.warn('Attempting to call non registered action: ' + actionName);
+        }
+        var cb = this.actions[actionName].cb;
+        var results = cb.apply(null, data);
+        this.actions[actionName].stores.forEach(function (storeInfo) {
             var store = storeInfo.store;
-            var cb = store[storeInfo.cb];
+            var cb = storeInfo.cb;
             store.stateChange(actionName, cb(results));
         });
     };
-    actionFunction['ACTION_NAME'] = actionName;
-    actionFunction['bind'] = function (store, cb) {
-        storeCallbacks.push({
-            store: store,
-            cb: cb
-        });
+    ActionsClass.prototype.register = function (actionData, store) {
+        for (var actionName in actionData) {
+            if (typeof this.actions[actionName] === 'undefined') {
+                console.warn('Store attempting to register missing action: ' + actionName);
+                continue;
+            }
+            this.actions[actionName].stores.push({
+                store: store,
+                cb: actionData[actionName]
+            });
+        }
     };
-    return actionFunction;
-};
+    return ActionsClass;
+}());
+exports.ActionsClass = ActionsClass;
+var Actions = new ActionsClass();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Action;
+exports.default = Actions;
 
 },{}],2:[function(require,module,exports){
 "use strict";
@@ -255,9 +296,9 @@ var route_decorator_1 = require("../routing/decorators/route-decorator");
 var routing_service_1 = require("../routing/routing-service");
 var store_1 = require("../store/store");
 var store_decorator_1 = require("../store/store-decorator");
-var action_1 = require("../action/action");
+var actions_1 = require("../action/actions");
 module.exports = {
-    Action: action_1.default,
+    Actions: actions_1.default,
     ApiService: api_service_1.ApiService,
     ApiServiceClass: api_service_1.ApiServiceClass,
     RoutingConfig: config_1.RoutingConfig,
@@ -268,7 +309,7 @@ module.exports = {
     Schema: store_decorator_1.Schema
 };
 
-},{"../action/action":1,"../api/api-service":2,"../routing/component/config":4,"../routing/decorators/route-decorator":5,"../routing/routing-service":6,"../store/store":8,"../store/store-decorator":7}],4:[function(require,module,exports){
+},{"../action/actions":1,"../api/api-service":2,"../routing/component/config":4,"../routing/decorators/route-decorator":5,"../routing/routing-service":6,"../store/store":8,"../store/store-decorator":7}],4:[function(require,module,exports){
 "use strict";
 /**
  * Holds routes (an object with 'url/pattern': function())
@@ -556,7 +597,6 @@ var Store = (function () {
         this.upsertItem = this.upsertItem.bind(this);
         this.removeItem = this.removeItem.bind(this);
         this.removeItems = this.removeItems.bind(this);
-        this.action = this.action.bind(this);
     }
     /**
      * Listen on a given event
@@ -566,20 +606,6 @@ var Store = (function () {
     };
     Store.prototype.getState = function () {
         return this.state;
-    };
-    Store.prototype.action = function (actionName) {
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
-        }
-        if (this.debug) {
-            console.debug('Dispatching action', actionName, args);
-        }
-        if (typeof this.actionListeners[actionName] === 'undefined') {
-            console.warn('No action is registered for', actionName);
-            return false;
-        }
-        return this.actionListeners[actionName].apply(this, args);
     };
     /**
      * Ignore an event we are listening on
@@ -18736,7 +18762,7 @@ module.exports = function extend() {
 },{"xhr2":9}]},{},[3])(3)
 });
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/action":undefined,"../api/api-service":undefined,"../routing/component/config":undefined,"../routing/decorators/route-decorator":undefined,"../routing/routing-service":undefined,"../store/store":undefined,"../store/store-decorator":undefined,"./component/config":undefined,"./store":undefined,"extend":8,"lodash":9,"reqwest":10,"xhr2":undefined}],7:[function(require,module,exports){
+},{"../action/actions":undefined,"../api/api-service":undefined,"../routing/component/config":undefined,"../routing/decorators/route-decorator":undefined,"../routing/routing-service":undefined,"../store/store":undefined,"../store/store-decorator":undefined,"./component/config":undefined,"./store":undefined,"extend":8,"lodash":9,"reqwest":10,"xhr2":undefined}],7:[function(require,module,exports){
 
 },{}],8:[function(require,module,exports){
 'use strict';
