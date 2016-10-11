@@ -1,3 +1,4 @@
+/// <reference path="../../../typings/index.d.ts" />
 import {TodoStore, TodoState} from "./TodoStore"
 import {TodoApi} from "./TodoApi"
 import Todo from "./Todo"
