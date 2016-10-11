@@ -6,6 +6,12 @@ var Action = function (actionName, cb) {
         storeCallbacks.forEach(function (storeInfo) {
             var store = storeInfo.store;
             var cb = store[storeInfo.cb];
+            if (store.debug) {
+                console.log('dispatching action', {
+                    action: actionName,
+                    newState: results
+                });
+            }
             store.stateChange(actionName, cb(results));
         });
     };

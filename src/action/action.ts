@@ -10,6 +10,12 @@ const Action = (actionName : string, cb) => {
         storeCallbacks.forEach((storeInfo) => {
             let store = storeInfo.store
             let cb = store[storeInfo.cb]
+            if(store.debug) {
+                console.log('dispatching action', {
+                    action: actionName,
+                    newState: results
+                })
+            }
             store.stateChange(actionName, cb(results))
         })
     }
