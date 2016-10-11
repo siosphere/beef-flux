@@ -7,7 +7,6 @@ var ActionsClass = (function () {
         this.register = this.register.bind(this);
     }
     ActionsClass.prototype.define = function (actionName, cb) {
-        console.log('attempting to define action', actionName);
         if (typeof this.actions[actionName] !== 'undefined') {
             console.warn('Action with name ' + actionName + ' was already defined, and is now being overwritten');
         }

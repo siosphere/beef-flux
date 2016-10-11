@@ -30,16 +30,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Todo;
 
 },{"beef":6}],2:[function(require,module,exports){
-/// <reference path="../../../dist/typings/index.d.ts" />
-"use strict";
-var beef = require('beef');
-var RECEIVE_TODOS = beef.Actions.define('RECEIVE_TODOS', function (rawTodos) {
-    return rawTodos;
-});
-exports.RECEIVE_TODOS = RECEIVE_TODOS;
-console.log('INCLUDED TODO ACTIONS');
 
-},{"beef":6}],3:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 /// <reference path="../../../dist/typings/index.d.ts" />
 "use strict";
 var beef = require('beef');
@@ -145,7 +137,6 @@ var ActionsClass = (function () {
         this.register = this.register.bind(this);
     }
     ActionsClass.prototype.define = function (actionName, cb) {
-        console.log('attempting to define action', actionName);
         if (typeof this.actions[actionName] !== 'undefined') {
             console.warn('Action with name ' + actionName + ' was already defined, and is now being overwritten');
         }
@@ -18763,8 +18754,8 @@ module.exports = function extend() {
 });
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../action/actions":undefined,"../api/api-service":undefined,"../routing/component/config":undefined,"../routing/decorators/route-decorator":undefined,"../routing/routing-service":undefined,"../store/store":undefined,"../store/store-decorator":undefined,"./component/config":undefined,"./store":undefined,"extend":8,"lodash":9,"reqwest":10,"xhr2":undefined}],7:[function(require,module,exports){
-
-},{}],8:[function(require,module,exports){
+arguments[4][2][0].apply(exports,arguments)
+},{"dup":2}],8:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
