@@ -9,7 +9,7 @@ var Action = function (actionName, cb) {
             if (store.debug) {
                 console.log('dispatching action', {
                     action: actionName,
-                    newState: results
+                    data: results
                 });
             }
             store.stateChange(actionName, cb(results));
