@@ -1,5 +1,3 @@
-/// <reference path="../../typings/index.d.ts" />
-
 declare module 'beef'
 {
     import * as reqwest from "reqwest";
