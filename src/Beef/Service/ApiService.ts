@@ -25,38 +25,34 @@ class ApiService extends BaseService
     
     public get(url : string, data : any)
     {
-        return $.ajax({
+        return this.doAjaxCall("GET", {
             url: this.buildUrl(url, data),
-            method: "GET",
             dataType: 'json'
         });
     }
     
     public post(url : string, data : any)
     {
-        return $.ajax({
+        return this.doAjaxCall("POST", {
             url: this.buildUrl(url, data, false),
             data: JSON.stringify(data),
-            method: "POST",
             dataType: 'json'
         });
     }
     
     public put(url : string, data : any)
     {
-        return $.ajax({
+        return this.doAjaxCall("PUT", {
             url: this.buildUrl(url, data, false),
             data: JSON.stringify(data),
-            method: "PUT",
             dataType: 'json'
         });
     }
     
     public 'delete' (url : string, data : any)
     {
-        return $.ajax({
+        return this.doAjaxCall("DELETE", {
             url: this.buildUrl(url, data),
-            method: "DELETE",
             dataType: 'json'
         });
     }
@@ -87,5 +83,21 @@ class ApiService extends BaseService
         }
 
         return url;
+    }
+    
+    protected doAjaxCall(method : string, params : any)
+    {
+        let jQueryVersion = $.fn.jquery.split('.')
+        let major = jQueryVersion[0]
+        let minor = jQueryVersion[1]
+
+        if(major == 1 && minor < 9) {
+            params['type'] = method
+            return $.ajax(params)
+        }
+        params['method'] = method
+
+        return $.ajax(params)
+
     }
 }

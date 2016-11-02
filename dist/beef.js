@@ -723,32 +723,28 @@ var ApiService = (function (_super) {
         };
     };
     ApiService.prototype.get = function (url, data) {
-        return $.ajax({
+        return this.doAjaxCall("GET", {
             url: this.buildUrl(url, data),
-            method: "GET",
             dataType: 'json'
         });
     };
     ApiService.prototype.post = function (url, data) {
-        return $.ajax({
+        return this.doAjaxCall("POST", {
             url: this.buildUrl(url, data, false),
             data: JSON.stringify(data),
-            method: "POST",
             dataType: 'json'
         });
     };
     ApiService.prototype.put = function (url, data) {
-        return $.ajax({
+        return this.doAjaxCall("PUT", {
             url: this.buildUrl(url, data, false),
             data: JSON.stringify(data),
-            method: "PUT",
             dataType: 'json'
         });
     };
     ApiService.prototype['delete'] = function (url, data) {
-        return $.ajax({
+        return this.doAjaxCall("DELETE", {
             url: this.buildUrl(url, data),
-            method: "DELETE",
             dataType: 'json'
         });
     };
@@ -773,6 +769,17 @@ var ApiService = (function (_super) {
             url += i + '=' + data[i];
         }
         return url;
+    };
+    ApiService.prototype.doAjaxCall = function (method, params) {
+        var jQueryVersion = $.fn.jquery.split('.');
+        var major = jQueryVersion[0];
+        var minor = jQueryVersion[1];
+        if (major == 1 && minor < 9) {
+            params['type'] = method;
+            return $.ajax(params);
+        }
+        params['method'] = method;
+        return $.ajax(params);
     };
     ApiService.SERVICE_ID = 'beef.service.api';
     return ApiService;
