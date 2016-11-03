@@ -15,7 +15,6 @@ var files = [
 gulp.task('default', function(){
     gulp.src(files)
     .pipe(ts({
-        sortOutput: true,
         declarationFiles: false,
     }))
     .pipe(gulp.dest('./build/'))
