@@ -52,7 +52,7 @@ var Beef = (function () {
         Beef.start();
         return {
             create: function (params) {
-                var store = $.extend(true, new Store(), params);
+                var store = jQuery.extend(true, new Store(), params);
                 store.actions();
                 return store;
             }
@@ -113,20 +113,20 @@ var Store = (function () {
      * Listen on a given event
      */
     Store.prototype.listen = function (event, callback) {
-        $(window).on(event, callback);
+        jQuery(window).on(event, callback);
     };
     /**
      * Ignore an event we are listening on
      */
     Store.prototype.ignore = function (event, callback) {
-        $(window).off(event, callback);
+        jQuery(window).off(event, callback);
     };
     /**
      * Emit an event
      */
     Store.prototype.emit = function (event, data) {
         if (data === void 0) { data = false; }
-        $(window).trigger(event, [data]);
+        jQuery(window).trigger(event, [data]);
     };
     /**
      * Insert a row if it doesn't exist, update it otherwise
@@ -329,51 +329,51 @@ var Store = (function () {
     };
     Store.string = function (params) {
         if (params === void 0) { params = {}; }
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'string'
         }, params);
     };
     Store.int = function (params) {
         if (params === void 0) { params = {}; }
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'int'
         }, params);
     };
     Store.double = function (params) {
         if (params === void 0) { params = {}; }
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'double'
         }, params);
     };
     Store.bool = function (params) {
         if (params === void 0) { params = {}; }
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'bool'
         }, params);
     };
     Store.float = function (params) {
         if (params === void 0) { params = {}; }
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'float'
         }, params);
     };
     Store.array = function (params) {
         if (params === void 0) { params = {}; }
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'array',
             schema: null
         }, params);
     };
     Store.object = function (params) {
         if (params === void 0) { params = {}; }
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'object',
             schema: null
         }, params);
     };
     Store.datetime = function (params) {
         if (params === void 0) { params = {}; }
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'datetime',
             schema: null,
             format: 'YYYY-MM-DD HH:mm:ss'
@@ -381,7 +381,7 @@ var Store = (function () {
     };
     Store.callback = function (params) {
         if (params === void 0) { params = {}; }
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'callback',
             schema: null
         }, params);
@@ -771,15 +771,15 @@ var ApiService = (function (_super) {
         return url;
     };
     ApiService.prototype.doAjaxCall = function (method, params) {
-        var jQueryVersion = $.fn.jquery.split('.');
+        var jQueryVersion = jQuery.fn.jquery.split('.');
         var major = jQueryVersion[0];
         var minor = jQueryVersion[1];
         if (major == 1 && minor < 9) {
             params['type'] = method;
-            return $.ajax(params);
+            return jQuery.ajax(params);
         }
         params['method'] = method;
-        return $.ajax(params);
+        return jQuery.ajax(params);
     };
     ApiService.SERVICE_ID = 'beef.service.api';
     return ApiService;

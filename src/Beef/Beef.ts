@@ -28,7 +28,7 @@ class Beef {
         Beef.start();
         return {
             create: function(params) {
-                var store = $.extend(true, new Store(), params);
+                var store = jQuery.extend(true, new Store(), params);
                 store.actions();
                 return store;
             }

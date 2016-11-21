@@ -87,17 +87,17 @@ class ApiService extends BaseService
     
     protected doAjaxCall(method : string, params : any)
     {
-        let jQueryVersion = $.fn.jquery.split('.')
+        let jQueryVersion = jQuery.fn.jquery.split('.')
         let major = jQueryVersion[0]
         let minor = jQueryVersion[1]
 
         if(major == 1 && minor < 9) {
             params['type'] = method
-            return $.ajax(params)
+            return jQuery.ajax(params)
         }
         params['method'] = method
 
-        return $.ajax(params)
+        return jQuery.ajax(params)
 
     }
 }

@@ -27,7 +27,7 @@ class Store
      */
     public listen(event : string, callback : ((...args : any[]) => any))
     {
-        $(window).on(event, callback);
+        jQuery(window).on(event, callback);
     }
     
     /**
@@ -35,7 +35,7 @@ class Store
      */
     public ignore(event : string, callback : ((...args : any[]) => any))
     {
-        $(window).off(event, callback);
+        jQuery(window).off(event, callback);
     }
     
     /**
@@ -43,7 +43,7 @@ class Store
      */
     public emit(event : string, data : any = false)
     {
-         $(window).trigger(event, [data]);
+         jQuery(window).trigger(event, [data]);
     }
     
     /**
@@ -289,56 +289,56 @@ class Store
     }
     
     public static string(params = {}) {
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'string'
         }, params);
     }
     
     public static int(params = {}) {
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'int'
         }, params);
     }
     
     public static double(params = {}) {
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'double'
         }, params);
     }
     public static bool(params = {}) {
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'bool'
         }, params);
     }
     
     public static float(params = {}) {
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'float'
         }, params);
     }
     
     public static array (params = {}) {
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'array',
             schema: null
         }, params);
     }
     public static object (params = {}) {
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'object',
             schema: null
         }, params);
     }
     
     public static datetime (params = {}) {
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'datetime',
             schema: null,
             format: 'YYYY-MM-DD HH:mm:ss'
         }, params);
     }
     public static callback(params = {}) {
-        return $.extend(true, {
+        return jQuery.extend(true, {
             type: 'callback',
             schema: null
         }, params);
