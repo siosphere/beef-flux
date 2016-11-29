@@ -573,6 +573,10 @@ class Store<T>
             return null
         }
 
+        if(!json && typeof schemaConfig.constructor === 'function') {
+            return new schemaConfig.constructor(this.sanitize(value, schemaConfig.schema()))
+        }
+
         return this.sanitize(value, schemaConfig.schema(), json)
     }
     
