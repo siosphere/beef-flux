@@ -485,6 +485,9 @@ var Store = (function () {
             return []; //empty array
         }
         return value.map(function (v) {
+            if (!json && typeof schemaConfig.constructor === 'function') {
+                return new schemaConfig.constructor(_this.sanitize(v, schemaConfig.schema()));
+            }
             return _this.sanitize(v, schemaConfig.schema(), json);
         });
     };

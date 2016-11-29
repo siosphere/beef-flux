@@ -595,6 +595,9 @@ class Store<T>
 
 
         return value.map((v) => {
+            if(!json && typeof schemaConfig.constructor === 'function') {
+                return new schemaConfig.constructor(this.sanitize(v, schemaConfig.schema()))
+            }
             return this.sanitize(v, schemaConfig.schema(), json)
         })
     }
