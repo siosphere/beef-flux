@@ -312,6 +312,13 @@ var Store = (function () {
             schema: null
         }, params);
     };
+    Store.customType = function (type, params) {
+        if (params === void 0) { params = {}; }
+        return extend(true, {
+            type: type,
+            schema: null
+        }, params);
+    };
     /**
      * Sanitizes a field on an object to the given schema
      */

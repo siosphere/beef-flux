@@ -145,6 +145,11 @@ declare module 'beef'
         type: string;
         schema: any;
     };
+
+    static customType(type : string, params?: {}): {
+        type: string;
+        schema: any;
+    };
     /**
      * Sanitizes a field on an object to the given schema
      */
@@ -210,6 +215,7 @@ declare module 'beef'
         object: (config?: any) => any;
         datetime: (config?: any) => any;
         callback: (config?: any) => any;
+        custom: (type : string, config?: any) => any;
         uuid: (config?: any) => any;
     };
 

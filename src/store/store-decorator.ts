@@ -58,6 +58,10 @@ export let Schema = {
     callback: function(config : any = null) {
         return setupFunction.bind(null, Store.callback.bind(null, config));
     },
+
+    custom: function(type, config : any = null) {
+        return setupFunction.bind(null, Store.customType.bind(null, type, config));
+    },
     
     uuid: function(config : any = {}) {
         

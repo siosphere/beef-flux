@@ -375,10 +375,19 @@ class Store<T>
             format: 'YYYY-MM-DD HH:mm:ss'
         }, params)
     }
+
     public static callback(params = {}) 
     {
         return extend(true, {
             type: 'callback',
+            schema: null
+        }, params)
+    }
+
+    public static customType(type, params = {}) 
+    {
+        return extend(true, {
+            type: type,
             schema: null
         }, params)
     }

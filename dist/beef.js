@@ -405,6 +405,10 @@ exports.Schema = {
         if (config === void 0) { config = null; }
         return setupFunction.bind(null, store_1.default.callback.bind(null, config));
     },
+    custom: function (type, config) {
+        if (config === void 0) { config = null; }
+        return setupFunction.bind(null, store_1.default.customType.bind(null, type, config));
+    },
     uuid: function (config) {
         if (config === void 0) { config = {}; }
         config.initial = function () {
@@ -735,6 +739,13 @@ var Store = (function () {
         if (params === void 0) { params = {}; }
         return extend(true, {
             type: 'callback',
+            schema: null
+        }, params);
+    };
+    Store.customType = function (type, params) {
+        if (params === void 0) { params = {}; }
+        return extend(true, {
+            type: type,
             schema: null
         }, params);
     };
