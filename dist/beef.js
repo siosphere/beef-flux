@@ -1,59 +1,4 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.beef = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-"use strict";
-var ActionsClass = (function () {
-    function ActionsClass() {
-        this.actions = {};
-        this.define = this.define.bind(this);
-        this.dispatch = this.dispatch.bind(this);
-        this.register = this.register.bind(this);
-    }
-    ActionsClass.prototype.define = function (actionName, cb) {
-        if (typeof this.actions[actionName] !== 'undefined') {
-            console.warn('Action with name ' + actionName + ' was already defined, and is now being overwritten');
-        }
-        this.actions[actionName] = {
-            cb: cb,
-            stores: []
-        };
-        var override = function () {
-            this.dispatch(actionName, arguments);
-        };
-        override = override.bind(this);
-        override.toString = function () {
-            return actionName;
-        };
-        return override;
-    };
-    ActionsClass.prototype.dispatch = function (actionName, data) {
-        if (typeof this.actions[actionName] === 'undefined') {
-            console.warn('Attempting to call non registered action: ' + actionName);
-        }
-        var cb = this.actions[actionName].cb;
-        var results = cb.apply(null, data);
-        this.actions[actionName].stores.forEach(function (storeInfo) {
-            var store = storeInfo.store;
-            var cb = storeInfo.cb;
-            store.stateChange(actionName, cb(results));
-        });
-    };
-    ActionsClass.prototype.register = function (actionData, store) {
-        for (var actionName in actionData) {
-            if (typeof this.actions[actionName] === 'undefined') {
-                console.warn('Store attempting to register missing action: ' + actionName);
-                continue;
-            }
-            this.actions[actionName].stores.push({
-                store: store,
-                cb: actionData[actionName]
-            });
-        }
-    };
-    return ActionsClass;
-}());
-exports.ActionsClass = ActionsClass;
-var Actions = new ActionsClass();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Actions;
 
 },{}],2:[function(require,module,exports){
 "use strict";
@@ -794,12 +739,20 @@ var Store = (function () {
             case 'array':
             case 'collection':
                 return this.sanitizeArray(obj[field], schema[field], json);
+            case 'callback':
+                return this.sanitizeCallback(obj[field], schema[field]);
             default:
                 if (typeof schema[field].sanitize !== 'undefined') {
                     return schema[field].sanitize(obj[field], schema[field]);
                 }
                 break;
         }
+    };
+    Store.prototype.sanitizeCallback = function (value, schemaConfig) {
+        if (typeof value !== 'function') {
+            throw new Error('Provided callback is not a valid function');
+        }
+        return value;
     };
     /**
      * Sanitizes a field to an integer
@@ -934,8 +887,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Store;
 
 },{"extend":10,"lodash":11}],9:[function(require,module,exports){
-
-},{}],10:[function(require,module,exports){
+arguments[4][1][0].apply(exports,arguments)
+},{"dup":1}],10:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;

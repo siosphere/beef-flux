@@ -440,12 +440,23 @@ class Store<T>
             case 'array':
             case 'collection':
                 return this.sanitizeArray(obj[field], schema[field], json)
+            case 'callback':
+                return this.sanitizeCallback(obj[field], schema[field])
             default:
                 if(typeof schema[field].sanitize !== 'undefined') {
                     return schema[field].sanitize(obj[field], schema[field])
                 }
                 break
         }
+    }
+
+    protected sanitizeCallback(value : any, schemaConfig : any)
+    {
+        if(typeof value !== 'function') {
+            throw new Error('Provided callback is not a valid function')
+        }
+
+        return value
     }
     
     /**
