@@ -441,7 +441,7 @@ class Store<T>
             case 'collection':
                 return this.sanitizeArray(obj[field], schema[field], json)
             default:
-                if(schema[field].sanitize !== 'undefined') {
+                if(typeof schema[field].sanitize !== 'undefined') {
                     return schema[field].sanitize(obj[field], schema[field])
                 }
                 break
