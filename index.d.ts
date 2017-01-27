@@ -1,8 +1,5 @@
 declare module 'beef'
 {
-    import * as reqwest from "reqwest";
-    import { ReqwestOptions } from "reqwest";
-
     export class ActionsClass {
         actions: any;
         constructor();
@@ -19,10 +16,10 @@ declare module 'beef'
      */
     export class ApiServiceClass {
         throttle(func: () => any, wait: number, immediate: boolean): () => void;
-        get(url: string, data: any, config?: ReqwestOptions): reqwest.ReqwestPromise<any>;
-        post(url: string, data: any, config?: ReqwestOptions): reqwest.ReqwestPromise<any>;
-        put(url: string, data: any, config?: ReqwestOptions): reqwest.ReqwestPromise<any>;
-        ['delete'](url: string, data: any, config?: ReqwestOptions): reqwest.ReqwestPromise<any>;
+        get(url: string, data: any, config?: any): Promise<any>;
+        post(url: string, data: any, config?: any): Promise<any>;
+        put(url: string, data: any, config?: any): Promise<any>;
+        ['delete'](url: string, data: any, config?: any): Promise<any>;
         protected _buildUrl(url: string, data: any, queryString?: boolean): string;
         protected _buildConfig(defaultConfig: any, customConfig?: any): any;
     }
