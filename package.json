@@ -11,7 +11,6 @@
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.1.4",
     "lodash": "^4.16.4",
-    "reqwest": "^2.0.5",
     "typescript": "^2.1.5",
     "whatwg-fetch": "^2.0.2"
   },

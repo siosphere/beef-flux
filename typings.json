@@ -2,8 +2,7 @@
   "name": "beefjs",
   "dependencies": {
     "extend": "registry:dt/extend#2.0.0+20160428043022",
-    "lodash": "registry:npm/lodash#4.0.0+20160723033700",
-    "reqwest": "github:nozzlegear/reqwest.d.ts"
+    "lodash": "registry:npm/lodash#4.0.0+20160723033700"
   },
   "globalDependencies": {
     "jest": "registry:dt/jest#16.0.0+20170112172802",
