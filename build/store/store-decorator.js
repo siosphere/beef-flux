@@ -1,5 +1,4 @@
-"use strict";
-var store_1 = require("./store");
+import Store from "./store";
 /**
  * This is used to build a schema from a typescript class without having to
  * redefine all the fields.
@@ -21,53 +20,42 @@ var store_1 = require("./store");
  *     myAwesomeObject : any
  * }
  */
-exports.Schema = {
-    int: function (config) {
-        if (config === void 0) { config = null; }
-        return setupFunction.bind(null, store_1.default.int.bind(null, config));
+export let Schema = {
+    int: function (config = null) {
+        return setupFunction.bind(null, Store.int.bind(null, config));
     },
-    string: function (config) {
-        if (config === void 0) { config = null; }
-        return setupFunction.bind(null, store_1.default.string.bind(null, config));
+    string: function (config = null) {
+        return setupFunction.bind(null, Store.string.bind(null, config));
     },
-    double: function (config) {
-        if (config === void 0) { config = null; }
-        return setupFunction.bind(null, store_1.default.double.bind(null, config));
+    double: function (config = null) {
+        return setupFunction.bind(null, Store.double.bind(null, config));
     },
-    bool: function (config) {
-        if (config === void 0) { config = null; }
-        return setupFunction.bind(null, store_1.default.bool.bind(null, config));
+    bool: function (config = null) {
+        return setupFunction.bind(null, Store.bool.bind(null, config));
     },
-    float: function (config) {
-        if (config === void 0) { config = null; }
-        return setupFunction.bind(null, store_1.default.float.bind(null, config));
+    float: function (config = null) {
+        return setupFunction.bind(null, Store.float.bind(null, config));
     },
-    array: function (config) {
-        if (config === void 0) { config = null; }
-        return setupFunction.bind(null, store_1.default.array.bind(null, config));
+    array: function (config = null) {
+        return setupFunction.bind(null, Store.array.bind(null, config));
     },
-    object: function (config) {
-        if (config === void 0) { config = null; }
-        return setupFunction.bind(null, store_1.default.object.bind(null, config));
+    object: function (config = null) {
+        return setupFunction.bind(null, Store.object.bind(null, config));
     },
-    datetime: function (config) {
-        if (config === void 0) { config = null; }
-        return setupFunction.bind(null, store_1.default.datetime.bind(null, config));
+    datetime: function (config = null) {
+        return setupFunction.bind(null, Store.datetime.bind(null, config));
     },
-    callback: function (config) {
-        if (config === void 0) { config = null; }
-        return setupFunction.bind(null, store_1.default.callback.bind(null, config));
+    callback: function (config = null) {
+        return setupFunction.bind(null, Store.callback.bind(null, config));
     },
-    custom: function (type, config) {
-        if (config === void 0) { config = null; }
-        return setupFunction.bind(null, store_1.default.customType.bind(null, type, config));
+    custom: function (type, config = null) {
+        return setupFunction.bind(null, Store.customType.bind(null, type, config));
     },
-    uuid: function (config) {
-        if (config === void 0) { config = {}; }
+    uuid: function (config = {}) {
         config.initial = function () {
             return uuid();
         };
-        return setupFunction.bind(null, store_1.default.string.bind(null, config));
+        return setupFunction.bind(null, Store.string.bind(null, config));
     }
 };
 var setupFunction = function (storeCallback, target, propertyKey, descriptor) {

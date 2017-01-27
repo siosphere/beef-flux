@@ -4,12 +4,10 @@
         "experimentalDecorators": true,
         "target": "es2015"
     },
-    "exclude" : [
-        "dist",
-        "examples",
-        "lib",
-        "nbproject",
-        "node_modules"
+    "include": [
+        "./typings/index.d.ts",
+        "./src/*",
+        "./src/**/*"
     ],
     "rootDir": "build/"
 }

@@ -1,4 +1,3 @@
-"use strict";
 var sanitizeField = function (value, sanitizeConfig) {
     switch (sanitizeConfig.type) {
         case 'int':
@@ -14,7 +13,7 @@ var sanitizeField = function (value, sanitizeConfig) {
                 (value === true || (typeof value === 'string' && value.toLowerCase() === 'yes') || value === 1 || value === "1") ? true : false;
     }
 };
-var sanitize = function (value) {
+var sanitize = (value) => {
     return function (target, propertyKey, descriptor) {
         var routeMethod = target[propertyKey];
         descriptor.value = function (data) {
@@ -28,4 +27,4 @@ var sanitize = function (value) {
         };
     };
 };
-exports.sanitize = sanitize;
+export { sanitize };

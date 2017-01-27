@@ -1,4 +1,6 @@
 ///<reference path="../../typings/index.d.ts" />
+import * as extend from 'extend';
+import * as _ from 'lodash';
 /**
  * Store that hooks into actions
  *

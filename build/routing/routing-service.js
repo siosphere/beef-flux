@@ -1,20 +1,17 @@
-"use strict";
-var config_1 = require("./component/config");
+import { RoutingConfig } from "./component/config";
 /**
  * Will match a given url to a route, and execute a function/callback defined
  * for that route. Will also parse the URL for different parameters and
  * pass that into the callback if found
  */
-var RoutingServiceClass = (function () {
-    function RoutingServiceClass() {
+export class RoutingServiceClass {
+    onRouteFinished() {
     }
-    RoutingServiceClass.prototype.onRouteFinished = function () {
-    };
-    RoutingServiceClass.prototype.routes = function (routes) {
-        this.routingConfig = new config_1.RoutingConfig(routes);
+    routes(routes) {
+        this.routingConfig = new RoutingConfig(routes);
         return this;
-    };
-    RoutingServiceClass.prototype.route = function (url, data) {
+    }
+    route(url, data) {
         var isRoute = this.routingConfig.isRoute(url);
         if (!isRoute) {
             url = '/';
@@ -26,8 +23,8 @@ var RoutingServiceClass = (function () {
             return response;
         }
         return null;
-    };
-    RoutingServiceClass.prototype.handleRequest = function (url, request, response, data) {
+    }
+    handleRequest(url, request, response, data) {
         var isRoute = this.routingConfig.isRoute(url);
         if (!isRoute) {
             url = 'default:/';
@@ -39,11 +36,8 @@ var RoutingServiceClass = (function () {
             return response;
         }
         return null;
-    };
-    RoutingServiceClass.prototype.doRouting = function (url, request, response) {
-        if (url === void 0) { url = null; }
-        if (request === void 0) { request = null; }
-        if (response === void 0) { response = null; }
+    }
+    doRouting(url = null, request = null, response = null) {
         var matchRoute = '';
         for (var rawRoute in this.routingConfig.routes) {
             matchRoute = rawRoute;
@@ -108,9 +102,7 @@ var RoutingServiceClass = (function () {
             return this.handleRequest('default:/', request, response, {});
         }
         return this.route('/', {}); //default route
-    };
-    return RoutingServiceClass;
-}());
-exports.RoutingServiceClass = RoutingServiceClass;
-var RoutingService = new RoutingServiceClass();
-exports.RoutingService = RoutingService;
+    }
+}
+let RoutingService = new RoutingServiceClass();
+export { RoutingService };
