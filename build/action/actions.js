@@ -1,12 +1,11 @@
-"use strict";
-var ActionsClass = (function () {
-    function ActionsClass() {
+export class ActionsClass {
+    constructor() {
         this.actions = {};
         this.define = this.define.bind(this);
         this.dispatch = this.dispatch.bind(this);
         this.register = this.register.bind(this);
     }
-    ActionsClass.prototype.define = function (actionName, cb) {
+    define(actionName, cb) {
         if (typeof this.actions[actionName] !== 'undefined') {
             console.warn('Action with name ' + actionName + ' was already defined, and is now being overwritten');
         }
@@ -14,28 +13,28 @@ var ActionsClass = (function () {
             cb: cb,
             stores: []
         };
-        var override = function () {
+        let override = function () {
             this.dispatch(actionName, arguments);
         };
         override = override.bind(this);
-        override.toString = function () {
+        override.toString = () => {
             return actionName;
         };
         return override;
-    };
-    ActionsClass.prototype.dispatch = function (actionName, data) {
+    }
+    dispatch(actionName, data) {
         if (typeof this.actions[actionName] === 'undefined') {
             console.warn('Attempting to call non registered action: ' + actionName);
         }
-        var cb = this.actions[actionName].cb;
-        var results = cb.apply(null, data);
-        this.actions[actionName].stores.forEach(function (storeInfo) {
-            var store = storeInfo.store;
-            var cb = storeInfo.cb;
+        let cb = this.actions[actionName].cb;
+        let results = cb.apply(null, data);
+        this.actions[actionName].stores.forEach((storeInfo) => {
+            let store = storeInfo.store;
+            let cb = storeInfo.cb;
             store.stateChange(actionName, cb(results));
         });
-    };
-    ActionsClass.prototype.register = function (actionData, store) {
+    }
+    register(actionData, store) {
         for (var actionName in actionData) {
             if (typeof this.actions[actionName] === 'undefined') {
                 console.warn('Store attempting to register missing action: ' + actionName);
@@ -46,10 +45,7 @@ var ActionsClass = (function () {
                 cb: actionData[actionName]
             });
         }
-    };
-    return ActionsClass;
-}());
-exports.ActionsClass = ActionsClass;
-var Actions = new ActionsClass();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Actions;
+    }
+}
+const Actions = new ActionsClass();
+export default Actions;

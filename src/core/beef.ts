@@ -6,7 +6,7 @@ import Store from "../store/store"
 import {Schema} from "../store/store-decorator"
 import Actions, {ActionsClass} from "../action/actions"
 
-export = {
+export {
     Actions,
     ApiService,
     ApiServiceClass,

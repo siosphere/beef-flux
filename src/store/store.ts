@@ -1,7 +1,7 @@
 ///<reference path="../../typings/index.d.ts" />
 
-import extend = require('extend')
-import _ = require('lodash')
+import * as extend from 'extend'
+import * as _ from 'lodash'
 
 export interface StateHistory<T>
 {

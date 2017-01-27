@@ -8,15 +8,19 @@
   },
   "dependencies": {
     "extend": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^3.1.4",
     "lodash": "^4.16.4",
-    "reqwest": "^2.0.5"
+    "reqwest": "^2.0.5",
+    "typescript": "^2.1.5",
+    "whatwg-fetch": "^2.0.2"
   },
   "devDependencies": {
+    "@types/node": "^7.0.4",
     "browserify": "^13.1.0",
     "gulp-babel": "^6.1.2",
     "gulp-concat": "^2.6.0",
     "gulp-rename": "^1.2.2",
-    "gulp-typescript": "^2.13.6",
     "gulp-uglify": "^2.0.0",
     "jest-cli": "^14.1.0",
     "moment": "^2.13.0",

@@ -1,12 +1,15 @@
 {
   "name": "beefjs",
   "dependencies": {
-    "extend": "registry:npm/extend#1.0.0+20160723033700",
+    "extend": "registry:dt/extend#2.0.0+20160428043022",
     "lodash": "registry:npm/lodash#4.0.0+20160723033700",
     "reqwest": "github:nozzlegear/reqwest.d.ts"
   },
   "globalDependencies": {
+    "jest": "registry:dt/jest#16.0.0+20170112172802",
     "jquery": "registry:dt/jquery#1.10.0+20160704162008",
-    "moment": "registry:dt/moment#2.11.1+20160829143156"
+    "moment": "registry:dt/moment#2.11.1+20160829143156",
+    "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20161120230953",
+    "whatwg-streams": "registry:dt/whatwg-streams#0.0.0+20161214010628"
   }
 }

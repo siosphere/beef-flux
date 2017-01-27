@@ -1,7 +1,4 @@
 ///<reference path="../../typings/index.d.ts" />
-"use strict";
-var extend = require('extend');
-var _ = require('lodash');
 /**
  * Store that hooks into actions
  *
@@ -9,8 +6,8 @@ var _ = require('lodash');
  * anything that pulls data from the DataStore cannot modify it and should treat
  * it as immutable
  */
-var Store = (function () {
-    function Store() {
+class Store {
+    constructor() {
         /**
          * Holds our state
          */
@@ -40,25 +37,25 @@ var Store = (function () {
     /**
      * Listen on a given event
      */
-    Store.prototype.listen = function (callback) {
+    listen(callback) {
         this.listeners.push(callback);
-    };
-    Store.prototype.getState = function () {
+    }
+    getState() {
         return this.state;
-    };
+    }
     /**
      * Ignore an event we are listening on
      */
-    Store.prototype.ignore = function (callback) {
-        var index = this.listeners.indexOf(callback);
+    ignore(callback) {
+        let index = this.listeners.indexOf(callback);
         if (index >= 0) {
             this.listeners.splice(index, 1);
             return true;
         }
         return false;
-    };
-    Store.prototype.stateChange = function (actionName, newState) {
-        var oldState = _.cloneDeep(this.state);
+    }
+    stateChange(actionName, newState) {
+        let oldState = _.cloneDeep(this.state);
         if (this.debug) {
             this.stateHistory.push({
                 actionName: actionName,
@@ -68,24 +65,22 @@ var Store = (function () {
         this.state = newState;
         this.notify(oldState);
         return newState;
-    };
-    Store.prototype.newState = function () {
+    }
+    newState() {
         return _.cloneDeep(this.state);
-    };
-    Store.prototype.notify = function (oldState) {
-        var _this = this;
+    }
+    notify(oldState) {
         if (this.debug) {
             console.debug('Store state changed, notifying ' + this.listeners.length + ' listener(s) of change', 'Old State', oldState, 'New State', this.state);
         }
-        this.listeners.forEach(function (listener) {
-            listener(_this.state, oldState);
+        this.listeners.forEach((listener) => {
+            listener(this.state, oldState);
         });
-    };
+    }
     /**
      * Insert an item into the given modelArray, update it if it already exists
      */
-    Store.prototype.upsertItem = function (modelArray, keyValue, newItem, overwrite) {
-        if (overwrite === void 0) { overwrite = false; }
+    upsertItem(modelArray, keyValue, newItem, overwrite = false) {
         var updated = false;
         if (typeof modelArray === 'undefined' || !Array.isArray(modelArray)) {
             console.warn('Non array passed in as modelArray');
@@ -99,9 +94,9 @@ var Store = (function () {
             console.warn('Upserted item does not match the keyValue passed in', newItem['__bID'], '!=', keyValue);
             return false;
         }
-        var existing = null;
+        let existing = null;
         for (var i = 0; i < modelArray.length; i++) {
-            var item = modelArray[i];
+            let item = modelArray[i];
             if (item['__bID'] === keyValue) {
                 existing = i;
                 break;
@@ -112,18 +107,18 @@ var Store = (function () {
             modelArray.push(newItem);
         }
         else {
-            var existingItem = modelArray[existing];
+            let existingItem = modelArray[existing];
             modelArray[existing] = overwrite ? newItem : this.merge(existingItem, newItem);
         }
         return true;
-    };
+    }
     /**
      * Remove an item from a modelArray
      */
-    Store.prototype.removeItem = function (modelArray, keyValue) {
-        var existing = null;
+    removeItem(modelArray, keyValue) {
+        let existing = null;
         for (var i = 0; i < modelArray.length; i++) {
-            var item = modelArray[i];
+            let item = modelArray[i];
             if (item['__bID'] === keyValue) {
                 existing = i;
                 break;
@@ -133,32 +128,31 @@ var Store = (function () {
             return false;
         }
         return modelArray.splice(existing, 1);
-    };
+    }
     /**
      * Pass in an array of keyValues and remove all items that match
      */
-    Store.prototype.removeItems = function (modelArray, keyValues) {
-        var _this = this;
-        keyValues.forEach(function (keyValue) {
-            _this.removeItem(modelArray, keyValue);
+    removeItems(modelArray, keyValues) {
+        keyValues.forEach((keyValue) => {
+            this.removeItem(modelArray, keyValue);
         });
-    };
+    }
     /**
      * Sanitize and valide the given object to the given schema
      */
-    Store.prototype.sanitizeAndValidate = function (obj, schema) {
+    sanitizeAndValidate(obj, schema) {
         var model = this.sanitize(obj, schema, false);
         var validation = this.validate(model, schema);
         if (validation === true) {
             return model;
         }
         return validation;
-    };
+    }
     /**
      * Validate the given object to the given schema, will return an array
      * of errors, or true if valid
      */
-    Store.prototype.validate = function (obj, schema) {
+    validate(obj, schema) {
         var errors = [];
         for (var field in schema) {
             if (typeof (schema[field].validation) !== 'undefined') {
@@ -197,33 +191,31 @@ var Store = (function () {
             }
         }
         return errors.length > 0 ? errors : true;
-    };
+    }
     /**
      * Sanitize the given object to a schema, also an optional parameter if
      * you are sending the object as JSON, to format datetimes properly
      */
-    Store.prototype.sanitize = function (obj, schema, json) {
-        if (json === void 0) { json = false; }
+    sanitize(obj, schema, json = false) {
         var clean = {};
         var tmp = extend(true, {}, obj);
         for (var field in schema) {
             clean[field] = this.sanitizeField(field, tmp, schema, json);
         }
         return clean;
-    };
+    }
     /**
      * Merge objects together
      */
-    Store.prototype.merge = function (obj1, obj2) {
+    merge(obj1, obj2) {
         _.merge(obj1, obj2);
         return obj1;
-    };
+    }
     /**
      * Creates a filter sort callback to sort by a given key
      */
-    Store.prototype.sortBy = function (key, dir) {
-        if (dir === void 0) { dir = 'desc'; }
-        return function (a, b) {
+    sortBy(key, dir = 'desc') {
+        return (a, b) => {
             if ((b[key] && !a[key]) || (b[key] && a[key] && b[key] > a[key])) {
                 return dir.toLowerCase() === 'desc' ? 1 : -1;
             }
@@ -237,92 +229,82 @@ var Store = (function () {
                 return 0;
             }
         };
-    };
+    }
     /**
      * Formats a given number to two decimal places
      */
-    Store.prototype.money = function (value) {
+    money(value) {
         return value.toFixed(2);
-    };
+    }
     /**
      * Generates a UUID
      */
-    Store.prototype.uuid = function () {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    uuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
-    };
-    Store.string = function (params) {
-        if (params === void 0) { params = {}; }
+    }
+    static string(params = {}) {
         return extend(true, {
             type: 'string'
         }, params);
-    };
-    Store.int = function (params) {
-        if (params === void 0) { params = {}; }
+    }
+    static int(params = {}) {
         return extend(true, {
             type: 'int'
         }, params);
-    };
-    Store.double = function (params) {
-        if (params === void 0) { params = {}; }
+    }
+    static double(params = {}) {
         return extend(true, {
             type: 'double'
         }, params);
-    };
-    Store.bool = function (params) {
-        if (params === void 0) { params = {}; }
+    }
+    static bool(params = {}) {
         return extend(true, {
             type: 'bool'
         }, params);
-    };
-    Store.float = function (params) {
-        if (params === void 0) { params = {}; }
+    }
+    static float(params = {}) {
         return extend(true, {
             type: 'float'
         }, params);
-    };
-    Store.array = function (params) {
-        if (params === void 0) { params = {}; }
+    }
+    static array(params = {}) {
         return extend(true, {
             type: 'array',
             schema: null
         }, params);
-    };
-    Store.object = function (params) {
-        if (params === void 0) { params = {}; }
+    }
+    static object(params = {}) {
         return extend(true, {
             type: 'object',
             schema: null
         }, params);
-    };
-    Store.datetime = function (params) {
-        if (params === void 0) { params = {}; }
+    }
+    static datetime(params = {}) {
         return extend(true, {
             type: 'datetime',
             schema: null,
             format: 'YYYY-MM-DD HH:mm:ss'
         }, params);
-    };
-    Store.callback = function (params) {
-        if (params === void 0) { params = {}; }
+    }
+    static callback(params = {}) {
         return extend(true, {
             type: 'callback',
             schema: null
         }, params);
-    };
-    Store.customType = function (type, params) {
-        if (params === void 0) { params = {}; }
+    }
+    static customType(type, params = {}) {
         return extend(true, {
             type: type,
             schema: null
         }, params);
-    };
+    }
     /**
      * Sanitizes a field on an object to the given schema
      */
-    Store.prototype.sanitizeField = function (field, obj, schema, json) {
+    sanitizeField(field, obj, schema, json) {
         if (schema[field].type === 'function') {
             return schema[field].value; //return function
         }
@@ -372,17 +354,17 @@ var Store = (function () {
                 }
                 break;
         }
-    };
-    Store.prototype.sanitizeCallback = function (value, schemaConfig) {
+    }
+    sanitizeCallback(value, schemaConfig) {
         if (typeof value !== 'function') {
             throw new Error('Provided callback is not a valid function');
         }
         return value;
-    };
+    }
     /**
      * Sanitizes a field to an integer
      */
-    Store.prototype.sanitizeInteger = function (value, schemaConfig) {
+    sanitizeInteger(value, schemaConfig) {
         if (typeof value === 'string') {
             value = value.replace(/[a-zA-Z]+/gi, '');
             if (value.length === 0) {
@@ -400,11 +382,11 @@ var Store = (function () {
             return value = '';
         }
         return value;
-    };
+    }
     /**
      * Sanitizes a field to a float
      */
-    Store.prototype.sanitizeFloat = function (value, schemaConfig) {
+    sanitizeFloat(value, schemaConfig) {
         value = parseFloat(value);
         if (typeof (schemaConfig.min) !== 'undefined' && value < schemaConfig.min) {
             throw new Error('Provided value cannot be sanitized, value is below minimum float allowed');
@@ -413,11 +395,11 @@ var Store = (function () {
             throw new Error('Provided value cannot be sanitized, value is greater than maximum float allowed');
         }
         return value;
-    };
+    }
     /**
      * Sanitizes a field to a string
      */
-    Store.prototype.sanitizeString = function (value, schemaConfig) {
+    sanitizeString(value, schemaConfig) {
         value = String(value);
         if (typeof (schemaConfig.minLength) !== 'undefined' && value.length < schemaConfig.minLength) {
             throw new Error('Provided value cannot be sanitized, string length is below minimum allowed');
@@ -428,11 +410,11 @@ var Store = (function () {
             value = value.substr(0, schemaConfig.maxLength);
         }
         return value;
-    };
+    }
     /**
      * Sanitizes a field to a moment object
      */
-    Store.prototype.sanitizeDateTime = function (value, schemaConfig, json) {
+    sanitizeDateTime(value, schemaConfig, json) {
         if (typeof schemaConfig.utc === 'undefined' || schemaConfig.utc) {
             var momentDate = moment.utc(value, schemaConfig.format);
         }
@@ -446,11 +428,11 @@ var Store = (function () {
             return momentDate;
         }
         throw new Error("Provided value (" + value + ") cannot be sanitized for field (" + schemaConfig.field + "), is not a valid date");
-    };
+    }
     /**
      * Sanitizes a field to boolean
      */
-    Store.prototype.sanitizeBoolean = function (value, schemaConfig) {
+    sanitizeBoolean(value, schemaConfig) {
         if (value === false || value === true) {
             return value;
         }
@@ -469,11 +451,11 @@ var Store = (function () {
             return true;
         }
         throw new Error('Provided value cannot be santized, is not a valid boolean');
-    };
+    }
     /**
      * Sanitizes an object
      */
-    Store.prototype.sanitizeObject = function (value, schemaConfig, json) {
+    sanitizeObject(value, schemaConfig, json) {
         if (typeof (schemaConfig.schema) === 'undefined') {
             throw new Error('Provided value cannot be santized, no reference schema provided for field type of object');
         }
@@ -487,26 +469,23 @@ var Store = (function () {
             return new schemaConfig.constructor(this.sanitize(value, schemaConfig.schema()));
         }
         return this.sanitize(value, schemaConfig.schema(), json);
-    };
+    }
     /**
      * Sanitizes an array of objects
      */
-    Store.prototype.sanitizeArray = function (value, schemaConfig, json) {
-        var _this = this;
+    sanitizeArray(value, schemaConfig, json) {
         if (typeof (schemaConfig.schema) === 'undefined' || schemaConfig.schema === null || schemaConfig.schema === false) {
             return value;
         }
         if (typeof (value.length) === 'undefined') {
             return []; //empty array
         }
-        return value.map(function (v) {
+        return value.map((v) => {
             if (!json && typeof schemaConfig.constructor === 'function') {
-                return new schemaConfig.constructor(_this.sanitize(v, schemaConfig.schema()));
+                return new schemaConfig.constructor(this.sanitize(v, schemaConfig.schema()));
             }
-            return _this.sanitize(v, schemaConfig.schema(), json);
+            return this.sanitize(v, schemaConfig.schema(), json);
         });
-    };
-    return Store;
-}());
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Store;
+    }
+}
+export default Store;

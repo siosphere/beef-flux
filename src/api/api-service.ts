@@ -1,7 +1,5 @@
 ///<reference path="../../typings/index.d.ts" />
-import * as reqwest from "reqwest"
-import { ReqwestOptions } from "reqwest"
-import extend = require('extend')
+import * as extend from 'extend'
 
 /**
  * Wrapper to create a consistent sdk for doing XHR requests. Will
@@ -26,37 +24,43 @@ export class ApiServiceClass
         };
     }
     
-    public get(url : string, data : any, config : ReqwestOptions = null)
+    public get(url : string, data : any, config : RequestInfo = null)
     {
-        return reqwest(this._buildConfig({
+        return fetch(this._buildConfig({
             url: this._buildUrl(url, data),
             method: 'get'
         }, config))
     }
     
-    public post(url : string, data : any, config : ReqwestOptions = null)
+    public post(url : string, data : any, config : RequestInfo = null)
     {
-        return reqwest(this._buildConfig({
+        let headers = new Headers()
+        headers.append('Content-Type', 'application/json')
+
+        return fetch(this._buildConfig({
             url: this._buildUrl(url, data, false),
             method: 'post',
-            data: JSON.stringify(data),
-            contentType: 'application/json'
+            body: JSON.stringify(data),
+            headers: headers
         }, config))
     }
     
-    public put(url : string, data : any, config : ReqwestOptions = null)
+    public put(url : string, data : any, config : RequestInfo = null)
     {
-        return reqwest(this._buildConfig({
+        let headers = new Headers()
+        headers.append('Content-Type', 'application/json')
+
+        return fetch(this._buildConfig({
             url: this._buildUrl(url, data, false),
             method: 'put',
-            data: JSON.stringify(data),
-            contentType: 'application/json'
+            body: JSON.stringify(data),
+            headers: headers
         }, config))
     }
     
-    public ['delete'](url : string, data : any, config : ReqwestOptions = null)
+    public ['delete'](url : string, data : any, config : RequestInfo = null)
     {
-        return reqwest(this._buildConfig({
+        return fetch(this._buildConfig({
             url: this._buildUrl(url, data),
             method: 'delete'
         }, config))

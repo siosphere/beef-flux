@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
-        "modules": "requirejs",
-        "experimentalDecorators": true
+        "module": "es6",
+        "experimentalDecorators": true,
+        "target": "es2015"
     },
     "exclude" : [
         "dist",
