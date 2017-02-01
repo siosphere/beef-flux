@@ -37,12 +37,15 @@ export class ApiServiceClass
         let headers = new Headers()
         headers.append('Content-Type', 'application/json')
 
-        return fetch(this._buildConfig({
-            url: this._buildUrl(url, data, false),
+        let finalConfig = this._buildConfig({
             method: 'post',
             body: JSON.stringify(data),
             headers: headers
-        }, config))
+        }, config)
+
+        let request = new Request(this._buildUrl(url, data, false), finalConfig)
+
+        return fetch(request)
     }
     
     public put(url : string, data : any, config : RequestInfo = null)
