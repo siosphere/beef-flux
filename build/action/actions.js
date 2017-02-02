@@ -23,7 +23,7 @@ var ActionsClass = (function () {
         };
         return override;
     };
-    ActionsClass.prototype.dispatch = function (actionName, data) {
+    ActionsClass.prototype.dispatch = function (actionName, data, additionalParams) {
         if (typeof this.actions[actionName] === 'undefined') {
             console.warn('Attempting to call non registered action: ' + actionName);
         }
@@ -32,7 +32,7 @@ var ActionsClass = (function () {
         this.actions[actionName].stores.forEach(function (storeInfo) {
             var store = storeInfo.store;
             var cb = storeInfo.cb;
-            store.stateChange(actionName, cb(results));
+            store.stateChange(actionName, cb(results, additionalParams));
         });
     };
     ActionsClass.prototype.register = function (actionData, store) {

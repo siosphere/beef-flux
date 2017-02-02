@@ -7,7 +7,7 @@ declare module 'beef'
         actions: any;
         constructor();
         define(actionName: any, cb: any): () => void;
-        dispatch(actionName: string, data: any): void;
+        dispatch(actionName: string, data: any, additionalParams ?: any): void;
         register<T>(actionData: any, store: Store<T>): void;
     }
     export const Actions: ActionsClass;
