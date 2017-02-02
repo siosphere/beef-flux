@@ -2,10 +2,11 @@
   "name": "beefjs",
   "dependencies": {
     "extend": "registry:dt/extend#2.0.0+20160428043022",
-    "lodash": "registry:npm/lodash#4.0.0+20160723033700"
+    "lodash": "registry:npm/lodash#4.0.0+20160723033700",
+    "react": "registry:npm/react#15.0.1+20170104200836"
   },
   "globalDependencies": {
-    "jest": "registry:dt/jest#16.0.0+20170112172802",
+    "jest": "registry:dt/jest#18.1.0+20170131225342",
     "jquery": "registry:dt/jquery#1.10.0+20160704162008",
     "moment": "registry:dt/moment#2.11.1+20160829143156",
     "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20161120230953",

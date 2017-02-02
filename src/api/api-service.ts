@@ -1,5 +1,5 @@
 ///<reference path="../../typings/index.d.ts" />
-import * as extend from 'extend'
+import * as _ from 'lodash'
 
 /**
  * Wrapper to create a consistent sdk for doing XHR requests. Will
@@ -100,8 +100,10 @@ export class ApiServiceClass
         if(customConfig === null) {
             return defaultConfig
         }
+        let config = {}
+        _.merge(config, defaultConfig, customConfig)
 
-        return extend(true, {}, defaultConfig, customConfig)
+        return config
     }
 }
 

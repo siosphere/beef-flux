@@ -1,5 +1,4 @@
 ///<reference path="../../typings/index.d.ts" />
-import * as extend from 'extend';
 import * as _ from 'lodash';
 /**
  * Store that hooks into actions
@@ -200,7 +199,8 @@ class Store {
      */
     sanitize(obj, schema, json = false) {
         var clean = {};
-        var tmp = extend(true, {}, obj);
+        let tmp = {};
+        _.merge(tmp, obj);
         for (var field in schema) {
             clean[field] = this.sanitizeField(field, tmp, schema, json);
         }
@@ -248,60 +248,80 @@ class Store {
         });
     }
     static string(params = {}) {
-        return extend(true, {
+        let tmp = {};
+        _.merge(tmp, {
             type: 'string'
         }, params);
+        return tmp;
     }
     static int(params = {}) {
-        return extend(true, {
+        let tmp = {};
+        _.merge(tmp, {
             type: 'int'
         }, params);
+        return tmp;
     }
     static double(params = {}) {
-        return extend(true, {
+        let tmp = {};
+        _.merge(tmp, {
             type: 'double'
         }, params);
+        return tmp;
     }
     static bool(params = {}) {
-        return extend(true, {
+        let tmp = {};
+        _.merge(tmp, {
             type: 'bool'
         }, params);
+        return tmp;
     }
     static float(params = {}) {
-        return extend(true, {
+        let tmp = {};
+        _.merge(tmp, {
             type: 'float'
         }, params);
+        return tmp;
     }
     static array(params = {}) {
-        return extend(true, {
+        let tmp = {};
+        _.merge(tmp, {
             type: 'array',
             schema: null
         }, params);
+        return tmp;
     }
     static object(params = {}) {
-        return extend(true, {
+        let tmp = {};
+        _.merge(tmp, {
             type: 'object',
             schema: null
         }, params);
+        return tmp;
     }
     static datetime(params = {}) {
-        return extend(true, {
+        let tmp = {};
+        _.merge(tmp, {
             type: 'datetime',
             schema: null,
             format: 'YYYY-MM-DD HH:mm:ss'
         }, params);
+        return tmp;
     }
     static callback(params = {}) {
-        return extend(true, {
+        let tmp = {};
+        _.merge(tmp, {
             type: 'callback',
             schema: null
         }, params);
+        return tmp;
     }
     static customType(type, params = {}) {
-        return extend(true, {
+        let tmp = {};
+        _.merge(tmp, {
             type: type,
             schema: null
         }, params);
+        return tmp;
     }
     /**
      * Sanitizes a field on an object to the given schema

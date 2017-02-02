@@ -1,5 +1,5 @@
 ///<reference path="../../typings/index.d.ts" />
-import * as extend from 'extend';
+import * as _ from 'lodash';
 /**
  * Wrapper to create a consistent sdk for doing XHR requests. Will
  * automatically replace matching variables in urls that match the pattern.
@@ -79,7 +79,9 @@ export class ApiServiceClass {
         if (customConfig === null) {
             return defaultConfig;
         }
-        return extend(true, {}, defaultConfig, customConfig);
+        let config = {};
+        _.merge(config, defaultConfig, customConfig);
+        return config;
     }
 }
 let ApiService = new ApiServiceClass();

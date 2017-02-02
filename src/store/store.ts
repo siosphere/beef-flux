@@ -1,6 +1,5 @@
 ///<reference path="../../typings/index.d.ts" />
 
-import * as extend from 'extend'
 import * as _ from 'lodash'
 
 export interface StateHistory<T>
@@ -255,7 +254,8 @@ class Store<T>
     public sanitize(obj : any, schema : any, json : boolean = false) : any
     {
         var clean = {}
-        var tmp = extend(true, {}, obj)
+        let tmp = {}
+        _.merge(tmp, obj)
         for(var field in schema) {
             clean[field] = this.sanitizeField(field, tmp, schema, json)
         }
@@ -320,76 +320,116 @@ class Store<T>
     
     public static string(params = {}) 
     {
-        return extend(true, {
+        let tmp = {}
+
+        _.merge(tmp, {
             type: 'string'
         }, params)
+
+        return tmp
     }
     
     public static int(params = {}) 
     {
-        return extend(true, {
+        let tmp = {}
+
+        _.merge(tmp, {
             type: 'int'
         }, params)
+
+        return tmp
     }
     
     public static double(params = {}) 
     {
-        return extend(true, {
+        let tmp = {}
+
+        _.merge(tmp, {
             type: 'double'
         }, params)
+
+        return tmp
     }
     public static bool(params = {}) 
     {
-        return extend(true, {
+        let tmp = {}
+
+        _.merge(tmp, {
             type: 'bool'
         }, params)
+
+        return tmp
     }
     
     public static float(params = {}) 
     {
-        return extend(true, {
+        let tmp = {}
+
+        _.merge(tmp, {
             type: 'float'
         }, params)
+
+        return tmp
     }
     
     public static array (params = {}) 
     {
-        return extend(true, {
+        let tmp = {}
+
+        _.merge(tmp, {
             type: 'array',
             schema: null
         }, params)
+
+        return tmp
     }
     public static object (params = {}) 
     {
-        return extend(true, {
+        let tmp = {}
+
+        _.merge(tmp, {
             type: 'object',
             schema: null
         }, params)
+
+        return tmp
     }
     
     public static datetime (params = {}) 
     {
-        return extend(true, {
+        let tmp = {}
+
+        _.merge(tmp, {
             type: 'datetime',
             schema: null,
             format: 'YYYY-MM-DD HH:mm:ss'
         }, params)
+
+        return tmp
     }
 
     public static callback(params = {}) 
     {
-        return extend(true, {
+        let tmp = {}
+
+        _.merge(tmp, {
             type: 'callback',
             schema: null
         }, params)
+
+        return tmp
     }
 
     public static customType(type, params = {}) 
     {
-        return extend(true, {
+        let tmp = {}
+
+        _.merge(tmp, {
             type: type,
             schema: null
         }, params)
+
+        return tmp
     }
     
     /**
