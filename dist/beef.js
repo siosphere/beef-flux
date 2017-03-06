@@ -1,10 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-/// <reference path="../../../lib/jquery.d.ts" />
-/// <reference path="../../../lib/moment.d.ts" /> 
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 /**
  * Handles our services, our initial setup of services, and starts the
  * framework
@@ -31,41 +34,98 @@ var Beef = (function () {
         });
         this.started = true;
     };
-    Beef.started = false;
-    Beef.Actions = function () {
-        Beef.start();
-        return {
-            create: function (params) {
-                return Actions.create(params);
-            }
-        };
-    };
-    Beef.Api = function () {
-        Beef.start();
-        return Beef.service(ApiService.SERVICE_ID);
-    };
-    Beef.Dispatcher = function () {
-        Beef.start();
-        return Beef.service(Dispatcher.SERVICE_ID);
-    };
-    Beef.Store = function () {
-        Beef.start();
-        return {
-            create: function (params) {
-                var store = jQuery.extend(true, new Store(), params);
-                store.actions();
-                return store;
-            }
-        };
-    };
-    Beef.Router = function () {
-        Beef.start();
-        return Beef.service(RoutingService.SERVICE_ID);
-    };
-    Beef.services = {};
-    Beef.setupCallbacks = [];
     return Beef;
 }());
+Beef.started = false;
+Beef.Actions = function () {
+    Beef.start();
+    return {
+        create: function (params) {
+            return Actions.create(params);
+        }
+    };
+};
+Beef.Api = function () {
+    Beef.start();
+    return Beef.service(ApiService.SERVICE_ID);
+};
+Beef.Dispatcher = function () {
+    Beef.start();
+    return Beef.service(Dispatcher.SERVICE_ID);
+};
+Beef.Store = function () {
+    Beef.start();
+    return {
+        create: function (params) {
+            var store = jQuery.extend(true, new Store(), params);
+            store.actions();
+            return store;
+        }
+    };
+};
+Beef.Router = function () {
+    Beef.start();
+    return Beef.service(RoutingService.SERVICE_ID);
+};
+Beef.services = {};
+Beef.setupCallbacks = [];
+/**
+ * Used to create actions that can be dispatched to stores.
+ *
+ * Usage:
+ *
+ * class TodoActionsClass extends Action {
+ *
+ *   receiveTodos(todos : any[])
+ *   {
+ *       return todos;
+ *   }
+ * };
+ *
+ * var TodoActions : TodoActionsClass = Actions.create(new TodoActionsClass());
+ *
+ *
+ * Listening on a store:
+ *
+ * TodoActions._register({
+ *     receiveTodos: TodoActions.receiveTodos
+ * }, this);
+ *
+ * Each action should return the value that will be sent to the callbacks
+ * listening on this action
+ */
+var Actions = (function () {
+    function Actions() {
+    }
+    /**
+     * Create the action
+     */
+    Actions.create = function (params) {
+        var action = new Action();
+        for (var key in params) {
+            if (key[0] === '_' || Actions.ignoreFunctions.indexOf(key) >= 0) {
+                continue;
+            }
+            action[key] = new function () {
+                return (new Function("return function (fn) { return function " + key +
+                    " () { return fn(this, arguments) }; };")())(Function.apply.bind(function (key) {
+                    var args = [];
+                    for (var i in arguments) {
+                        if (i === "0") {
+                            continue;
+                        }
+                        args.push(arguments[i]);
+                    }
+                    action._dispatch(key, params[key].bind(action), args);
+                }.bind(null, key)));
+            };
+        }
+        return action;
+    };
+    return Actions;
+}());
+Actions.ignoreFunctions = ['constructor'];
+;
 /**
  * Used to create an application
  * TODO: setup
@@ -600,63 +660,6 @@ var Action = (function () {
     return Action;
 }());
 /**
- * Used to create actions that can be dispatched to stores.
- *
- * Usage:
- *
- * class TodoActionsClass extends Action {
- *
- *   receiveTodos(todos : any[])
- *   {
- *       return todos;
- *   }
- * };
- *
- * var TodoActions : TodoActionsClass = Actions.create(new TodoActionsClass());
- *
- *
- * Listening on a store:
- *
- * TodoActions._register({
- *     receiveTodos: TodoActions.receiveTodos
- * }, this);
- *
- * Each action should return the value that will be sent to the callbacks
- * listening on this action
- */
-var Actions = (function () {
-    function Actions() {
-    }
-    /**
-     * Create the action
-     */
-    Actions.create = function (params) {
-        var action = new Action();
-        for (var key in params) {
-            if (key[0] === '_' || Actions.ignoreFunctions.indexOf(key) >= 0) {
-                continue;
-            }
-            action[key] = new function () {
-                return (new Function("return function (fn) { return function " + key +
-                    " () { return fn(this, arguments) }; };")())(Function.apply.bind(function (key) {
-                    var args = [];
-                    for (var i in arguments) {
-                        if (i === "0") {
-                            continue;
-                        }
-                        args.push(arguments[i]);
-                    }
-                    action._dispatch(key, params[key].bind(action), args);
-                }.bind(null, key)));
-            };
-        }
-        return action;
-    };
-    Actions.ignoreFunctions = ['constructor'];
-    return Actions;
-}());
-;
-/**
  * Holds a dispatcher callback function, with dependencies (array of dispatchIds)
  * that need to be called before this callback will fire. Also holds its
  * dispatchId
@@ -704,7 +707,7 @@ var RoutingConfig = (function () {
 var ApiService = (function (_super) {
     __extends(ApiService, _super);
     function ApiService() {
-        _super.apply(this, arguments);
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     ApiService.prototype.throttle = function (func, wait, immediate) {
         var timeout;
@@ -781,18 +784,19 @@ var ApiService = (function (_super) {
         params['method'] = method;
         return jQuery.ajax(params);
     };
-    ApiService.SERVICE_ID = 'beef.service.api';
     return ApiService;
 }(BaseService));
+ApiService.SERVICE_ID = 'beef.service.api';
 /**
  * Used to dispatch messages to any registered listeners
  */
 var Dispatcher = (function (_super) {
     __extends(Dispatcher, _super);
     function Dispatcher() {
-        _super.apply(this, arguments);
-        this.maxIterations = 10;
-        this.callbacks = [];
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.maxIterations = 10;
+        _this.callbacks = [];
+        return _this;
     }
     Dispatcher.prototype.register = function (callback, dependencies) {
         var dispatchId = this.callbacks.length;
@@ -823,9 +827,9 @@ var Dispatcher = (function (_super) {
             console.warn('Hit max dispatcher iterations, check dependencies of callbacks');
         }
     };
-    Dispatcher.SERVICE_ID = 'beef.service.dispatcher';
     return Dispatcher;
 }(BaseService));
+Dispatcher.SERVICE_ID = 'beef.service.dispatcher';
 /**
  * Will match a given url to a route, and execute a function/callback defined
  * for that route. Will also parse the URL for different parameters and
@@ -909,9 +913,9 @@ var RoutingService = (function () {
         }
         return this.lastResponse = this.route('/', {}); //default route
     };
-    RoutingService.SERVICE_ID = 'beef.service.routing';
     return RoutingService;
 }());
+RoutingService.SERVICE_ID = 'beef.service.routing';
 /// <reference path="../Beef.ts" />
 /// <reference path="../Component/BaseApp.ts" />
 /// <reference path="../Component/BaseService.ts" />

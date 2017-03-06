@@ -9,27 +9,30 @@ var files = [
     './src/Beef/resources/package.ts',
 ];
 
+
+var tsProject = ts.createProject("tsconfig.json")
+
 gulp.task('default', function(){
-    gulp.src(files)
-    .pipe(ts({
-        sortOutput: true,
-        declarationFiles: true,
-        out: "beef.js"
-    }))
+    return tsProject.src()
+    .pipe(tsProject()).js
     .pipe(concat('beef.js'))
     .pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('minify', function(){
-    gulp.src(files)
-    .pipe(ts({
-        sortOutput: true,
-        declarationFiles: true,
-        out: "beef.js"
+gulp.task('minify', ['default'], function(){
+    return gulp.src(['dist/beef.js'])
+    .pipe(uglify().on('error', function(err) {
+        console.log(err)
     }))
     .pipe(concat('beef.min.js'))
-    .pipe(uglify())
     .pipe(gulp.dest('./dist/'));
+});
+
+
+gulp.task('typings', function(){
+    return tsProject.src()
+    .pipe(tsProject()).dts
+    .pipe(gulp.dest('./dist/typings/'));
 });
 
 

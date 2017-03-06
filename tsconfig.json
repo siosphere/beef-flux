@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "declarationFiles": true,
+        "out": "beef.js",
+        "target": "es5"
+    },
+    "include": [
+        "typings/index.d.ts",
+        "src/**/*.ts"
+    ]
+}
