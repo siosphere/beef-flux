@@ -1,4 +1,4 @@
-declare module 'beef'
+declare module 'beef-flux'
 {
     import * as reqwest from "reqwest";
     import { ReqwestOptions } from "reqwest";
