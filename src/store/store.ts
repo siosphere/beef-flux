@@ -212,6 +212,15 @@ class Store<T>
                         break
                     }
                     var value = obj[field]
+
+                    //validate sub objects if marked as should validate
+                    if(schema[field].type === 'object' && schema[field].validate) {
+                        let subErrors = this.validate(value, schema[field].schema())
+                        if(subErrors !== true) {
+                            errors.concat(subErrors as string[])
+                            break
+                        }
+                    }
                     
                     var label = schema[field].label ? schema[field].label : field
                     
