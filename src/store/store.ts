@@ -212,12 +212,13 @@ class Store<T>
                         break
                     }
                     var value = obj[field]
+                    let validationParameters = schema[field].validation[validation]
 
                     //validate sub objects if marked as should validate
-                    if(schema[field].type === 'object' && schema[field].validate) {
+                    if(schema[field].type === 'object' && validation === 'validate' && validationParameters) {
                         let subErrors = this.validate(value, schema[field].schema())
                         if(subErrors !== true) {
-                            errors.concat(subErrors as string[])
+                            errors = errors.concat(subErrors as string[])
                             break
                         }
                     }
@@ -231,20 +232,20 @@ class Store<T>
                             }
                         break
                         case 'minLength':
-                            if(value.length < schema[field].validation[validation]) {
-                                errors.push(label + ' must be at least ' + schema[field].validation[validation] + ' characters')
+                            if(value.length < validationParameters) {
+                                errors.push(label + ' must be at least ' + validationParameters + ' characters')
                             }
                         break
                         case 'maxLength':
-                            if(value.length > schema[field].validation[validation]) {
-                                errors.push(label + ' must be at under ' + schema[field].validation[validation] + ' characters')
+                            if(value.length > validationParameters) {
+                                errors.push(label + ' must be at under ' + validationParameters + ' characters')
                             }
                         break
                         default:
-                            if(typeof(schema[field].validation[validation]) === 'function') {
-                                var results = schema[field].validation[validation](value)
+                            if(typeof(validationParameters) === 'function') {
+                                var results = validationParameters(value)
                                 if(results !== true) {
-                                    errors.concat(results)
+                                    errors = errors.concat(results)
                                 }
                             }
                         break
