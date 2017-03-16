@@ -1,6 +1,6 @@
 {
   "name": "beef-flux",
-  "version": "11.2.0",
+  "version": "11.2.1",
   "description": "BeefJS is a Flux framework with Typescript Support, and can also be used standalone without Typescript.",
   "main": "build/core/beef.js",
   "directories": {
