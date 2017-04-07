@@ -35,12 +35,30 @@ class Store<T>
     protected listeners : ((...any) => any)[] = []
 
     /**
+     * High performance loads will only dispatch state updates on requestAnimationFrame
+     */
+    protected highPerformance : boolean
+
+    /**
+     * Used to signify if the state is dirty and we should send a notify
+     */
+    protected dirtyState : boolean
+
+    /**
+     * 
+     */
+    protected _nextState : T = null
+
+    /**
      * Whether or not we are in debug mode
      */
     public debug : boolean = false
 
     constructor()
     {
+        this.highPerformance = false
+        this.dirtyState = false
+
         this.listen = this.listen.bind(this)
         this.ignore = this.ignore.bind(this)
         this.stateChange = this.stateChange.bind(this)
@@ -59,6 +77,9 @@ class Store<T>
         this.listeners.push(callback)
     }
 
+    /**
+     * Return our current state
+     */
     public getState() : T
     {
         return this.state
@@ -78,26 +99,73 @@ class Store<T>
         return false
     }
 
-    public stateChange(actionName : string, newState : T) 
+    /**
+     * Change the state
+     */
+    public stateChange(actionName : string, nextState : T) 
     {
-        let oldState = _.cloneDeep(this.state)
+        let oldState : any = {}
+         _.assign(oldState, this.state)
+         
         if(this.debug) {
             this.stateHistory.push({
                 actionName: actionName,
                 state: oldState
             })
         }
-        this.state = newState
-        this.notify(oldState)
 
-        return newState
+        this.state = nextState
+        
+        this.nextState = null
+
+        if(!this.dirtyState) {
+            this.dirtyState = true
+
+            if(this.highPerformance) {
+                requestAnimationFrame(this.notify.bind(this, oldState))
+            } else {
+                this.notify(oldState)
+            }
+        }
+
+        return nextState
     }
 
+    /**
+     * Clonse the current state
+     */
+    public cloneState() : T
+    {
+        let clonedState : any = {}
+        _.assign(clonedState, this.state)
+
+        return clonedState
+    }
+
+    /**
+     * @deprecated use nextState
+     */
     public newState() : T
     {
-        return _.cloneDeep(this.state)
+        return this.nextState()
     }
 
+    /**
+     * Return the next state (this is a WIP state that has not been sent to listeners)
+     */
+    public nextState() : T
+    {
+        if(this._nextState)
+        {
+            return this._nextState
+        }
+
+        return this.cloneState()
+    }
+
+    /**
+     * Sends notification of state to given listeners
+     */
     protected notify(oldState : T)
     {
         if(this.debug) {
@@ -107,6 +175,8 @@ class Store<T>
         this.listeners.forEach((listener) => {
             listener(this.state, oldState)
         })
+
+        this.dirtyState = false
     }
     
     /**
@@ -149,6 +219,22 @@ class Store<T>
         }
 
         return true
+    }
+
+    /**
+     * Get an item from a modelArray
+     */
+    public getItem(modelArray : any[], keyValue : any) : any
+    {
+        let existing = null
+        for(var i = 0; i < modelArray.length; i++) {
+            let item = modelArray[i]
+            if(item['__bID'] === keyValue) {
+                return item
+            }
+        }
+
+        return null
     }
     
     /**

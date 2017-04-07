@@ -455,9 +455,15 @@ var Store = (function () {
          */
         this.listeners = [];
         /**
+         *
+         */
+        this._nextState = null;
+        /**
          * Whether or not we are in debug mode
          */
         this.debug = false;
+        this.highPerformance = false;
+        this.dirtyState = false;
         this.listen = this.listen.bind(this);
         this.ignore = this.ignore.bind(this);
         this.stateChange = this.stateChange.bind(this);
@@ -473,6 +479,9 @@ var Store = (function () {
     Store.prototype.listen = function (callback) {
         this.listeners.push(callback);
     };
+    /**
+     * Return our current state
+     */
     Store.prototype.getState = function () {
         return this.state;
     };
@@ -487,21 +496,57 @@ var Store = (function () {
         }
         return false;
     };
-    Store.prototype.stateChange = function (actionName, newState) {
-        var oldState = _.cloneDeep(this.state);
+    /**
+     * Change the state
+     */
+    Store.prototype.stateChange = function (actionName, nextState) {
+        var oldState = {};
+        _.assign(oldState, this.state);
         if (this.debug) {
             this.stateHistory.push({
                 actionName: actionName,
                 state: oldState
             });
         }
-        this.state = newState;
-        this.notify(oldState);
-        return newState;
+        this.state = nextState;
+        this.nextState = null;
+        if (!this.dirtyState) {
+            this.dirtyState = true;
+            if (this.highPerformance) {
+                requestAnimationFrame(this.notify.bind(this, oldState));
+            }
+            else {
+                this.notify(oldState);
+            }
+        }
+        return nextState;
     };
+    /**
+     * Clonse the current state
+     */
+    Store.prototype.cloneState = function () {
+        var clonedState = {};
+        _.assign(clonedState, this.state);
+        return clonedState;
+    };
+    /**
+     * @deprecated use nextState
+     */
     Store.prototype.newState = function () {
-        return _.cloneDeep(this.state);
+        return this.nextState();
     };
+    /**
+     * Return the next state (this is a WIP state that has not been sent to listeners)
+     */
+    Store.prototype.nextState = function () {
+        if (this._nextState) {
+            return this._nextState;
+        }
+        return this.cloneState();
+    };
+    /**
+     * Sends notification of state to given listeners
+     */
     Store.prototype.notify = function (oldState) {
         var _this = this;
         if (this.debug) {
@@ -510,6 +555,7 @@ var Store = (function () {
         this.listeners.forEach(function (listener) {
             listener(_this.state, oldState);
         });
+        this.dirtyState = false;
     };
     /**
      * Insert an item into the given modelArray, update it if it already exists
@@ -546,6 +592,19 @@ var Store = (function () {
             modelArray[existing] = overwrite ? newItem : this.merge(existingItem, newItem);
         }
         return true;
+    };
+    /**
+     * Get an item from a modelArray
+     */
+    Store.prototype.getItem = function (modelArray, keyValue) {
+        var existing = null;
+        for (var i = 0; i < modelArray.length; i++) {
+            var item = modelArray[i];
+            if (item['__bID'] === keyValue) {
+                return item;
+            }
+        }
+        return null;
     };
     /**
      * Remove an item from a modelArray
