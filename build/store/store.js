@@ -38,6 +38,8 @@ var Store = (function () {
         this.ignore = this.ignore.bind(this);
         this.stateChange = this.stateChange.bind(this);
         this.newState = this.newState.bind(this);
+        this.nextState = this.nextState.bind(this);
+        this.cloneState = this.cloneState.bind(this);
         this.notify = this.notify.bind(this);
         this.upsertItem = this.upsertItem.bind(this);
         this.removeItem = this.removeItem.bind(this);
@@ -79,7 +81,7 @@ var Store = (function () {
             });
         }
         this.state = nextState;
-        this.nextState = null;
+        this._nextState = null;
         if (!this.dirtyState) {
             this.dirtyState = true;
             if (this.highPerformance) {
