@@ -22,6 +22,7 @@ var ActionsClass = (function () {
         override.toString = function () {
             return actionName;
         };
+        override['original_argument_length'] = cb.length;
         return override;
     };
     ActionsClass.prototype.dispatch = function (actionName, data, additionalParams) {

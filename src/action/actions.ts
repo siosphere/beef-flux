@@ -29,6 +29,8 @@ export class ActionsClass
             return actionName
         }
 
+        override['original_argument_length'] = cb.length
+
         return override
     }
 
