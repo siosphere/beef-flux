@@ -56,7 +56,9 @@ const Router = Beef.RoutingService
 class RouteDefinitions
 {
     @Beef.sanitize({
-        type: 'int'
+        userId: {
+            type: 'int'
+        }
     })
     ['/user/{userId}'](data) => 
     {
