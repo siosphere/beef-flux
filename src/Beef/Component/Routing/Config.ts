@@ -20,3 +20,5 @@ class RoutingConfig
         return this.routes[url](data);
     }
 }
+
+window['RoutingConfig'] = RoutingConfig

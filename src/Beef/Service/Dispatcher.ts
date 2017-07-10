@@ -47,3 +47,5 @@ class Dispatcher extends BaseService
         }
     }
 }
+
+window['Dispatcher'] = Dispatcher

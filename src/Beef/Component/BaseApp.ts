@@ -11,3 +11,5 @@ class BaseApp {
         
     }
 }
+
+window['BaseApp'] = BaseApp

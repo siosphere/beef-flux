@@ -552,3 +552,5 @@ class Store
         return Beef.service(Dispatcher.SERVICE_ID);
     }
 }
+
+window['Store'] = Store

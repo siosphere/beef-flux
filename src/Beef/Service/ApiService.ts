@@ -101,3 +101,5 @@ class ApiService extends BaseService
 
     }
 }
+
+window['ApiService'] = ApiService

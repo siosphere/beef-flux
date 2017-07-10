@@ -68,3 +68,5 @@ class Beef {
         this.started = true;
     }
 }
+
+window['Beef'] = Beef

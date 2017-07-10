@@ -4,3 +4,5 @@
 class BaseService {
     
 }
+
+window['BaseService'] = BaseService

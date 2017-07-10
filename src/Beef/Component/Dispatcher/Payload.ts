@@ -13,3 +13,5 @@ class DispatcherPayload
         this.data = data;
     }
 }
+
+window['DispatcherPayload'] = DispatcherPayload

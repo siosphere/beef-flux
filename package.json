@@ -1,6 +1,6 @@
 {
   "name": "beefjs",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "BeefJS is a Flux framework with Typescript Support, and can also be used standalone without Typescript.",
   "main": "gulpfile.js",
   "directories": {

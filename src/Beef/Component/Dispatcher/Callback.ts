@@ -16,3 +16,5 @@ class DispatcherCallback {
         this.dispatchId = dispatchId;
     }
 };
+
+window['DispatcherCallback'] = DispatcherCallback

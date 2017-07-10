@@ -39,3 +39,5 @@ class Action
         });
     }
 }
+
+window['Action'] = Action

@@ -34,41 +34,42 @@ var Beef = (function () {
         });
         this.started = true;
     };
+    Beef.started = false;
+    Beef.Actions = function () {
+        Beef.start();
+        return {
+            create: function (params) {
+                return Actions.create(params);
+            }
+        };
+    };
+    Beef.Api = function () {
+        Beef.start();
+        return Beef.service(ApiService.SERVICE_ID);
+    };
+    Beef.Dispatcher = function () {
+        Beef.start();
+        return Beef.service(Dispatcher.SERVICE_ID);
+    };
+    Beef.Store = function () {
+        Beef.start();
+        return {
+            create: function (params) {
+                var store = jQuery.extend(true, new Store(), params);
+                store.actions();
+                return store;
+            }
+        };
+    };
+    Beef.Router = function () {
+        Beef.start();
+        return Beef.service(RoutingService.SERVICE_ID);
+    };
+    Beef.services = {};
+    Beef.setupCallbacks = [];
     return Beef;
 }());
-Beef.started = false;
-Beef.Actions = function () {
-    Beef.start();
-    return {
-        create: function (params) {
-            return Actions.create(params);
-        }
-    };
-};
-Beef.Api = function () {
-    Beef.start();
-    return Beef.service(ApiService.SERVICE_ID);
-};
-Beef.Dispatcher = function () {
-    Beef.start();
-    return Beef.service(Dispatcher.SERVICE_ID);
-};
-Beef.Store = function () {
-    Beef.start();
-    return {
-        create: function (params) {
-            var store = jQuery.extend(true, new Store(), params);
-            store.actions();
-            return store;
-        }
-    };
-};
-Beef.Router = function () {
-    Beef.start();
-    return Beef.service(RoutingService.SERVICE_ID);
-};
-Beef.services = {};
-Beef.setupCallbacks = [];
+window['Beef'] = Beef;
 /**
  * Used to create actions that can be dispatched to stores.
  *
@@ -122,10 +123,11 @@ var Actions = (function () {
         }
         return action;
     };
+    Actions.ignoreFunctions = ['constructor'];
     return Actions;
 }());
-Actions.ignoreFunctions = ['constructor'];
 ;
+window['Actions'] = Actions;
 /**
  * Used to create an application
  * TODO: setup
@@ -139,6 +141,7 @@ var BaseApp = (function () {
     };
     return BaseApp;
 }());
+window['BaseApp'] = BaseApp;
 /**
  * All services should extend from this class
  */
@@ -147,6 +150,7 @@ var BaseService = (function () {
     }
     return BaseService;
 }());
+window['BaseService'] = BaseService;
 /**
  * Store that hooks into actions dispatched by a Dispatcher
  *
@@ -624,6 +628,7 @@ var Store = (function () {
     };
     return Store;
 }());
+window['Store'] = Store;
 /**
  * An action will store callbacks that apply to actionTypes it can dispatch,
  */
@@ -659,6 +664,7 @@ var Action = (function () {
     };
     return Action;
 }());
+window['Action'] = Action;
 /**
  * Holds a dispatcher callback function, with dependencies (array of dispatchIds)
  * that need to be called before this callback will fire. Also holds its
@@ -674,6 +680,7 @@ var DispatcherCallback = (function () {
     return DispatcherCallback;
 }());
 ;
+window['DispatcherCallback'] = DispatcherCallback;
 /**
  * The payload that will be sent to the dispatch callback
  */
@@ -684,6 +691,7 @@ var DispatcherPayload = (function () {
     }
     return DispatcherPayload;
 }());
+window['DispatcherPayload'] = DispatcherPayload;
 /**
  * Holds routes (an object with 'url/pattern': function())
  */
@@ -699,6 +707,7 @@ var RoutingConfig = (function () {
     };
     return RoutingConfig;
 }());
+window['RoutingConfig'] = RoutingConfig;
 /**
  * Wrapper to create a consistent sdk for doing XHR requests. Will
  * automatically replace matching variables in urls that match the pattern.
@@ -784,9 +793,10 @@ var ApiService = (function (_super) {
         params['method'] = method;
         return jQuery.ajax(params);
     };
+    ApiService.SERVICE_ID = 'beef.service.api';
     return ApiService;
 }(BaseService));
-ApiService.SERVICE_ID = 'beef.service.api';
+window['ApiService'] = ApiService;
 /**
  * Used to dispatch messages to any registered listeners
  */
@@ -827,9 +837,10 @@ var Dispatcher = (function (_super) {
             console.warn('Hit max dispatcher iterations, check dependencies of callbacks');
         }
     };
+    Dispatcher.SERVICE_ID = 'beef.service.dispatcher';
     return Dispatcher;
 }(BaseService));
-Dispatcher.SERVICE_ID = 'beef.service.dispatcher';
+window['Dispatcher'] = Dispatcher;
 /**
  * Will match a given url to a route, and execute a function/callback defined
  * for that route. Will also parse the URL for different parameters and
@@ -913,9 +924,10 @@ var RoutingService = (function () {
         }
         return this.lastResponse = this.route('/', {}); //default route
     };
+    RoutingService.SERVICE_ID = 'beef.service.routing';
     return RoutingService;
 }());
-RoutingService.SERVICE_ID = 'beef.service.routing';
+window['RoutingService'] = RoutingService;
 /// <reference path="../Beef.ts" />
 /// <reference path="../Component/BaseApp.ts" />
 /// <reference path="../Component/BaseService.ts" />

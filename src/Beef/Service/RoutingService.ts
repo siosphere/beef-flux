@@ -110,3 +110,5 @@ class RoutingService
         return this.lastResponse = this.route('/', {}); //default route
     }
 }
+
+window['RoutingService'] = RoutingService

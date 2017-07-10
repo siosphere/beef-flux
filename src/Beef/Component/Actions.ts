@@ -60,3 +60,5 @@ class Actions
         return action;
     }
 };
+
+window['Actions'] = Actions
