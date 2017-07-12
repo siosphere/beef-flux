@@ -162,6 +162,7 @@ var Store = (function () {
         else {
             var existingItem = modelArray[existing];
             modelArray[existing] = overwrite ? newItem : this.merge(existingItem, newItem);
+            modelArray['__bID'] = keyValue;
         }
         return true;
     };
