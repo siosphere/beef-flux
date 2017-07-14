@@ -7,9 +7,6 @@
   },
   "globalDependencies": {
     "jest": "registry:dt/jest#18.1.0+20170131225342",
-    "jquery": "registry:dt/jquery#1.10.0+20160704162008",
-    "moment": "registry:dt/moment#2.11.1+20160829143156",
-    "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20161120230953",
-    "whatwg-streams": "registry:dt/whatwg-streams#0.0.0+20161214010628"
+    "jquery": "registry:dt/jquery#1.10.0+20160704162008"
   }
 }

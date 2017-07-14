@@ -2,12 +2,17 @@
     "compilerOptions": {
         "module": "es6",
         "experimentalDecorators": true,
-        "target": "es2015"
+        "target": "es2015",
+        "types": [
+            
+        ],
+        "moduleResolution": "node"
     },
     "include": [
         "./typings/index.d.ts",
         "./src/*",
-        "./src/**/*"
+        "./src/**/*",
+        "./node_modules/moment/moment.d.ts"
     ],
     "rootDir": "build/"
 }

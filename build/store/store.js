@@ -1,5 +1,6 @@
 ///<reference path="../../typings/index.d.ts" />
 import * as _ from 'lodash';
+import * as moment from 'moment';
 /**
  * Store that hooks into actions
  *

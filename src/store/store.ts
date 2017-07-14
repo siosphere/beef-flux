@@ -1,6 +1,7 @@
 ///<reference path="../../typings/index.d.ts" />
 
 import * as _ from 'lodash'
+import * as moment from 'moment'
 
 export interface StateHistory<T>
 {
