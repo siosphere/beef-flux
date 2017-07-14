@@ -23,13 +23,21 @@ class Store {
          */
         this.listeners = [];
         /**
+         *
+         */
+        this._nextState = null;
+        /**
          * Whether or not we are in debug mode
          */
         this.debug = false;
+        this.highPerformance = false;
+        this.dirtyState = false;
         this.listen = this.listen.bind(this);
         this.ignore = this.ignore.bind(this);
         this.stateChange = this.stateChange.bind(this);
         this.newState = this.newState.bind(this);
+        this.nextState = this.nextState.bind(this);
+        this.cloneState = this.cloneState.bind(this);
         this.notify = this.notify.bind(this);
         this.upsertItem = this.upsertItem.bind(this);
         this.removeItem = this.removeItem.bind(this);
@@ -41,6 +49,9 @@ class Store {
     listen(callback) {
         this.listeners.push(callback);
     }
+    /**
+     * Return our current state
+     */
     getState() {
         return this.state;
     }
@@ -55,21 +66,57 @@ class Store {
         }
         return false;
     }
-    stateChange(actionName, newState) {
-        let oldState = _.cloneDeep(this.state);
+    /**
+     * Change the state
+     */
+    stateChange(actionName, nextState) {
+        let oldState = {};
+        _.assign(oldState, this.state);
         if (this.debug) {
             this.stateHistory.push({
                 actionName: actionName,
                 state: oldState
             });
         }
-        this.state = newState;
-        this.notify(oldState);
-        return newState;
+        this.state = nextState;
+        this._nextState = null;
+        if (!this.dirtyState) {
+            this.dirtyState = true;
+            if (this.highPerformance) {
+                requestAnimationFrame(this.notify.bind(this, oldState));
+            }
+            else {
+                this.notify(oldState);
+            }
+        }
+        return nextState;
     }
+    /**
+     * Clonse the current state
+     */
+    cloneState() {
+        let clonedState = {};
+        _.assign(clonedState, this.state);
+        return clonedState;
+    }
+    /**
+     * @deprecated use nextState
+     */
     newState() {
-        return _.cloneDeep(this.state);
+        return this.nextState();
     }
+    /**
+     * Return the next state (this is a WIP state that has not been sent to listeners)
+     */
+    nextState() {
+        if (this._nextState) {
+            return this._nextState;
+        }
+        return this.cloneState();
+    }
+    /**
+     * Sends notification of state to given listeners
+     */
     notify(oldState) {
         if (this.debug) {
             console.debug('Store state changed, notifying ' + this.listeners.length + ' listener(s) of change', 'Old State', oldState, 'New State', this.state);
@@ -77,6 +124,7 @@ class Store {
         this.listeners.forEach((listener) => {
             listener(this.state, oldState);
         });
+        this.dirtyState = false;
     }
     /**
      * Insert an item into the given modelArray, update it if it already exists
@@ -110,8 +158,22 @@ class Store {
         else {
             let existingItem = modelArray[existing];
             modelArray[existing] = overwrite ? newItem : this.merge(existingItem, newItem);
+            modelArray[existing]['__bID'] = keyValue;
         }
         return true;
+    }
+    /**
+     * Get an item from a modelArray
+     */
+    getItem(modelArray, keyValue) {
+        let existing = null;
+        for (var i = 0; i < modelArray.length; i++) {
+            let item = modelArray[i];
+            if (item['__bID'] === keyValue) {
+                return item;
+            }
+        }
+        return null;
     }
     /**
      * Remove an item from a modelArray
@@ -162,6 +224,15 @@ class Store {
                         break;
                     }
                     var value = obj[field];
+                    let validationParameters = schema[field].validation[validation];
+                    //validate sub objects if marked as should validate
+                    if (schema[field].type === 'object' && validation === 'validate' && validationParameters) {
+                        let subErrors = this.validate(value, schema[field].schema());
+                        if (subErrors !== true) {
+                            errors = errors.concat(subErrors);
+                            break;
+                        }
+                    }
                     var label = schema[field].label ? schema[field].label : field;
                     switch (validation) {
                         case 'required':
@@ -170,20 +241,20 @@ class Store {
                             }
                             break;
                         case 'minLength':
-                            if (value.length < schema[field].validation[validation]) {
-                                errors.push(label + ' must be at least ' + schema[field].validation[validation] + ' characters');
+                            if (value.length < validationParameters) {
+                                errors.push(label + ' must be at least ' + validationParameters + ' characters');
                             }
                             break;
                         case 'maxLength':
-                            if (value.length > schema[field].validation[validation]) {
-                                errors.push(label + ' must be at under ' + schema[field].validation[validation] + ' characters');
+                            if (value.length > validationParameters) {
+                                errors.push(label + ' must be at under ' + validationParameters + ' characters');
                             }
                             break;
                         default:
-                            if (typeof (schema[field].validation[validation]) === 'function') {
-                                var results = schema[field].validation[validation](value);
+                            if (typeof (validationParameters) === 'function') {
+                                var results = validationParameters(value);
                                 if (results !== true) {
-                                    errors.concat(results);
+                                    errors = errors.concat(results);
                                 }
                             }
                             break;

@@ -29,10 +29,12 @@ export class ActionsClass
             return actionName
         }
 
+        override['original_argument_length'] = cb.length
+
         return override
     }
 
-    dispatch(actionName : string, data : any)
+    dispatch(actionName : string, data : any, additionalParams ?: any)
     {
         if(typeof this.actions[actionName] === 'undefined') {
             console.warn('Attempting to call non registered action: ' + actionName)
@@ -43,7 +45,7 @@ export class ActionsClass
         this.actions[actionName].stores.forEach((storeInfo) => {
             let store = storeInfo.store
             let cb = storeInfo.cb
-            store.stateChange(actionName, cb(results))
+            store.stateChange(actionName, cb(results, additionalParams))
         })
     }
 
