@@ -279,4 +279,6 @@ declare module 'beef-flux-native'
         callRoute(url: string, data: any): any;
         handleRequest(url: string, request: any, response: any, data: any): any;
     }
+
+    export let sanitize : (value : any) => any
 }
