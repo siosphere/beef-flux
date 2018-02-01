@@ -1,59 +1,4 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.beef = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-"use strict";
-var ActionsClass = (function () {
-    function ActionsClass() {
-        this.actions = {};
-        this.define = this.define.bind(this);
-        this.dispatch = this.dispatch.bind(this);
-        this.register = this.register.bind(this);
-    }
-    ActionsClass.prototype.define = function (actionName, cb) {
-        if (typeof this.actions[actionName] !== 'undefined') {
-            console.warn('Action with name ' + actionName + ' was already defined, and is now being overwritten');
-        }
-        this.actions[actionName] = {
-            cb: cb,
-            stores: []
-        };
-        var override = function () {
-            this.dispatch(actionName, arguments);
-        };
-        override = override.bind(this);
-        override.toString = function () {
-            return actionName;
-        };
-        return override;
-    };
-    ActionsClass.prototype.dispatch = function (actionName, data, additionalParams) {
-        if (typeof this.actions[actionName] === 'undefined') {
-            console.warn('Attempting to call non registered action: ' + actionName);
-        }
-        var cb = this.actions[actionName].cb;
-        var results = cb.apply(null, data);
-        this.actions[actionName].stores.forEach(function (storeInfo) {
-            var store = storeInfo.store;
-            var cb = storeInfo.cb;
-            store.stateChange(actionName, cb(results, additionalParams));
-        });
-    };
-    ActionsClass.prototype.register = function (actionData, store) {
-        for (var actionName in actionData) {
-            if (typeof this.actions[actionName] === 'undefined') {
-                console.warn('Store attempting to register missing action: ' + actionName);
-                continue;
-            }
-            this.actions[actionName].stores.push({
-                store: store,
-                cb: actionData[actionName]
-            });
-        }
-    };
-    return ActionsClass;
-}());
-exports.ActionsClass = ActionsClass;
-var Actions = new ActionsClass();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Actions;
 
 },{}],2:[function(require,module,exports){
 "use strict";
@@ -455,13 +400,21 @@ var Store = (function () {
          */
         this.listeners = [];
         /**
+         *
+         */
+        this._nextState = null;
+        /**
          * Whether or not we are in debug mode
          */
         this.debug = false;
+        this.highPerformance = false;
+        this.dirtyState = false;
         this.listen = this.listen.bind(this);
         this.ignore = this.ignore.bind(this);
         this.stateChange = this.stateChange.bind(this);
         this.newState = this.newState.bind(this);
+        this.nextState = this.nextState.bind(this);
+        this.cloneState = this.cloneState.bind(this);
         this.notify = this.notify.bind(this);
         this.upsertItem = this.upsertItem.bind(this);
         this.removeItem = this.removeItem.bind(this);
@@ -473,6 +426,9 @@ var Store = (function () {
     Store.prototype.listen = function (callback) {
         this.listeners.push(callback);
     };
+    /**
+     * Return our current state
+     */
     Store.prototype.getState = function () {
         return this.state;
     };
@@ -487,21 +443,57 @@ var Store = (function () {
         }
         return false;
     };
-    Store.prototype.stateChange = function (actionName, newState) {
-        var oldState = _.cloneDeep(this.state);
+    /**
+     * Change the state
+     */
+    Store.prototype.stateChange = function (actionName, nextState) {
+        var oldState = {};
+        _.assign(oldState, this.state);
         if (this.debug) {
             this.stateHistory.push({
                 actionName: actionName,
                 state: oldState
             });
         }
-        this.state = newState;
-        this.notify(oldState);
-        return newState;
+        this.state = nextState;
+        this._nextState = null;
+        if (!this.dirtyState) {
+            this.dirtyState = true;
+            if (this.highPerformance) {
+                requestAnimationFrame(this.notify.bind(this, oldState));
+            }
+            else {
+                this.notify(oldState);
+            }
+        }
+        return nextState;
     };
+    /**
+     * Clonse the current state
+     */
+    Store.prototype.cloneState = function () {
+        var clonedState = {};
+        _.assign(clonedState, this.state);
+        return clonedState;
+    };
+    /**
+     * @deprecated use nextState
+     */
     Store.prototype.newState = function () {
-        return _.cloneDeep(this.state);
+        return this.nextState();
     };
+    /**
+     * Return the next state (this is a WIP state that has not been sent to listeners)
+     */
+    Store.prototype.nextState = function () {
+        if (this._nextState) {
+            return this._nextState;
+        }
+        return this.cloneState();
+    };
+    /**
+     * Sends notification of state to given listeners
+     */
     Store.prototype.notify = function (oldState) {
         var _this = this;
         if (this.debug) {
@@ -510,6 +502,7 @@ var Store = (function () {
         this.listeners.forEach(function (listener) {
             listener(_this.state, oldState);
         });
+        this.dirtyState = false;
     };
     /**
      * Insert an item into the given modelArray, update it if it already exists
@@ -544,8 +537,22 @@ var Store = (function () {
         else {
             var existingItem = modelArray[existing];
             modelArray[existing] = overwrite ? newItem : this.merge(existingItem, newItem);
+            modelArray[existing]['__bID'] = keyValue;
         }
         return true;
+    };
+    /**
+     * Get an item from a modelArray
+     */
+    Store.prototype.getItem = function (modelArray, keyValue) {
+        var existing = null;
+        for (var i = 0; i < modelArray.length; i++) {
+            var item = modelArray[i];
+            if (item['__bID'] === keyValue) {
+                return item;
+            }
+        }
+        return null;
     };
     /**
      * Remove an item from a modelArray
@@ -951,8 +958,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Store;
 
 },{"extend":10,"lodash":11}],9:[function(require,module,exports){
-
-},{}],10:[function(require,module,exports){
+arguments[4][1][0].apply(exports,arguments)
+},{"dup":1}],10:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
