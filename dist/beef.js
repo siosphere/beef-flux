@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 /**
  * Handles our services, our initial setup of services, and starts the
  * framework
@@ -129,6 +124,42 @@ var Actions = (function () {
 ;
 window['Actions'] = Actions;
 /**
+ * An action will store callbacks that apply to actionTypes it can dispatch,
+ */
+var Action = (function () {
+    function Action() {
+        this._callbacks = {};
+    }
+    /**
+     * Register functions to actions we may contain,
+     * Params should be an object where the "key" is the function that should
+     * be called on "scope" when the params[key] action takes place
+     */
+    Action.prototype._register = function (params, scope) {
+        for (var key in params) {
+            var actionName = params[key].name ? params[key].name : params[key].toString().match(/^function\s*([^\s(]+)/)[1];
+            if (typeof this._callbacks[actionName] === 'undefined') {
+                this._callbacks[actionName] = [];
+            }
+            this._callbacks[actionName].push(scope[key].bind(scope));
+        }
+    };
+    /**
+     * Internal function used to dispatch a message when an action is called
+     */
+    Action.prototype._dispatch = function (actionName, fn, args) {
+        if (typeof this._callbacks[actionName] === 'undefined') {
+            return;
+        }
+        var data = fn.apply(this, args);
+        this._callbacks[actionName].forEach(function (callback) {
+            callback(data);
+        });
+    };
+    return Action;
+}());
+window['Action'] = Action;
+/**
  * Used to create an application
  * TODO: setup
  */
@@ -151,6 +182,49 @@ var BaseService = (function () {
     return BaseService;
 }());
 window['BaseService'] = BaseService;
+/**
+ * Holds a dispatcher callback function, with dependencies (array of dispatchIds)
+ * that need to be called before this callback will fire. Also holds its
+ * dispatchId
+ */
+var DispatcherCallback = (function () {
+    function DispatcherCallback(func, dependencies, dispatchId) {
+        if (dependencies === void 0) { dependencies = []; }
+        this.func = func;
+        this.dependencies = dependencies;
+        this.dispatchId = dispatchId;
+    }
+    return DispatcherCallback;
+}());
+;
+window['DispatcherCallback'] = DispatcherCallback;
+/**
+ * The payload that will be sent to the dispatch callback
+ */
+var DispatcherPayload = (function () {
+    function DispatcherPayload(action, data) {
+        this.action = action;
+        this.data = data;
+    }
+    return DispatcherPayload;
+}());
+window['DispatcherPayload'] = DispatcherPayload;
+/**
+ * Holds routes (an object with 'url/pattern': function())
+ */
+var RoutingConfig = (function () {
+    function RoutingConfig(routes) {
+        this.routes = routes;
+    }
+    RoutingConfig.prototype.isRoute = function (url) {
+        return typeof this.routes[url] !== 'undefined';
+    };
+    RoutingConfig.prototype.callRoute = function (url, data) {
+        return this.routes[url](data);
+    };
+    return RoutingConfig;
+}());
+window['RoutingConfig'] = RoutingConfig;
 /**
  * Store that hooks into actions dispatched by a Dispatcher
  *
@@ -630,85 +704,6 @@ var Store = (function () {
 }());
 window['Store'] = Store;
 /**
- * An action will store callbacks that apply to actionTypes it can dispatch,
- */
-var Action = (function () {
-    function Action() {
-        this._callbacks = {};
-    }
-    /**
-     * Register functions to actions we may contain,
-     * Params should be an object where the "key" is the function that should
-     * be called on "scope" when the params[key] action takes place
-     */
-    Action.prototype._register = function (params, scope) {
-        for (var key in params) {
-            var actionName = params[key].name ? params[key].name : params[key].toString().match(/^function\s*([^\s(]+)/)[1];
-            if (typeof this._callbacks[actionName] === 'undefined') {
-                this._callbacks[actionName] = [];
-            }
-            this._callbacks[actionName].push(scope[key].bind(scope));
-        }
-    };
-    /**
-     * Internal function used to dispatch a message when an action is called
-     */
-    Action.prototype._dispatch = function (actionName, fn, args) {
-        if (typeof this._callbacks[actionName] === 'undefined') {
-            return;
-        }
-        var data = fn.apply(this, args);
-        this._callbacks[actionName].forEach(function (callback) {
-            callback(data);
-        });
-    };
-    return Action;
-}());
-window['Action'] = Action;
-/**
- * Holds a dispatcher callback function, with dependencies (array of dispatchIds)
- * that need to be called before this callback will fire. Also holds its
- * dispatchId
- */
-var DispatcherCallback = (function () {
-    function DispatcherCallback(func, dependencies, dispatchId) {
-        if (dependencies === void 0) { dependencies = []; }
-        this.func = func;
-        this.dependencies = dependencies;
-        this.dispatchId = dispatchId;
-    }
-    return DispatcherCallback;
-}());
-;
-window['DispatcherCallback'] = DispatcherCallback;
-/**
- * The payload that will be sent to the dispatch callback
- */
-var DispatcherPayload = (function () {
-    function DispatcherPayload(action, data) {
-        this.action = action;
-        this.data = data;
-    }
-    return DispatcherPayload;
-}());
-window['DispatcherPayload'] = DispatcherPayload;
-/**
- * Holds routes (an object with 'url/pattern': function())
- */
-var RoutingConfig = (function () {
-    function RoutingConfig(routes) {
-        this.routes = routes;
-    }
-    RoutingConfig.prototype.isRoute = function (url) {
-        return typeof this.routes[url] !== 'undefined';
-    };
-    RoutingConfig.prototype.callRoute = function (url, data) {
-        return this.routes[url](data);
-    };
-    return RoutingConfig;
-}());
-window['RoutingConfig'] = RoutingConfig;
-/**
  * Wrapper to create a consistent sdk for doing XHR requests. Will
  * automatically replace matching variables in urls that match the pattern.
  * i.e/ /my/url/{someId}/ { someId: 1 } = /my/url/1/
@@ -716,7 +711,7 @@ window['RoutingConfig'] = RoutingConfig;
 var ApiService = (function (_super) {
     __extends(ApiService, _super);
     function ApiService() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     ApiService.prototype.throttle = function (func, wait, immediate) {
         var timeout;
@@ -783,7 +778,7 @@ var ApiService = (function (_super) {
         return url;
     };
     ApiService.prototype.doAjaxCall = function (method, params) {
-        var jQueryVersion = jQuery.fn.jquery.split('.');
+        var jQueryVersion = window['jQuery'].fn.jquery.split('.');
         var major = jQueryVersion[0];
         var minor = jQueryVersion[1];
         if (major == 1 && minor < 9) {
@@ -803,10 +798,9 @@ window['ApiService'] = ApiService;
 var Dispatcher = (function (_super) {
     __extends(Dispatcher, _super);
     function Dispatcher() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.maxIterations = 10;
-        _this.callbacks = [];
-        return _this;
+        _super.apply(this, arguments);
+        this.maxIterations = 10;
+        this.callbacks = [];
     }
     Dispatcher.prototype.register = function (callback, dependencies) {
         var dispatchId = this.callbacks.length;

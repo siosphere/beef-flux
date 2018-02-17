@@ -87,7 +87,7 @@ class ApiService extends BaseService
     
     protected doAjaxCall(method : string, params : any)
     {
-        let jQueryVersion = jQuery.fn.jquery.split('.')
+        let jQueryVersion = window['jQuery'].fn.jquery.split('.')
         let major = jQueryVersion[0]
         let minor = jQueryVersion[1]
 
