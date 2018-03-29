@@ -1,4 +1,5 @@
 ![beefJS logo](/logo/BeefJS_logo_horizontal.png?raw=true "beefJS")
+# Overview
 BeefFlux is a Flux framework with Typescript Support, and can also be used standalone without Typescript.
 
 It contains a URL Router, Data Store, Action Class, and an API Wrapper around reqwest to simplify and standardize API calls.
