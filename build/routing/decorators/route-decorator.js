@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var sanitizeField = function (value, sanitizeConfig) {
     switch (sanitizeConfig.type) {
         case 'int':

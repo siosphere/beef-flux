@@ -1,16 +1,96 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.beef = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var ActionsClass = /** @class */ (function () {
+    function ActionsClass() {
+        this.actions = {};
+        this.define = this.define.bind(this);
+        this.dispatch = this.dispatch.bind(this);
+        this.register = this.register.bind(this);
+        this.debug = false;
+    }
+    ActionsClass.prototype.setDebug = function (debug) {
+        this.debug = debug;
+        return this;
+    };
+    ActionsClass.prototype.define = function (actionName, cb) {
+        if (typeof actionName !== 'string') {
+            console.error("actionName is not a valid string", actionName);
+        }
+        if (typeof cb !== 'function') {
+            console.error("Must pass valid callback for action: ", cb);
+        }
+        if (typeof this.actions[actionName] !== 'undefined') {
+            console.warn('Action with name ' + actionName + ' was already defined, and is now being overwritten');
+        }
+        this.actions[actionName] = {
+            cb: cb,
+            stores: []
+        };
+        var override = function () {
+            this.dispatch(actionName, arguments);
+        };
+        override = override.bind(this);
+        override.toString = function () {
+            return actionName;
+        };
+        override['original_argument_length'] = cb.length;
+        return override;
+    };
+    ActionsClass.prototype.dispatch = function (actionName, data, additionalParams) {
+        if (typeof this.actions[actionName] === 'undefined') {
+            console.warn('Attempting to call non registered action: ' + actionName);
+        }
+        this._debug("ACTION.DISPATCH: " + actionName, data);
+        var cb = this.actions[actionName].cb;
+        var results = cb.apply(null, data);
+        this.actions[actionName].stores.forEach(function (storeInfo) {
+            var store = storeInfo.store;
+            var cb = storeInfo.cb;
+            store.stateChange(actionName, cb(results, additionalParams));
+        });
+    };
+    ActionsClass.prototype.register = function (actionData, store) {
+        for (var actionName in actionData) {
+            if (typeof this.actions[actionName] === 'undefined') {
+                console.warn('Store attempting to register missing action: ' + actionName);
+                continue;
+            }
+            this._debug(actionName + " registered for ", store);
+            this.actions[actionName].stores.push({
+                store: store,
+                cb: actionData[actionName]
+            });
+        }
+    };
+    ActionsClass.prototype._debug = function () {
+        var any = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            any[_i] = arguments[_i];
+        }
+        if (!this.debug) {
+            return;
+        }
+        console.debug.apply(null, arguments);
+    };
+    return ActionsClass;
+}());
+exports.ActionsClass = ActionsClass;
+var Actions = new ActionsClass();
+exports.default = Actions;
 
 },{}],2:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 ///<reference path="../../typings/index.d.ts" />
 var reqwest = require("reqwest");
-var extend = require('extend');
+var extend = require("extend");
 /**
  * Wrapper to create a consistent sdk for doing XHR requests. Will
  * automatically replace matching variables in urls that match the pattern.
  * i.e/ /my/url/{someId}/ { someId: 1 } = /my/url/1/
  */
-var ApiServiceClass = (function () {
+var ApiServiceClass = /** @class */ (function () {
     function ApiServiceClass() {
     }
     ApiServiceClass.prototype.throttle = function (func, wait, immediate) {
@@ -95,7 +175,7 @@ exports.ApiServiceClass = ApiServiceClass;
 var ApiService = new ApiServiceClass();
 exports.ApiService = ApiService;
 
-},{"extend":10,"reqwest":12}],3:[function(require,module,exports){
+},{"extend":11,"reqwest":13}],3:[function(require,module,exports){
 "use strict";
 var api_service_1 = require("../api/api-service");
 var config_1 = require("../routing/component/config");
@@ -104,10 +184,12 @@ var routing_service_1 = require("../routing/routing-service");
 var store_1 = require("../store/store");
 var store_decorator_1 = require("../store/store-decorator");
 var actions_1 = require("../action/actions");
+var model_1 = require("./model");
 module.exports = {
     Actions: actions_1.default,
     ApiService: api_service_1.ApiService,
     ApiServiceClass: api_service_1.ApiServiceClass,
+    Model: model_1.default,
     RoutingConfig: config_1.RoutingConfig,
     sanitize: route_decorator_1.sanitize,
     RoutingService: routing_service_1.RoutingService,
@@ -116,12 +198,29 @@ module.exports = {
     Schema: store_decorator_1.Schema
 };
 
-},{"../action/actions":1,"../api/api-service":2,"../routing/component/config":4,"../routing/decorators/route-decorator":5,"../routing/routing-service":6,"../store/store":8,"../store/store-decorator":7}],4:[function(require,module,exports){
+},{"../action/actions":1,"../api/api-service":2,"../routing/component/config":5,"../routing/decorators/route-decorator":6,"../routing/routing-service":7,"../store/store":9,"../store/store-decorator":8,"./model":4}],4:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var Model = /** @class */ (function () {
+    function Model(raw) {
+        if (raw === void 0) { raw = null; }
+        if (raw && typeof raw === 'object') {
+            for (var key in raw) {
+                this[key] = raw[key];
+            }
+        }
+    }
+    return Model;
+}());
+exports.default = Model;
+
+},{}],5:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Holds routes (an object with 'url/pattern': function())
  */
-var RoutingConfig = (function () {
+var RoutingConfig = /** @class */ (function () {
     function RoutingConfig(routes) {
         this.routes = routes;
     }
@@ -138,8 +237,9 @@ var RoutingConfig = (function () {
 }());
 exports.RoutingConfig = RoutingConfig;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var sanitizeField = function (value, sanitizeConfig) {
     switch (sanitizeConfig.type) {
         case 'int':
@@ -171,15 +271,16 @@ var sanitize = function (value) {
 };
 exports.sanitize = sanitize;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var config_1 = require("./component/config");
 /**
  * Will match a given url to a route, and execute a function/callback defined
  * for that route. Will also parse the URL for different parameters and
  * pass that into the callback if found
  */
-var RoutingServiceClass = (function () {
+var RoutingServiceClass = /** @class */ (function () {
     function RoutingServiceClass() {
     }
     RoutingServiceClass.prototype.onRouteFinished = function () {
@@ -230,10 +331,10 @@ var RoutingServiceClass = (function () {
             if (res !== null) {
                 var routeParts = rawRoute.split('/');
                 var hashParts = rawHash.split('/');
-                if (routeParts[0].length === 0) {
+                if (routeParts[0].length === 0) { //remove first if route started with a /
                     routeParts = routeParts.splice(1, routeParts.length - 1);
                 }
-                if (hashParts[0].length === 0) {
+                if (hashParts[0].length === 0) { //remove first if route started with a /
                     hashParts = hashParts.splice(1, hashParts.length - 1);
                 }
                 if (hashParts.length !== routeParts.length) {
@@ -289,8 +390,9 @@ exports.RoutingServiceClass = RoutingServiceClass;
 var RoutingService = new RoutingServiceClass();
 exports.RoutingService = RoutingService;
 
-},{"./component/config":4}],7:[function(require,module,exports){
+},{"./component/config":5}],8:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var store_1 = require("./store");
 /**
  * This is used to build a schema from a typescript class without having to
@@ -372,11 +474,12 @@ var uuid = function () {
     });
 };
 
-},{"./store":8}],8:[function(require,module,exports){
-///<reference path="../../typings/index.d.ts" />
+},{"./store":9}],9:[function(require,module,exports){
 "use strict";
-var extend = require('extend');
-var _ = require('lodash');
+///<reference path="../../typings/index.d.ts" />
+Object.defineProperty(exports, "__esModule", { value: true });
+var extend = require("extend");
+var _ = require("lodash");
 /**
  * Store that hooks into actions
  *
@@ -384,7 +487,7 @@ var _ = require('lodash');
  * anything that pulls data from the DataStore cannot modify it and should treat
  * it as immutable
  */
-var Store = (function () {
+var Store = /** @class */ (function () {
     function Store() {
         /**
          * Holds our state
@@ -472,8 +575,16 @@ var Store = (function () {
      * Clonse the current state
      */
     Store.prototype.cloneState = function () {
-        var clonedState = {};
-        _.assign(clonedState, this.state);
+        var clonedState = _.cloneDeepWith(this.state, function (value) {
+            if (window && window['moment'] && window['moment'].isMoment(value)) {
+                var v = value;
+                return v.clone();
+            }
+            if (value instanceof Date) {
+                return new Date(value.getTime());
+            }
+            return;
+        });
         return clonedState;
     };
     /**
@@ -954,12 +1065,11 @@ var Store = (function () {
     };
     return Store;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Store;
 
-},{"extend":10,"lodash":11}],9:[function(require,module,exports){
-arguments[4][1][0].apply(exports,arguments)
-},{"dup":1}],10:[function(require,module,exports){
+},{"extend":11,"lodash":12}],10:[function(require,module,exports){
+
+},{}],11:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -1047,7 +1157,7 @@ module.exports = function extend() {
 };
 
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -18135,7 +18245,7 @@ module.exports = function extend() {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*!
   * Reqwest! A general purpose XHR connection manager
   * license MIT (c) Dustin Diaz 2015
@@ -18767,5 +18877,5 @@ module.exports = function extend() {
   return reqwest
 });
 
-},{"xhr2":9}]},{},[3])(3)
+},{"xhr2":10}]},{},[3])(3)
 });

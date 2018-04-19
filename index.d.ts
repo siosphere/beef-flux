@@ -5,10 +5,13 @@ declare module 'beef-flux'
 
     export class ActionsClass {
         actions: any;
+        debug: boolean;
         constructor();
-        define(actionName: any, cb: any): () => void;
-        dispatch(actionName: string, data: any, additionalParams ?: any): void;
-        register<T>(actionData: any, store: Store<T>): void;
+        setDebug(debug: any): this;
+        define(actionName: string, cb: (...any) => any): (...any) => any;
+        dispatch(actionName: string, data: any, additionalParams?: any): void;
+        register<T>(actionData: object, store: Store<T>): void;
+        private _debug(...any);
     }
     export const Actions: ActionsClass;
 
@@ -40,7 +43,7 @@ declare module 'beef-flux'
      * anything that pulls data from the DataStore cannot modify it and should treat
      * it as immutable
      */
-    class Store<T> {
+    export class Store<T> {
         /**
          * Holds our state
          */
@@ -140,7 +143,7 @@ declare module 'beef-flux'
         /**
          * Creates a filter sort callback to sort by a given key
          */
-        sortBy(key: string, dir?: string): (a: any, b: any) => number;
+        sortBy(key: string, dir?: string): (a: any, b: any) => 0 | 1 | -1;
         /**
          * Formats a given number to two decimal places
          */
@@ -220,6 +223,10 @@ declare module 'beef-flux'
         protected sanitizeArray(value: any, schemaConfig: any, json: boolean): any;
     }
 
+    export class Model {
+        constructor(raw?: object);
+    }
+    
     /**
      * This is used to build a schema from a typescript class without having to
      * redefine all the fields.

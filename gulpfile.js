@@ -15,7 +15,6 @@ var files = [
 gulp.task('compile', function() {
     var tsResult = gulp.src(files)
     .pipe(ts({
-        sortOutput: true,
         declarationFiles: true,
         experimentalDecorators: true,
         target: 'ES5'

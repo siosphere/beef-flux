@@ -5,11 +5,13 @@ import {RoutingService, RoutingServiceClass} from "../routing/routing-service"
 import Store from "../store/store"
 import {Schema} from "../store/store-decorator"
 import Actions, {ActionsClass} from "../action/actions"
+import Model from "./model"
 
 export = {
     Actions,
     ApiService,
     ApiServiceClass,
+    Model,
     RoutingConfig,
     sanitize,
     RoutingService,

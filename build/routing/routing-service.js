@@ -1,11 +1,12 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var config_1 = require("./component/config");
 /**
  * Will match a given url to a route, and execute a function/callback defined
  * for that route. Will also parse the URL for different parameters and
  * pass that into the callback if found
  */
-var RoutingServiceClass = (function () {
+var RoutingServiceClass = /** @class */ (function () {
     function RoutingServiceClass() {
     }
     RoutingServiceClass.prototype.onRouteFinished = function () {
@@ -56,10 +57,10 @@ var RoutingServiceClass = (function () {
             if (res !== null) {
                 var routeParts = rawRoute.split('/');
                 var hashParts = rawHash.split('/');
-                if (routeParts[0].length === 0) {
+                if (routeParts[0].length === 0) { //remove first if route started with a /
                     routeParts = routeParts.splice(1, routeParts.length - 1);
                 }
-                if (hashParts[0].length === 0) {
+                if (hashParts[0].length === 0) { //remove first if route started with a /
                     hashParts = hashParts.splice(1, hashParts.length - 1);
                 }
                 if (hashParts.length !== routeParts.length) {

@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var store_1 = require("./store");
 /**
  * This is used to build a schema from a typescript class without having to

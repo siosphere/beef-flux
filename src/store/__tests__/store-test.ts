@@ -47,13 +47,13 @@ class TestStoreClass extends Store<TestStoreState>
 
     receiveItems(items)
     {
-        let newState = this.newState()
+        let nextState = this.nextState()
 
         items.forEach((item : any) => {
-            this.upsertItem(newState.items, item.id, item)
+            this.upsertItem(nextState.items, item.id, item, true)
         })
 
-        return newState
+        return nextState
     }
 }
 

@@ -1,8 +1,9 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Holds routes (an object with 'url/pattern': function())
  */
-var RoutingConfig = (function () {
+var RoutingConfig = /** @class */ (function () {
     function RoutingConfig(routes) {
         this.routes = routes;
     }

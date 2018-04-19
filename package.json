@@ -1,7 +1,7 @@
 {
   "name": "beef-flux",
-  "version": "11.3.4",
-  "description": "BeefJS is a Flux framework with Typescript Support, and can also be used standalone without Typescript.",
+  "version": "11.4.0",
+  "description": "Beef-Flux is a Flux framework with Typescript Support, and can also be used standalone without Typescript.",
   "main": "build/core/beef.js",
   "directories": {
     "example": "examples"
@@ -12,16 +12,19 @@
     "reqwest": "^2.0.5"
   },
   "devDependencies": {
+    "@types/jest": "^22.2.3",
     "browserify": "^13.1.0",
-    "gulp-babel": "^6.1.2",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.1",
     "gulp-concat": "^2.6.0",
     "gulp-rename": "^1.2.2",
-    "gulp-typescript": "^2.13.6",
+    "gulp-typescript": "^4.0.2",
     "gulp-uglify": "^2.0.0",
     "jest-cli": "^14.1.0",
     "moment": "^2.13.0",
     "react": "^15.0.2",
     "ts-jest": "^0.1.6",
+    "typescript": "2.8",
     "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {

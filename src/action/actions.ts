@@ -3,15 +3,32 @@ import Store from "../store/store"
 export class ActionsClass
 {
     actions : any = {}
+    debug : boolean
     constructor()
     {
         this.define = this.define.bind(this)
         this.dispatch = this.dispatch.bind(this)
         this.register = this.register.bind(this)
+        this.debug = false
     }
 
-    define(actionName, cb)
+    setDebug(debug)
     {
+        this.debug = debug
+
+        return this
+    }
+
+    define(actionName : string, cb : (...any) => any) : (...any) => any
+    {
+        if(typeof actionName !== 'string') {
+            console.error("actionName is not a valid string", actionName)
+        }
+
+        if(typeof cb !== 'function') {
+            console.error("Must pass valid callback for action: ", cb)
+        }
+
         if(typeof this.actions[actionName] !== 'undefined') {
             console.warn('Action with name ' + actionName + ' was already defined, and is now being overwritten')
         }
@@ -39,6 +56,8 @@ export class ActionsClass
         if(typeof this.actions[actionName] === 'undefined') {
             console.warn('Attempting to call non registered action: ' + actionName)
         }
+        
+        this._debug(`ACTION.DISPATCH: ${actionName}`, data)
 
         let cb = this.actions[actionName].cb
         let results = cb.apply(null, data)
@@ -49,7 +68,7 @@ export class ActionsClass
         })
     }
 
-    register<T>(actionData : any, store : Store<T>)
+    register<T>(actionData : object, store : Store<T>)
     {
         for(var actionName in actionData)
         {
@@ -57,12 +76,21 @@ export class ActionsClass
                 console.warn('Store attempting to register missing action: ' + actionName)
                 continue
             }
-
+            this._debug(`${actionName} registered for `, store)
             this.actions[actionName].stores.push({
                 store: store,
                 cb: actionData[actionName]
             })
         }
+    }
+
+    private _debug(...any)
+    {
+        if(!this.debug) {
+            return
+        }
+
+        console.debug.apply(null, arguments)
     }
 }
 

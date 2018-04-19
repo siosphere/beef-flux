@@ -1,7 +1,8 @@
-///<reference path="../../typings/index.d.ts" />
 "use strict";
-var extend = require('extend');
-var _ = require('lodash');
+///<reference path="../../typings/index.d.ts" />
+Object.defineProperty(exports, "__esModule", { value: true });
+var extend = require("extend");
+var _ = require("lodash");
 /**
  * Store that hooks into actions
  *
@@ -9,7 +10,7 @@ var _ = require('lodash');
  * anything that pulls data from the DataStore cannot modify it and should treat
  * it as immutable
  */
-var Store = (function () {
+var Store = /** @class */ (function () {
     function Store() {
         /**
          * Holds our state
@@ -97,8 +98,16 @@ var Store = (function () {
      * Clonse the current state
      */
     Store.prototype.cloneState = function () {
-        var clonedState = {};
-        _.assign(clonedState, this.state);
+        var clonedState = _.cloneDeepWith(this.state, function (value) {
+            if (window && window['moment'] && window['moment'].isMoment(value)) {
+                var v = value;
+                return v.clone();
+            }
+            if (value instanceof Date) {
+                return new Date(value.getTime());
+            }
+            return;
+        });
         return clonedState;
     };
     /**
@@ -579,5 +588,4 @@ var Store = (function () {
     };
     return Store;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Store;

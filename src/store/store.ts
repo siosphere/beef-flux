@@ -138,8 +138,19 @@ class Store<T>
      */
     public cloneState() : T
     {
-        let clonedState : any = {}
-        _.assign(clonedState, this.state)
+        let clonedState : any = _.cloneDeepWith(this.state, (value) => {
+            
+            if(window && window['moment'] && window['moment'].isMoment(value)) {
+                let v : moment.Moment = value as moment.Moment
+                return v.clone()
+            }
+
+            if(value instanceof Date) {
+                return new Date(value.getTime())
+            }
+            
+            return
+        })
 
         return clonedState
     }

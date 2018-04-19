@@ -1,10 +1,13 @@
-![beefJS logo](/logo/BeefJS_logo_horizontal.png?raw=true "beefJS")
+![Beef-Flux logo](/logo/BeefJS_logo_horizontal.png?raw=true "Beef-Flux")
 # Overview
-BeefFlux is a Flux framework with Typescript Support, and can also be used standalone without Typescript.
+Beef-Flux is a Flux framework with Typescript Support, and can also be used standalone without Typescript.
 
 It contains a URL Router, Data Store, Action Class, and an API Wrapper around reqwest to simplify and standardize API calls.
 
 # Usage
+```bash
+yarn add beef-flux
+```
 
 # Routing
 Routing can be used as both client-side routing as well as server-side routing. It supports passing in url parameters, sanitizing params, and support
@@ -73,10 +76,10 @@ Router.routes(new RouteDefinitions())
 ## Server routes
 Similar to client routes, server routes are setup in classes much the same, and are matched in a similar way, with the exception that they contain 
 HTTP methods during the match as well.
-```
+```typescript
 import connect = require('connect')
 import http = require('http')
-import Beef from 'beef-flux'
+import * as Beef from 'beef-flux'
 
 const Router = Beef.RoutingService
 let server = connect()
@@ -202,7 +205,7 @@ Api.put(url, data).then(success, error) // url = /api/v1/users/1, data = JSON.st
 Api.delete(url, data).then(success, error) // url = /api/v1/users/1?foo=bar
 
 ```
-It will also automatically replace variables in the URL that are surrounded
+It will automatically replace variables in the URL that are surrounded
 by curly braces.
 
 For verbs that support a request body, the data that doesn't match a url token, 
@@ -367,7 +370,7 @@ Optionally can provide a "constructor" which refers to a class
 })
 ```
 #### datetime
-Required MomentJS to be available in the global scope, and will sanitize the value into a moment.Moment object
+Requires MomentJS to be available in the global scope, and will sanitize the value into a moment.Moment object
 ```typescript
 @Beef.Schema.datetime()
 ```
@@ -392,13 +395,14 @@ Allows you to provide a custom sanitization callback (such as sanitizing for ema
 ```
 
 ## Items
-upserItem allows you to update a row if it exists already, or insert a new one.
+upsertItem allows you to update a row if it exists already, or insert a new one.
 
 You give it an array, a primary key value, and then the object
 you want to insert, or update.
 
-Updates are merge, and not replace. To do a replace, you would need to remove 
-the existing row, and then upsert the new row.
+Updates are by default, merge, and not replace. A good optimization if you are
+always receiving the full object, is to pass true as the 4th argument to 
+overwrite the row.
 
 ```
 import TodoStore from "./todo-store"
@@ -411,6 +415,7 @@ let todo = {
 }
 
 TodoStore.upsertItem(todos, todo.id, todo)
+TodoStore.upsertItem(todos, todo.id, todo, true) //overwrite
 
 let byTitle = todos.sort(TodoStore.sortBy('name', 'ASC'))
 
@@ -495,7 +500,7 @@ const OnTodoStoreUpdate = (nextState : TodoStoreState) => {
 }
 
 TodoStore.listen(OnTodoStoreUpdate)
-//TodoStore.ignore(OnTodoStoreUpdate)
+TodoStore.ignore(OnTodoStoreUpdate) //no longer listen for changes
 ```
 # Actions
 Beef contains action classes, which help to simply the flux dispatcher pattern.
@@ -541,7 +546,7 @@ class TodoStore extends Beef.Store<TodoStoreState>
         }, this);
     }
 
-    receiveTodos(rawTodos)
+    receiveTodos(rawTodos) : TodoStoreState
     {
         let nextState = this.nextState()
 

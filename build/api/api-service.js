@@ -1,13 +1,14 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 ///<reference path="../../typings/index.d.ts" />
 var reqwest = require("reqwest");
-var extend = require('extend');
+var extend = require("extend");
 /**
  * Wrapper to create a consistent sdk for doing XHR requests. Will
  * automatically replace matching variables in urls that match the pattern.
  * i.e/ /my/url/{someId}/ { someId: 1 } = /my/url/1/
  */
-var ApiServiceClass = (function () {
+var ApiServiceClass = /** @class */ (function () {
     function ApiServiceClass() {
     }
     ApiServiceClass.prototype.throttle = function (func, wait, immediate) {
