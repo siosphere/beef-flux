@@ -1,7 +1,9 @@
 ///<reference path="../../typings/index.d.ts" />
 
 import extend = require('extend')
-import _ = require('lodash')
+import assign = require('lodash/assign')
+import cloneDeepWith = require('lodash/cloneDeepWith')
+import merge = require('lodash/merge')
 
 export interface StateHistory<T>
 {
@@ -107,7 +109,7 @@ class Store<T>
     public stateChange(actionName : string, nextState : T) 
     {
         let oldState : any = {}
-         _.assign(oldState, this.state)
+        assign(oldState, this.state)
          
         if(this.debug) {
             this.stateHistory.push({
@@ -138,7 +140,7 @@ class Store<T>
      */
     public cloneState() : T
     {
-        let clonedState : any = _.cloneDeepWith(this.state, (value) => {
+        let clonedState : any = cloneDeepWith(this.state, (value) => {
             
             if(window && window['moment'] && window['moment'].isMoment(value)) {
                 let v : moment.Moment = value as moment.Moment
@@ -378,7 +380,7 @@ class Store<T>
      */
     public merge(obj1 : any, obj2 : any) 
     {
-        _.merge(obj1, obj2)
+        merge(obj1, obj2)
 
         return obj1
     }
