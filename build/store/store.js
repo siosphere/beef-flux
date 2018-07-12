@@ -2,7 +2,9 @@
 ///<reference path="../../typings/index.d.ts" />
 Object.defineProperty(exports, "__esModule", { value: true });
 var extend = require("extend");
-var _ = require("lodash");
+var assign = require("lodash/assign");
+var cloneDeepWith = require("lodash/cloneDeepWith");
+var merge = require("lodash/merge");
 /**
  * Store that hooks into actions
  *
@@ -74,7 +76,7 @@ var Store = /** @class */ (function () {
      */
     Store.prototype.stateChange = function (actionName, nextState) {
         var oldState = {};
-        _.assign(oldState, this.state);
+        assign(oldState, this.state);
         if (this.debug) {
             this.stateHistory.push({
                 actionName: actionName,
@@ -98,7 +100,7 @@ var Store = /** @class */ (function () {
      * Clonse the current state
      */
     Store.prototype.cloneState = function () {
-        var clonedState = _.cloneDeepWith(this.state, function (value) {
+        var clonedState = cloneDeepWith(this.state, function (value) {
             if (window && window['moment'] && window['moment'].isMoment(value)) {
                 var v = value;
                 return v.clone();
@@ -295,7 +297,7 @@ var Store = /** @class */ (function () {
      * Merge objects together
      */
     Store.prototype.merge = function (obj1, obj2) {
-        _.merge(obj1, obj2);
+        merge(obj1, obj2);
         return obj1;
     };
     /**

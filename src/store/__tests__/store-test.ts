@@ -1,7 +1,9 @@
 "use strict"
 jest.unmock('../store')
 jest.unmock('../../action/actions')
-jest.unmock('lodash')
+jest.unmock('lodash/assign')
+jest.unmock('lodash/cloneDeepWith')
+jest.unmock('lodash/merge')
 jest.unmock('extend')
 
 import Store from '../store'
