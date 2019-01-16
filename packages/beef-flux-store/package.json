@@ -1,0 +1,33 @@
+{
+  "name": "@beef-flux/store",
+  "version": "12.0.0",
+  "description": "Flux compatible state machine",
+  "keywords": [
+    "flux",
+    "state",
+    "machine",
+    "schema",
+    "models",
+    "beefjs",
+    "beef-flux"
+  ],
+  "author": "Michael Kramer <kramer@siosphere.com>",
+  "homepage": "http://russetjs.org",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "extend": "^3.0.2",
+    "lodash": "^4.17.11",
+    "moment": "^2.22.2"
+  }
+}

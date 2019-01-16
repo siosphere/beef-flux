@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "experimentalDecorators": true,
+        "baseUrl": "./src",
+        "declaration": true,
+        "jsx": "react"
+    },
+    "exclude" : [
+        "__tests__",
+        "lib",
+        "node_modules"
+    ]
+}

@@ -1,0 +1,76 @@
+<html>
+    <head>
+        <title>Beef Flux Example</title>
+        <style type="text/css">
+            body {
+                margin:0;
+                padding: 0;
+                background: #fff;
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 100%;
+            }
+
+            .todo-list {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            .todo-list li {
+                margin: 0;
+                padding: 20px;
+                box-sizing: border-box;
+                border-bottom: 1px solid #f1f1f1;
+                font-size: 1em;
+                color: #212121;
+                cursor: pointer;
+            }
+
+            .todo-list li strong {
+                display: inline-block;
+                width: 100%;
+                box-sizing: border-box;
+                padding: 0px 0px 10px 0px;
+            }
+
+            .todo-list li.done {
+                font-style: italic;
+                text-decoration: line-through;
+            }
+
+            .todo-list li.done strong {
+                text-decoration: line-through;
+            }
+
+            .todo-list em {
+                font-size: 0.7em;
+                color: #333;
+            }
+
+            .create-todo-form {
+                box-sizing: border-box;
+                padding: 20px;
+            }
+
+            .create-todo-form input {
+                box-sizing: border-box;
+                padding: 10px;
+                border:1px solid #f1f1f1;
+                color: #212121;
+            }
+
+            .create-todo-form button {
+                background: #212121;
+                color: #f1f1f1;
+                border:none;
+                box-sizing: border-box;
+                margin-left: 10px;
+                padding: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script src="./todo.bundle.js"></script>
+    </body>
+</html>
