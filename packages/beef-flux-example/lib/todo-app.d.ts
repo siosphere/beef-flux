@@ -6,7 +6,7 @@ interface TodoAppState {
 declare class TodoApp extends React.Component<{
     todoStore?: TodoStore;
 }, TodoAppState> {
-    static contextType: any;
+    static contextType: React.Context<import("../../beef-flux-store/lib").ContextManager>;
     constructor(props: any);
     render(): JSX.Element;
     static onTodoAppUpdate(componentState: TodoAppState, nextStoreState: TodoStoreState, oldStoreState: TodoStoreState): Partial<TodoStoreState>;

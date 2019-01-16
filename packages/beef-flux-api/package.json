@@ -1,0 +1,29 @@
+{
+  "name": "@beef-flux/api",
+  "version": "12.0.0",
+  "description": "> TODO: description",
+  "author": "Michael Kramer <kramer@siosphere.com>",
+  "homepage": "https://github.com/siosphere/beef-flux#readme",
+  "license": "MIT",
+  "main": "lib/beef-flux-api.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/siosphere/beef-flux.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/siosphere/beef-flux/issues"
+  },
+  "dependencies": {
+    "extend": "^3.0.2"
+  }
+}

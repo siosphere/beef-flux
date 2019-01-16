@@ -1,15 +1,15 @@
-0 silly argv { _: [ 'create' ],
-0 silly argv   lernaVersion: '3.4.1',
-0 silly argv   '$0': '../../.config/yarn/global/node_modules/.bin/lerna',
-0 silly argv   name: 'beef-flux-react' }
-1 notice cli v3.4.1
-2 verbose rootPath /Users/mkramer/Projects/beef-flux
-3 error Error: Command failed: git config --get user.name
-3 error
-3 error
-3 error     at makeError (/Users/mkramer/.config/yarn/global/node_modules/@lerna/child-process/node_modules/execa/index.js:174:9)
-3 error     at Function.module.exports.sync (/Users/mkramer/.config/yarn/global/node_modules/@lerna/child-process/node_modules/execa/index.js:338:15)
-3 error     at Object.execSync (/Users/mkramer/.config/yarn/global/node_modules/@lerna/child-process/index.js:22:16)
-3 error     at CreateCommand.gitConfig (/Users/mkramer/.config/yarn/global/node_modules/@lerna/create/index.js:179:34)
-3 error     at CreateCommand.initialize (/Users/mkramer/.config/yarn/global/node_modules/@lerna/create/index.js:102:46)
-3 error     at Promise.resolve.then (/Users/mkramer/.config/yarn/global/node_modules/@lerna/command/index.js:245:24)
+0 silly argv { _: [ 'add' ],
+0 silly argv   globs: [ 'extend' ],
+0 silly argv   lernaVersion: '3.10.5',
+0 silly argv   '$0': 'node_modules/.bin/lerna',
+0 silly argv   pkg: 'packages/beef-flux-api' }
+1 notice cli v3.10.5
+2 verbose rootPath /home/mkramer/Projects/beef-flux
+3 error Error: exited with error code: 128
+3 error     at ChildProcess.<anonymous> (/home/mkramer/Projects/beef-flux/node_modules/pacote/lib/util/finished.js:12:19)
+3 error     at emitTwo (events.js:126:13)
+3 error     at ChildProcess.emit (events.js:214:7)
+3 error     at maybeClose (internal/child_process.js:925:16)
+3 error     at Socket.stream.socket.on (internal/child_process.js:346:11)
+3 error     at emitOne (events.js:116:13)
+3 error     at Socket.emit (events.js:211:7)

@@ -76,9 +76,6 @@ declare abstract class Store<T> {
                 [key: string]: React.ReactInstance;
             };
             componentDidMount?(): void;
-            /**
-             * Sanitizes a field to a string
-             */
             shouldComponentUpdate?(nextProps: Readonly<{}>, nextState: Readonly<{}>, nextContext: any): boolean;
             componentWillUnmount?(): void;
             componentDidCatch?(error: Error, errorInfo: React.ErrorInfo): void;

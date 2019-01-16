@@ -40,7 +40,6 @@ var TodoApp = /** @class */ (function (_super) {
     TodoApp_1 = TodoApp;
     TodoApp.prototype.render = function () {
         var _this = this;
-        console.log(this.context.prefix);
         return React.createElement("div", null,
             React.createElement(todo_list_1.default, { todos: this.state.todos, toggle: function (todo) {
                     todo.done = !todo.done;
