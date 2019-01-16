@@ -1,6 +1,6 @@
 {
   "name": "@beef-flux/example",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "> TODO: description",
   "author": "Michael Kramer <kramer@siosphere.com>",
   "homepage": "",
@@ -17,7 +17,7 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@beef-flux/store": "^12.0.0",
+    "@beef-flux/store": "^0.0.1",
     "@types/express": "^4.16.0",
     "express": "^4.16.4",
     "react": "^16.6.1",
