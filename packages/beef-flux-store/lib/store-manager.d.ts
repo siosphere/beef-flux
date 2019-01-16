@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import Store, { StoreConfig } from './base-store';
 /**
  * Store manager controls store flushes
@@ -19,9 +18,8 @@ declare class StoreManager {
     queueFlush(store: Store<any>): number | void;
     register(store: Store<any>): void;
     protected flushStores(key: string): void;
-    protected clearFlush(key: string): number | NodeJS.Timeout;
+    protected clearFlush(key: string): number;
     protected getConfig(key: string): StoreConfig;
 }
 declare const Manager: StoreManager;
 export default Manager;
-//# sourceMappingURL=store-manager.d.ts.map

@@ -5,7 +5,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -20,6 +20,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var store_1 = require("@beef-flux/store");
 // # Actions
 var todo_actions_1 = require("./actions/todo-actions");
 // # Components
@@ -32,15 +33,14 @@ var TodoApp = /** @class */ (function (_super) {
     function TodoApp(props) {
         var _this = _super.call(this, props) || this;
         _this.state = {
-            todos: todo_store_1.default.getState().todos
+            todos: props.todoStore.getState().todos
         };
-        setTimeout(function () {
-            console.log(todo_store_1.default.Instance().getState());
-        }, 5000);
         return _this;
     }
     TodoApp_1 = TodoApp;
     TodoApp.prototype.render = function () {
+        var _this = this;
+        console.log(this.context.prefix);
         return React.createElement("div", null,
             React.createElement(todo_list_1.default, { todos: this.state.todos, toggle: function (todo) {
                     todo.done = !todo.done;
@@ -48,7 +48,7 @@ var TodoApp = /** @class */ (function (_super) {
                 } }),
             React.createElement(create_todo_1.default, null),
             React.createElement("div", { onClick: function () {
-                    console.log(todo_store_1.default.dump());
+                    console.log(_this.props.todoStore.dump());
                 } }, "Hey"));
     };
     TodoApp.onTodoAppUpdate = function (componentState, nextStoreState, oldStoreState) {
@@ -57,8 +57,12 @@ var TodoApp = /** @class */ (function (_super) {
         };
     };
     var TodoApp_1;
+    TodoApp.contextType = store_1.default.Context;
     TodoApp = TodoApp_1 = __decorate([
-        todo_store_1.default.subscribe(TodoApp_1.onTodoAppUpdate)
+        todo_store_1.default.bind("todoStore"),
+        store_1.default.subscribe({
+            "todoStore": TodoApp_1.onTodoAppUpdate
+        })
     ], TodoApp);
     return TodoApp;
 }(React.Component));

@@ -64,7 +64,6 @@ var ActionsManager = /** @class */ (function () {
         }
         this.actions[base_store_1.default.ACTION_SEED + "_" + store.uuid] = {
             cb: function (raw) {
-                console.log('action is being dispatched', raw);
                 return raw;
             },
             stores: [{

@@ -40,9 +40,7 @@ class TodoStore extends Store.BaseStore<TodoStoreState>
     }
 }
 
-const instance = new TodoStore()
-
-export default instance
+export default TodoStore
 
 export {
     Todo,

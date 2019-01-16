@@ -8,4 +8,3 @@ declare abstract class Actions {
 }
 export default Actions;
 export { ActionsManager };
-//# sourceMappingURL=actions.d.ts.map

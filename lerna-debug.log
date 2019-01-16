@@ -1,17 +1,15 @@
 0 silly argv { _: [ 'create' ],
-0 silly argv   lernaVersion: '3.4.3',
-0 silly argv   '$0': '../../.npm/_npx/25436/bin/lerna',
-0 silly argv   name: 'store' }
-1 notice cli v3.4.3
-2 verbose rootPath /home/mkramer/Projects/beef-flux
-3 warn ENOREMOTE No git remote found, skipping repository property
-4 error Error: canceled
-4 error     at Interface.<anonymous> (/home/mkramer/.npm/_npx/25436/lib/node_modules/lerna/node_modules/read/lib/read.js:66:13)
-4 error     at emitNone (events.js:106:13)
-4 error     at Interface.emit (events.js:208:7)
-4 error     at Interface._ttyWrite (readline.js:775:16)
-4 error     at ReadStream.onkeypress (readline.js:160:10)
-4 error     at emitTwo (events.js:126:13)
-4 error     at ReadStream.emit (events.js:214:7)
-4 error     at emitKeys (internal/readline.js:420:14)
-4 error     at emitKeys.next (<anonymous>)
+0 silly argv   lernaVersion: '3.4.1',
+0 silly argv   '$0': '../../.config/yarn/global/node_modules/.bin/lerna',
+0 silly argv   name: 'beef-flux-react' }
+1 notice cli v3.4.1
+2 verbose rootPath /Users/mkramer/Projects/beef-flux
+3 error Error: Command failed: git config --get user.name
+3 error
+3 error
+3 error     at makeError (/Users/mkramer/.config/yarn/global/node_modules/@lerna/child-process/node_modules/execa/index.js:174:9)
+3 error     at Function.module.exports.sync (/Users/mkramer/.config/yarn/global/node_modules/@lerna/child-process/node_modules/execa/index.js:338:15)
+3 error     at Object.execSync (/Users/mkramer/.config/yarn/global/node_modules/@lerna/child-process/index.js:22:16)
+3 error     at CreateCommand.gitConfig (/Users/mkramer/.config/yarn/global/node_modules/@lerna/create/index.js:179:34)
+3 error     at CreateCommand.initialize (/Users/mkramer/.config/yarn/global/node_modules/@lerna/create/index.js:102:46)
+3 error     at Promise.resolve.then (/Users/mkramer/.config/yarn/global/node_modules/@lerna/command/index.js:245:24)

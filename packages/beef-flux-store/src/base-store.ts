@@ -1,3 +1,4 @@
+import * as React from 'react'
 import extend = require('extend')
 import assign = require('lodash/assign')
 import cloneDeepWith = require('lodash/cloneDeepWith')
@@ -5,6 +6,7 @@ import merge = require('lodash/merge')
 import * as moment from 'moment'
 import StoreManager from './store-manager'
 import ActionManager from './actions/manager'
+import StoreContext from './context'
 
 export interface StateHistory<T>
 {
@@ -45,8 +47,8 @@ abstract class Store<T>
 
     public uuid : string
 
-    public config : StoreConfig = DEFAULT_CONFIG
-
+	public config : StoreConfig = DEFAULT_CONFIG
+	
     /**
      * Holds our state
      */
@@ -91,7 +93,6 @@ abstract class Store<T>
     {
         this.dirtyState = false
 
-        this.Instance = this.Instance.bind(this)
         this.listen = this.listen.bind(this)
         this.ignore = this.ignore.bind(this)
         this.stateChange = this.stateChange.bind(this)
@@ -105,12 +106,34 @@ abstract class Store<T>
         this.__onSeed = this.__onSeed.bind(this)
 
         StoreManager.register(this)
-    }
+	}
+	
+	public static bind(storeName : string)
+	{
+		return Store.bindTo.bind(this, storeName)
+	}
 
-    public Instance()
+	public static bindTo<S, P extends {new(...args:any[]):{}}>(storeName : string, constructor : P)
     {
-        const obj : any = this
-        return new obj.constructor
+		const storeType = this
+
+        return class extends React.Component {
+
+			static contextType = StoreContext
+
+			constructor(props)
+			{
+				super(props)
+			}
+
+			render()
+			{
+				const store = this.context.getStore(storeName, storeType)
+
+				return React.createElement(constructor as any, {[storeName]: store, ...this.props}, null)
+			}
+
+        }
     }
 
     public static Config(config : Partial<StoreConfig>)
@@ -140,7 +163,7 @@ abstract class Store<T>
     {
         return this.dirtyState
     }
-
+	//TODO: Change to static -> and then use the context manager to create/seed the proper store
     public seed(partialState : any)
     {
         if(typeof partialState !== 'object' || typeof partialState.state !== 'object') {
@@ -182,35 +205,6 @@ abstract class Store<T>
 
     }
 
-    public subscribe<S>(cb : (componentState : S, nextState : T, oldState : T) => any)
-    {
-        return Store.subscribeTo.bind(this, cb)
-    }
-
-    public static subscribeTo<S, P extends {new(...args:any[]):{}}>(cb : (componentState : S, nextState : any, oldState : any) => any, constructor : P)
-    {
-        const store : any = this
-
-        return class extends constructor {
-
-            __listeners : number[] = []
-
-            componentDidMount()
-            {
-                super['componentDidMount'] ? super['componentDidMount']() : null
-                this.__listeners.push(store.listen((nextState, oldState) => this['setState'](cb(this['state'], nextState, oldState))))
-            }
-
-            componentWillUnmount()
-            {
-                super['componentWillUnmount'] ? super['componentWillUnmount']() : null
-                this.__listeners.forEach(index => {
-                    store.ignore(index)
-                })
-            }
-        }
-    }
-    
     /**
      * Listen on a given event
      */

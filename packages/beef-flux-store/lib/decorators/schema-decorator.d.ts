@@ -58,4 +58,3 @@ declare class Schema {
     static uuid(config?: BaseConfig<string>): any;
 }
 export default Schema;
-//# sourceMappingURL=schema-decorator.d.ts.map

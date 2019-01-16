@@ -8,7 +8,5 @@ declare class TodoStore extends Store.BaseStore<TodoStoreState> {
     sanitizeTodo(rawTodo: any): Todo;
     protected onReceiveTodos(rawTodos: any[]): TodoStoreState;
 }
-declare const instance: TodoStore;
-export default instance;
+export default TodoStore;
 export { Todo, TodoStoreState };
-//# sourceMappingURL=todo-store.d.ts.map

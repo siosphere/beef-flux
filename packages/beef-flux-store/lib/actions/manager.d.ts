@@ -11,4 +11,3 @@ declare class ActionsManager {
 }
 declare const Manager: ActionsManager;
 export default Manager;
-//# sourceMappingURL=manager.d.ts.map

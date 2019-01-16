@@ -1,4 +1,5 @@
 import * as React from 'react'
+import Store from '@beef-flux/store'
 
 // # Actions
 import TodoActions from './actions/todo-actions'
@@ -15,16 +16,23 @@ interface TodoAppState
     todos : TodoModel[]
 }
 
-@TodoStore.subscribe(TodoApp.onTodoAppUpdate)
-class TodoApp extends React.Component<{}, TodoAppState>
+@TodoStore.bind("todoStore")
+@Store.subscribe({
+	"todoStore": TodoApp.onTodoAppUpdate
+})
+class TodoApp extends React.Component<{
+	todoStore ?: TodoStore
+}, TodoAppState>
 {
+	static contextType = Store.Context
+
     constructor(props : any)
     {
-        super(props)
+		super(props)
 
         this.state = {
-            todos: TodoStore.getState().todos
-        }
+            todos: props.todoStore.getState().todos
+		}
     }
 
     render() {
@@ -35,7 +43,7 @@ class TodoApp extends React.Component<{}, TodoAppState>
             }} />
             <CreateTodo />
             <div onClick={() => {
-                console.log(TodoStore.dump())
+                console.log(this.props.todoStore.dump())
             }}>Hey</div>
         </div>
     }

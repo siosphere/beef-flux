@@ -11,4 +11,3 @@ declare class CreateTodo extends React.PureComponent<CreateTodoProps, CreateTodo
     isValid(): boolean;
 }
 export default CreateTodo;
-//# sourceMappingURL=create-todo.d.ts.map

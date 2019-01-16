@@ -85,7 +85,6 @@ class ActionsManager
 
         this.actions[`${Store.ACTION_SEED}_${store.uuid}`] = {
             cb: (raw) => {
-                console.log('action is being dispatched', raw)
                 return raw
             },
             stores: [{

@@ -6,4 +6,3 @@ declare class Todo extends Store.Model {
     done: boolean;
 }
 export default Todo;
-//# sourceMappingURL=todo.d.ts.map

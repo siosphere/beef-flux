@@ -1,3 +1,4 @@
+import * as React from 'react';
 export interface StateHistory<T> {
     actionName: string;
     state: T;
@@ -54,7 +55,44 @@ declare abstract class Store<T> {
     protected pendingActions: string[];
     protected __seedFunctions: any[];
     constructor();
-    Instance(): any;
+    static bind(storeName: string): any;
+    static bindTo<S, P extends {
+        new (...args: any[]): {};
+    }>(storeName: string, constructor: P): {
+        new (props: any): {
+            render(): React.ComponentElement<{
+                children?: React.ReactNode;
+            }, React.Component<{
+                children?: React.ReactNode;
+            }, any, any>>;
+            context: any;
+            setState<K extends never>(state: {} | ((prevState: Readonly<{}>, props: Readonly<{}>) => {} | Pick<{}, K>) | Pick<{}, K>, callback?: () => void): void;
+            forceUpdate(callBack?: () => void): void;
+            readonly props: Readonly<{
+                children?: React.ReactNode;
+            }> & Readonly<{}>;
+            state: Readonly<{}>;
+            refs: {
+                [key: string]: React.ReactInstance;
+            };
+            componentDidMount?(): void;
+            /**
+             * Sanitizes a field to a string
+             */
+            shouldComponentUpdate?(nextProps: Readonly<{}>, nextState: Readonly<{}>, nextContext: any): boolean;
+            componentWillUnmount?(): void;
+            componentDidCatch?(error: Error, errorInfo: React.ErrorInfo): void;
+            getSnapshotBeforeUpdate?(prevProps: Readonly<{}>, prevState: Readonly<{}>): any;
+            componentDidUpdate?(prevProps: Readonly<{}>, prevState: Readonly<{}>, snapshot?: any): void;
+            componentWillMount?(): void;
+            UNSAFE_componentWillMount?(): void;
+            componentWillReceiveProps?(nextProps: Readonly<{}>, nextContext: any): void;
+            UNSAFE_componentWillReceiveProps?(nextProps: Readonly<{}>, nextContext: any): void;
+            componentWillUpdate?(nextProps: Readonly<{}>, nextState: Readonly<{}>, nextContext: any): void;
+            UNSAFE_componentWillUpdate?(nextProps: Readonly<{}>, nextState: Readonly<{}>, nextContext: any): void;
+        };
+        contextType: React.Context<import("./context").Manager>;
+    };
     static Config(config: Partial<StoreConfig>): <P extends new (...args: any[]) => {}>(constructor: P) => {
         new (...args: any[]): {
             config: any;
@@ -65,16 +103,6 @@ declare abstract class Store<T> {
     seed(partialState: any): void;
     dump(): string;
     clear(): void;
-    subscribe<S>(cb: (componentState: S, nextState: T, oldState: T) => any): any;
-    static subscribeTo<S, P extends {
-        new (...args: any[]): {};
-    }>(cb: (componentState: S, nextState: any, oldState: any) => any, constructor: P): {
-        new (...args: any[]): {
-            __listeners: number[];
-            componentDidMount(): void;
-            componentWillUnmount(): void;
-        };
-    } & P;
     /**
      * Listen on a given event
      */
@@ -148,7 +176,7 @@ declare abstract class Store<T> {
     /**
      * Creates a filter sort callback to sort by a given key
      */
-    sortBy(key: string, dir?: string): (a: any, b: any) => 0 | 1 | -1;
+    sortBy(key: string, dir?: string): (a: any, b: any) => 1 | 0 | -1;
     /**
      * Formats a given number to two decimal places
      */
@@ -199,4 +227,3 @@ declare abstract class Store<T> {
     __onSeed(rawState: Partial<T>): T;
 }
 export default Store;
-//# sourceMappingURL=base-store.d.ts.map

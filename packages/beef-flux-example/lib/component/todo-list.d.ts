@@ -6,4 +6,3 @@ interface TodoListProps {
 }
 declare const TodoList: (props: TodoListProps) => JSX.Element;
 export default TodoList;
-//# sourceMappingURL=todo-list.d.ts.map

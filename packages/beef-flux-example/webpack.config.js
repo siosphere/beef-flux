@@ -5,7 +5,6 @@ module.exports = {
   entry: [
     './lib/index.js'
   ],
-  devtool: 'inline-source-map',
   resolve: {
     modules: [
       'node_modules',

@@ -5,4 +5,3 @@ interface TodoProps {
 }
 declare const Todo: (props: TodoModel & TodoProps) => JSX.Element;
 export default Todo;
-//# sourceMappingURL=todo.d.ts.map

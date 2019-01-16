@@ -5,14 +5,26 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
 var extend = require("extend");
 var assign = require("lodash/assign");
 var cloneDeepWith = require("lodash/cloneDeepWith");
@@ -20,6 +32,7 @@ var merge = require("lodash/merge");
 var moment = require("moment");
 var store_manager_1 = require("./store-manager");
 var manager_1 = require("./actions/manager");
+var context_1 = require("./context");
 var DEFAULT_CONFIG = {
     async: false,
     flushRate: 10,
@@ -59,7 +72,6 @@ var Store = /** @class */ (function () {
         this.debug = false;
         this.pendingActions = [];
         this.dirtyState = false;
-        this.Instance = this.Instance.bind(this);
         this.listen = this.listen.bind(this);
         this.ignore = this.ignore.bind(this);
         this.stateChange = this.stateChange.bind(this);
@@ -73,20 +85,37 @@ var Store = /** @class */ (function () {
         this.__onSeed = this.__onSeed.bind(this);
         store_manager_1.default.register(this);
     }
-    Store.prototype.Instance = function () {
-        var obj = this;
-        return new obj.constructor;
+    Store.bind = function (storeName) {
+        return Store.bindTo.bind(this, storeName);
+    };
+    Store.bindTo = function (storeName, constructor) {
+        var _a;
+        var storeType = this;
+        return _a = /** @class */ (function (_super) {
+                __extends(class_1, _super);
+                function class_1(props) {
+                    return _super.call(this, props) || this;
+                }
+                class_1.prototype.render = function () {
+                    var _a;
+                    var store = this.context.getStore(storeName, storeType);
+                    return React.createElement(constructor, __assign((_a = {}, _a[storeName] = store, _a), this.props), null);
+                };
+                return class_1;
+            }(React.Component)),
+            _a.contextType = context_1.default,
+            _a;
     };
     Store.Config = function (config) {
         return function (constructor) {
             return /** @class */ (function (_super) {
-                __extends(class_1, _super);
-                function class_1() {
+                __extends(class_2, _super);
+                function class_2() {
                     var _this = _super !== null && _super.apply(this, arguments) || this;
                     _this.config = extend(true, {}, DEFAULT_CONFIG, config);
                     return _this;
                 }
-                return class_1;
+                return class_2;
             }(constructor));
         };
     };
@@ -104,6 +133,7 @@ var Store = /** @class */ (function () {
     Store.prototype.isDirty = function () {
         return this.dirtyState;
     };
+    //TODO: Change to static -> and then use the context manager to create/seed the proper store
     Store.prototype.seed = function (partialState) {
         if (typeof partialState !== 'object' || typeof partialState.state !== 'object') {
             console.warn("Invalid object supplied to store seed: ", partialState);
@@ -132,32 +162,6 @@ var Store = /** @class */ (function () {
         });
     };
     Store.prototype.clear = function () {
-    };
-    Store.prototype.subscribe = function (cb) {
-        return Store.subscribeTo.bind(this, cb);
-    };
-    Store.subscribeTo = function (cb, constructor) {
-        var store = this;
-        return /** @class */ (function (_super) {
-            __extends(class_2, _super);
-            function class_2() {
-                var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this.__listeners = [];
-                return _this;
-            }
-            class_2.prototype.componentDidMount = function () {
-                var _this = this;
-                _super.prototype['componentDidMount'] ? _super.prototype['componentDidMount'].call(this) : null;
-                this.__listeners.push(store.listen(function (nextState, oldState) { return _this['setState'](cb(_this['state'], nextState, oldState)); }));
-            };
-            class_2.prototype.componentWillUnmount = function () {
-                _super.prototype['componentWillUnmount'] ? _super.prototype['componentWillUnmount'].call(this) : null;
-                this.__listeners.forEach(function (index) {
-                    store.ignore(index);
-                });
-            };
-            return class_2;
-        }(constructor));
     };
     /**
      * Listen on a given event
