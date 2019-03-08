@@ -4,15 +4,14 @@ import Model from './model';
 import Store from './base-store';
 import { SubscribeMap } from './subscribe';
 import { Manager as ContextManager } from './context';
+import Schema from './decorators/schema-decorator';
 declare const _default: {
     Actions: typeof Actions;
     Model: typeof Model;
     BaseStore: typeof Store;
-    decorators: {
-        Schema: typeof import("./decorators/schema-decorator").default;
-    };
     Context: import("react").Context<ContextManager>;
     subscribe: (storeMap: SubscribeMap) => any;
+    Wrap: (Component: typeof import("react").Component) => (props: any) => JSX.Element;
 };
 export default _default;
-export { ActionsManager, SubscribeMap, ContextManager };
+export { ActionsManager, SubscribeMap, ContextManager, Schema };

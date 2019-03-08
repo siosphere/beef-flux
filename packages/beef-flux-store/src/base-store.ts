@@ -6,7 +6,7 @@ import merge = require('lodash/merge')
 import * as moment from 'moment'
 import StoreManager from './store-manager'
 import ActionManager from './actions/manager'
-import StoreContext from './context'
+import StoreContext, { Manager } from './context'
 
 export interface StateHistory<T>
 {
@@ -108,31 +108,51 @@ abstract class Store<T>
         StoreManager.register(this)
 	}
 	
-	public static bind(storeName : string)
+	public static subscribe<C, T>(onUpdate : (componentState : C, nextStoreState : T, oldStoreState : T) => Partial<C>)
 	{
-		return Store.bindTo.bind(this, storeName)
+		return Store.subscribeTo.bind(this, onUpdate)
 	}
 
-	public static bindTo<S, P extends {new(...args:any[]):{}}>(storeName : string, constructor : P)
+	public static subscribeTo<C, T, P extends {new(...args:any[]):{}}>(onUpdate : (componentState : C, nextStoreState : T, oldStoreState : T) => Partial<C>, constructor : P)
     {
-		const storeType = this
+        const storeType = this
+        
+        const storeName = this['name']
 
-        return class extends React.Component {
+        const construct : any = constructor
 
-			static contextType = StoreContext
+        return class extends construct{
 
-			constructor(props)
+            static contextType = StoreContext
+            
+            __listeners : number[] = []
+
+			constructor(args : any)
 			{
-				super(props)
-			}
+                super(args)
 
-			render()
-			{
-				const store = this.context.getStore(storeName, storeType)
+                const props = args
 
-				return React.createElement(constructor as any, {[storeName]: store, ...this.props}, null)
-			}
+                const store = props._manager.getStore(storeName, storeType)
+                this.state = onUpdate(this.state ? this.state as C : {} as C, store.getState(), {} as T)
+                
+            }
 
+            componentDidMount()
+            {
+                super['componentDidMount'] ? super['componentDidMount']() : null
+                const store = this.props._manager.getStore(storeName, storeType)
+                this.__listeners.push(store.listen((nextState, oldState) => this.setState(onUpdate(this.state, nextState, oldState))))
+            }
+
+            componentWillUnmount()
+            {
+                //super.componentWillUnmount()
+                const store = this.props._manager.getStore(storeName, storeType)
+                this.__listeners.forEach(index => {
+                    store.ignore(index)
+                })
+            }
         }
     }
 

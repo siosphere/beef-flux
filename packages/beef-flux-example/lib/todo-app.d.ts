@@ -1,14 +1,3 @@
-import * as React from 'react';
-import TodoStore, { Todo as TodoModel, TodoStoreState } from './model/todo-store';
-interface TodoAppState {
-    todos: TodoModel[];
-}
-declare class TodoApp extends React.Component<{
-    todoStore?: TodoStore;
-}, TodoAppState> {
-    static contextType: React.Context<import("../../beef-flux-store/lib").ContextManager>;
-    constructor(props: any);
-    render(): JSX.Element;
-    static onTodoAppUpdate(componentState: TodoAppState, nextStoreState: TodoStoreState, oldStoreState: TodoStoreState): Partial<TodoStoreState>;
-}
-export default TodoApp;
+/// <reference types="react" />
+declare const _default: (props: any) => JSX.Element;
+export default _default;

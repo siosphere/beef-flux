@@ -20,7 +20,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var store_1 = require("@beef-flux/store");
-var Schema = store_1.default.decorators.Schema;
 var Todo = /** @class */ (function (_super) {
     __extends(Todo, _super);
     function Todo() {
@@ -28,13 +27,13 @@ var Todo = /** @class */ (function (_super) {
     }
     Todo.schema = {};
     __decorate([
-        Schema.uuid()
+        store_1.Schema.uuid()
     ], Todo.prototype, "id", void 0);
     __decorate([
-        Schema.string()
+        store_1.Schema.string()
     ], Todo.prototype, "title", void 0);
     __decorate([
-        Schema.bool({
+        store_1.Schema.bool({
             initial: function () { return false; }
         })
     ], Todo.prototype, "done", void 0);

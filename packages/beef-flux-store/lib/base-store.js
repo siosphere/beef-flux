@@ -12,19 +12,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
 var extend = require("extend");
 var assign = require("lodash/assign");
 var cloneDeepWith = require("lodash/cloneDeepWith");
@@ -85,24 +73,39 @@ var Store = /** @class */ (function () {
         this.__onSeed = this.__onSeed.bind(this);
         store_manager_1.default.register(this);
     }
-    Store.bind = function (storeName) {
-        return Store.bindTo.bind(this, storeName);
+    Store.subscribe = function (onUpdate) {
+        return Store.subscribeTo.bind(this, onUpdate);
     };
-    Store.bindTo = function (storeName, constructor) {
+    Store.subscribeTo = function (onUpdate, constructor) {
         var _a;
         var storeType = this;
+        var storeName = this['name'];
+        var construct = constructor;
         return _a = /** @class */ (function (_super) {
                 __extends(class_1, _super);
-                function class_1(props) {
-                    return _super.call(this, props) || this;
+                function class_1(args) {
+                    var _this = _super.call(this, args) || this;
+                    _this.__listeners = [];
+                    var props = args;
+                    var store = props._manager.getStore(storeName, storeType);
+                    _this.state = onUpdate(_this.state ? _this.state : {}, store.getState(), {});
+                    return _this;
                 }
-                class_1.prototype.render = function () {
-                    var _a;
-                    var store = this.context.getStore(storeName, storeType);
-                    return React.createElement(constructor, __assign((_a = {}, _a[storeName] = store, _a), this.props), null);
+                class_1.prototype.componentDidMount = function () {
+                    var _this = this;
+                    _super.prototype['componentDidMount'] ? _super.prototype['componentDidMount'].call(this) : null;
+                    var store = this.props._manager.getStore(storeName, storeType);
+                    this.__listeners.push(store.listen(function (nextState, oldState) { return _this.setState(onUpdate(_this.state, nextState, oldState)); }));
+                };
+                class_1.prototype.componentWillUnmount = function () {
+                    //super.componentWillUnmount()
+                    var store = this.props._manager.getStore(storeName, storeType);
+                    this.__listeners.forEach(function (index) {
+                        store.ignore(index);
+                    });
                 };
                 return class_1;
-            }(React.Component)),
+            }(construct)),
             _a.contextType = context_1.default,
             _a;
     };

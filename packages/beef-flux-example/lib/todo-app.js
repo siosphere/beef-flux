@@ -31,13 +31,13 @@ var todo_store_1 = require("./model/todo-store");
 var TodoApp = /** @class */ (function (_super) {
     __extends(TodoApp, _super);
     function TodoApp(props) {
-        var _this = _super.call(this, props) || this;
-        _this.state = {
+        return _super.call(this, props) || this;
+        /*this.state = {
             todos: props.todoStore.getState().todos
-        };
-        return _this;
+        }
+        
+        console.log('original constructor')*/
     }
-    TodoApp_1 = TodoApp;
     TodoApp.prototype.render = function () {
         var _this = this;
         return React.createElement("div", null,
@@ -47,22 +47,17 @@ var TodoApp = /** @class */ (function (_super) {
                 } }),
             React.createElement(create_todo_1.default, null),
             React.createElement("div", { onClick: function () {
-                    console.log(_this.props.todoStore.dump());
+                    console.log(_this.props._manager.dump());
                 } }, "Hey"));
     };
-    TodoApp.onTodoAppUpdate = function (componentState, nextStoreState, oldStoreState) {
-        return {
-            todos: nextStoreState.todos
-        };
-    };
-    var TodoApp_1;
-    TodoApp.contextType = store_1.default.Context;
-    TodoApp = TodoApp_1 = __decorate([
-        todo_store_1.default.bind("todoStore"),
-        store_1.default.subscribe({
-            "todoStore": TodoApp_1.onTodoAppUpdate
+    TodoApp = __decorate([
+        todo_store_1.default.subscribe(function (componentState, nextStoreState, oldStoreState) {
+            console.log('update was called', nextStoreState);
+            return {
+                todos: nextStoreState.todos
+            };
         })
     ], TodoApp);
     return TodoApp;
 }(React.Component));
-exports.default = TodoApp;
+exports.default = store_1.default.Wrap(TodoApp);

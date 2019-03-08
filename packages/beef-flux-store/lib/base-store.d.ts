@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Manager } from './context';
 export interface StateHistory<T> {
     actionName: string;
     state: T;
@@ -55,40 +56,18 @@ declare abstract class Store<T> {
     protected pendingActions: string[];
     protected __seedFunctions: any[];
     constructor();
-    static bind(storeName: string): any;
-    static bindTo<S, P extends {
+    static subscribe<C, T>(onUpdate: (componentState: C, nextStoreState: T, oldStoreState: T) => Partial<C>): any;
+    static subscribeTo<C, T, P extends {
         new (...args: any[]): {};
-    }>(storeName: string, constructor: P): {
-        new (props: any): {
-            render(): React.ComponentElement<{
-                children?: React.ReactNode;
-            }, React.Component<{
-                children?: React.ReactNode;
-            }, any, any>>;
-            context: any;
-            setState<K extends never>(state: {} | ((prevState: Readonly<{}>, props: Readonly<{}>) => {} | Pick<{}, K>) | Pick<{}, K>, callback?: () => void): void;
-            forceUpdate(callBack?: () => void): void;
-            readonly props: Readonly<{
-                children?: React.ReactNode;
-            }> & Readonly<{}>;
-            state: Readonly<{}>;
-            refs: {
-                [key: string]: React.ReactInstance;
-            };
-            componentDidMount?(): void;
-            shouldComponentUpdate?(nextProps: Readonly<{}>, nextState: Readonly<{}>, nextContext: any): boolean;
-            componentWillUnmount?(): void;
-            componentDidCatch?(error: Error, errorInfo: React.ErrorInfo): void;
-            getSnapshotBeforeUpdate?(prevProps: Readonly<{}>, prevState: Readonly<{}>): any;
-            componentDidUpdate?(prevProps: Readonly<{}>, prevState: Readonly<{}>, snapshot?: any): void;
-            componentWillMount?(): void;
-            UNSAFE_componentWillMount?(): void;
-            componentWillReceiveProps?(nextProps: Readonly<{}>, nextContext: any): void;
-            UNSAFE_componentWillReceiveProps?(nextProps: Readonly<{}>, nextContext: any): void;
-            componentWillUpdate?(nextProps: Readonly<{}>, nextState: Readonly<{}>, nextContext: any): void;
-            UNSAFE_componentWillUpdate?(nextProps: Readonly<{}>, nextState: Readonly<{}>, nextContext: any): void;
+    }>(onUpdate: (componentState: C, nextStoreState: T, oldStoreState: T) => Partial<C>, constructor: P): {
+        new (args: any): {
+            [x: string]: any;
+            __listeners: number[];
+            componentDidMount(): void;
+            componentWillUnmount(): void;
         };
-        contextType: React.Context<import("./context").Manager>;
+        [x: string]: any;
+        contextType: React.Context<Manager>;
     };
     static Config(config: Partial<StoreConfig>): <P extends new (...args: any[]) => {}>(constructor: P) => {
         new (...args: any[]): {

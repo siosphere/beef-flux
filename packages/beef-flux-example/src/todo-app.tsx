@@ -16,23 +16,25 @@ interface TodoAppState
     todos : TodoModel[]
 }
 
-@TodoStore.bind("todoStore")
-@Store.subscribe({
-	"todoStore": TodoApp.onTodoAppUpdate
+@TodoStore.subscribe((componentState : TodoAppState, nextStoreState : TodoStoreState, oldStoreState : TodoStoreState) => {
+    console.log('update was called', nextStoreState)
+    return {
+        todos: nextStoreState.todos
+    }
 })
 class TodoApp extends React.Component<{
-	todoStore ?: TodoStore
+	_manager ?: any
 }, TodoAppState>
 {
-	static contextType = Store.Context
-
     constructor(props : any)
     {
 		super(props)
 
-        this.state = {
+        /*this.state = {
             todos: props.todoStore.getState().todos
-		}
+        }
+        
+        console.log('original constructor')*/
     }
 
     render() {
@@ -43,17 +45,10 @@ class TodoApp extends React.Component<{
             }} />
             <CreateTodo />
             <div onClick={() => {
-                console.log(this.props.todoStore.dump())
+                console.log(this.props._manager.dump())
             }}>Hey</div>
         </div>
     }
-
-    static onTodoAppUpdate(componentState : TodoAppState, nextStoreState : TodoStoreState, oldStoreState : TodoStoreState) : Partial<TodoStoreState>
-    {
-        return {
-            todos: nextStoreState.todos
-        }
-    }
 }
 
-export default TodoApp
+export default Store.Wrap(TodoApp)

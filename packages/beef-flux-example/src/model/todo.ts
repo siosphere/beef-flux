@@ -1,6 +1,4 @@
-import Store from '@beef-flux/store'
-
-const Schema = Store.decorators.Schema
+import Store, {Schema} from '@beef-flux/store'
 
 class Todo extends Store.Model
 {
