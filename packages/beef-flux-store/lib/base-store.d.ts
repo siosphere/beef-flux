@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Manager } from './context';
+export declare const useStore: <T>(store: Store<T>) => T;
 export interface StateHistory<T> {
     actionName: string;
     state: T;

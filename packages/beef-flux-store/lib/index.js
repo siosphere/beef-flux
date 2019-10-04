@@ -4,6 +4,7 @@ var actions_1 = require("./actions");
 exports.ActionsManager = actions_1.ActionsManager;
 var model_1 = require("./model");
 var base_store_1 = require("./base-store");
+exports.useStore = base_store_1.useStore;
 var subscribe_1 = require("./subscribe");
 var context_1 = require("./context");
 exports.ContextManager = context_1.Manager;

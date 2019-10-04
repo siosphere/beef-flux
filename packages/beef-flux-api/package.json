@@ -25,5 +25,6 @@
   },
   "dependencies": {
     "extend": "^3.0.2"
-  }
+  },
+  "gitHead": "5202db4746ac6fb0a4813b961d3ef6c046c4728e"
 }

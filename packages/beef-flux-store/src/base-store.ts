@@ -8,6 +8,20 @@ import StoreManager from './store-manager'
 import ActionManager from './actions/manager'
 import StoreContext, { Manager } from './context'
 
+export const useStore = <T>(store : Store<T>) : T => {
+    const [storeState, setStoreState] = React.useState(store.getState())
+
+    React.useEffect(() => {
+        store.listen(setStoreState)
+
+        return () => {
+            store.ignore(setStoreState)
+        }
+    })
+
+    return storeState
+}
+
 export interface StateHistory<T>
 {
     actionName : string

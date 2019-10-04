@@ -1,6 +1,6 @@
 import Actions, {ActionsManager} from './actions'
 import Model from './model'
-import Store from './base-store'
+import Store, {useStore} from './base-store'
 import subscribe, {SubscribeMap} from './subscribe'
 import Context, {Manager as ContextManager} from './context'
 import Schema from './decorators/schema-decorator'
@@ -19,5 +19,6 @@ export {
 	ActionsManager,
 	SubscribeMap,
 	ContextManager,
-	Schema
+    Schema,
+    useStore
 }

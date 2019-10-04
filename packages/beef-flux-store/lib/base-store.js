@@ -13,6 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
 var extend = require("extend");
 var assign = require("lodash/assign");
 var cloneDeepWith = require("lodash/cloneDeepWith");
@@ -21,6 +22,16 @@ var moment = require("moment");
 var store_manager_1 = require("./store-manager");
 var manager_1 = require("./actions/manager");
 var context_1 = require("./context");
+exports.useStore = function (store) {
+    var _a = React.useState(store.getState()), storeState = _a[0], setStoreState = _a[1];
+    React.useEffect(function () {
+        store.listen(setStoreState);
+        return function () {
+            store.ignore(setStoreState);
+        };
+    });
+    return storeState;
+};
 var DEFAULT_CONFIG = {
     async: false,
     flushRate: 10,
