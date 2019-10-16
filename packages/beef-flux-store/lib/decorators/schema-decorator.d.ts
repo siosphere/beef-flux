@@ -16,7 +16,7 @@ interface DateConfig {
 }
 interface ObjectConfig<T> {
     schema: null | ((...any: any[]) => object);
-    constructor?: (...any: any[]) => T;
+    factory?: (raw: object) => T;
 }
 declare type arrayMember = "int" | "float" | "string" | "date" | "bool" | "object" | "array" | "callback" | "custom";
 interface ArrayConfig<T> {

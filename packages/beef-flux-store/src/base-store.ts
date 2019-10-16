@@ -882,8 +882,8 @@ abstract class Store<T>
             return null
         }
 
-        if(!json && typeof schemaConfig.constructor === 'function') {
-            return new schemaConfig.constructor(this.sanitize(value, schemaConfig.schema()))
+        if(!json && typeof schemaConfig.factory === 'function') {
+            return schemaConfig.factory(this.sanitize(value, schemaConfig.schema()))
         }
 
         return this.sanitize(value, schemaConfig.schema(), json)
@@ -920,8 +920,8 @@ abstract class Store<T>
         }
 
         return value.map((v) => {
-            if(!json && typeof schemaConfig.constructor === 'function') {
-                return new schemaConfig.constructor(this.sanitize(v, schemaConfig.schema()))
+            if(!json && typeof schemaConfig.factory === 'function') {
+                return schemaConfig.factory(this.sanitize(v, schemaConfig.schema()))
             }
             return this.sanitize(v, schemaConfig.schema(), json)
         })

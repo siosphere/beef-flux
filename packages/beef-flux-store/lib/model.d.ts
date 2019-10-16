@@ -1,4 +1,4 @@
 declare abstract class Model {
-    constructor(raw?: object);
+    create(raw?: object): void;
 }
 export default Model;
