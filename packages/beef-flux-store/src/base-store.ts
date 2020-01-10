@@ -181,9 +181,9 @@ abstract class Store<T>
         }
     }
 
-    public static OnSeed<T>(cb : (p : Partial<T>) => any)
+    public static OnSeed(cb : (p : object) => any)
     {
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
             if(typeof target.__seedFunctions === 'undefined') {
                 target.__seedFunctions = []
             }

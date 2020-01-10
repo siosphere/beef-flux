@@ -75,7 +75,7 @@ declare abstract class Store<T> {
             config: any;
         };
     } & P;
-    static OnSeed<T>(cb: (p: Partial<T>) => any): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
+    static OnSeed(cb: (p: object) => any): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
     isDirty(): boolean;
     seed(partialState: any): void;
     dump(): string;
