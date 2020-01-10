@@ -12,7 +12,7 @@
     "beef-flux"
   ],
   "author": "Michael Kramer <kramer@siosphere.com>",
-  "homepage": "http://russetjs.org",
+  "homepage": "http://www.siosphere.com",
   "license": "MIT",
   "main": "lib/index.js",
   "directories": {
