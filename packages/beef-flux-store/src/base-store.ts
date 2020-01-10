@@ -226,6 +226,9 @@ abstract class Store<T>
             }
         }
 
+        this.__onSeed(nextState)
+        this.flush()
+
         ActionManager.dispatch(`${Store.ACTION_SEED}_${this.uuid}`, [nextState])
     }
 

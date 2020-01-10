@@ -169,6 +169,8 @@ var Store = /** @class */ (function () {
                 nextState[key] = newValue;
             }
         }
+        this.__onSeed(nextState);
+        this.flush();
         manager_1.default.dispatch(Store.ACTION_SEED + "_" + this.uuid, [nextState]);
     };
     Store.prototype.dump = function () {
