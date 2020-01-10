@@ -46,7 +46,7 @@ var DEFAULT_CONFIG = {
  * it as immutable
  */
 var Store = /** @class */ (function () {
-    function Store() {
+    function Store(initialState) {
         this.config = DEFAULT_CONFIG;
         /**
          * Holds our state
@@ -70,6 +70,7 @@ var Store = /** @class */ (function () {
          */
         this.debug = false;
         this.pendingActions = [];
+        this.state = initialState;
         this.dirtyState = false;
         this.listen = this.listen.bind(this);
         this.ignore = this.ignore.bind(this);

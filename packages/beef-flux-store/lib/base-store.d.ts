@@ -56,7 +56,7 @@ declare abstract class Store<T> {
     debug: boolean;
     protected pendingActions: string[];
     protected __seedFunctions: any[];
-    constructor();
+    constructor(initialState: Partial<T>);
     static subscribe<C, T>(onUpdate: (componentState: C, nextStoreState: T, oldStoreState: T) => Partial<C>): any;
     static subscribeTo<C, T, P extends {
         new (...args: any[]): {};

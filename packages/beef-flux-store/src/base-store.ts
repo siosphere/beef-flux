@@ -103,8 +103,10 @@ abstract class Store<T>
 
     protected __seedFunctions : any[]
 
-    constructor()
+    constructor(initialState : Partial<T>)
     {
+        this.state = initialState as T
+
         this.dirtyState = false
 
         this.listen = this.listen.bind(this)
