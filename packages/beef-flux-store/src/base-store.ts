@@ -181,7 +181,7 @@ abstract class Store<T>
         }
     }
 
-    public static OnSeed(cb : (p : object) => any)
+    public static OnSeed(cb : (p : object) => any) : any
     {
         return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
             if(typeof target.__seedFunctions === 'undefined') {
