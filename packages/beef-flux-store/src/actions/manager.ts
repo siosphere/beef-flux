@@ -55,6 +55,7 @@ class ActionsManager
     {
         if(typeof this.actions[actionName] === 'undefined') {
             console.warn('Attempting to call non registered action: ' + actionName)
+            return
         }
         
         this._debug(`ACTION.DISPATCH: ${actionName}`, data)

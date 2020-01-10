@@ -40,6 +40,7 @@ var ActionsManager = /** @class */ (function () {
     ActionsManager.prototype.dispatch = function (actionName, data, additionalParams) {
         if (typeof this.actions[actionName] === 'undefined') {
             console.warn('Attempting to call non registered action: ' + actionName);
+            return;
         }
         this._debug("ACTION.DISPATCH: " + actionName, data);
         var cb = this.actions[actionName].cb;
