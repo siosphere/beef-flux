@@ -706,8 +706,8 @@ var Store = /** @class */ (function () {
         if (value === null) {
             return null;
         }
-        if (!json && typeof schemaConfig.constructor === 'function') {
-            return new schemaConfig.constructor(this.sanitize(value, schemaConfig.schema()));
+        if (!json && typeof schemaConfig.factory === 'function') {
+            return schemaConfig.factory(this.sanitize(value, schemaConfig.schema()));
         }
         return this.sanitize(value, schemaConfig.schema(), json);
     };
@@ -738,8 +738,8 @@ var Store = /** @class */ (function () {
             return value;
         }
         return value.map(function (v) {
-            if (!json && typeof schemaConfig.constructor === 'function') {
-                return new schemaConfig.constructor(_this.sanitize(v, schemaConfig.schema()));
+            if (!json && typeof schemaConfig.factory === 'function') {
+                return schemaConfig.factory(_this.sanitize(v, schemaConfig.schema()));
             }
             return _this.sanitize(v, schemaConfig.schema(), json);
         });

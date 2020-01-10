@@ -1,6 +1,6 @@
 {
   "name": "@beef-flux/store",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Flux compatible state machine",
   "keywords": [
     "flux",
@@ -31,5 +31,5 @@
     "moment": "^2.22.2",
     "react": "^16.7.0"
   },
-  "gitHead": "0c36c7b7ddd3666ad12630b3e75af0fff0b1d094"
+  "gitHead": "68b7d4fd7822bbe3a7860b1460cb413b5bf8e0af"
 }
