@@ -1,6 +1,6 @@
 {
   "name": "@beef-flux/store",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Flux compatible state machine",
   "keywords": [
     "flux",
