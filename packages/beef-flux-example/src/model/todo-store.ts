@@ -9,7 +9,7 @@ interface TodoStoreState
 
 class TodoStore extends Store.BaseStore<TodoStoreState>
 {
-    constructor()
+    constructor(todoActions : TodoActions)
     {
         super()
 
@@ -17,7 +17,7 @@ class TodoStore extends Store.BaseStore<TodoStoreState>
             todos: []
         }
 
-        TodoActions.__register({
+        todoActions.__register({
             RECEIVE_TODOS: this.onReceiveTodos.bind(this)
         }, this)
     }

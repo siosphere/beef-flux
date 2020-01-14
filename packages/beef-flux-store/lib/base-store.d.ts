@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Manager } from './context';
+import Actions from 'actions';
 export declare const useStore: <T>(store: Store<T>) => T;
 export interface StateHistory<T> {
     actionName: string;
@@ -56,7 +57,7 @@ declare abstract class Store<T> {
     debug: boolean;
     protected pendingActions: string[];
     protected __seedFunctions: any[];
-    constructor(initialState: Partial<T>);
+    constructor(initialState: Partial<T>, actions?: Actions);
     static subscribe<C, T>(onUpdate: (componentState: C, nextStoreState: T, oldStoreState: T) => Partial<C>): any;
     static subscribeTo<C, T, P extends {
         new (...args: any[]): {};

@@ -46,7 +46,8 @@ var DEFAULT_CONFIG = {
  * it as immutable
  */
 var Store = /** @class */ (function () {
-    function Store(initialState) {
+    function Store(initialState, actions) {
+        if (actions === void 0) { actions = null; }
         this.config = DEFAULT_CONFIG;
         /**
          * Holds our state

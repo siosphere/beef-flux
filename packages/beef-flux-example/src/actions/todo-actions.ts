@@ -8,6 +8,4 @@ class TodoActions extends Store.Actions
     }
 }
 
-const Actions = new TodoActions()
-
-export default Actions
+export default TodoActions

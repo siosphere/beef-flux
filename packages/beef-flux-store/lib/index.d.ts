@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import Actions, { ActionsManager } from './actions';
+import Actions from './actions';
 import Model from './model';
 import Store, { useStore } from './base-store';
 import { SubscribeMap } from './subscribe';
@@ -14,4 +14,4 @@ declare const _default: {
     Wrap: (Component: typeof import("react").Component) => (props: any) => JSX.Element;
 };
 export default _default;
-export { ActionsManager, SubscribeMap, ContextManager, Schema, useStore };
+export { SubscribeMap, ContextManager, Schema, useStore };

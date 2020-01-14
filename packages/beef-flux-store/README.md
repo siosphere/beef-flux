@@ -5,7 +5,7 @@
 ## Usage
 
 ```
-const russetStore = require('@russet/russet-store');
+const russetStore = require('@beef-flux/store');
 
 // TODO: DEMONSTRATE API
 ```

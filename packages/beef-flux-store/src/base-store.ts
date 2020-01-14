@@ -7,6 +7,7 @@ import * as moment from 'moment'
 import StoreManager from './store-manager'
 import ActionManager from './actions/manager'
 import StoreContext, { Manager } from './context'
+import Actions from 'actions'
 
 export const useStore = <T>(store : Store<T>) : T => {
     const [storeState, setStoreState] = React.useState(store.getState())
@@ -103,7 +104,7 @@ abstract class Store<T>
 
     protected __seedFunctions : any[]
 
-    constructor(initialState : Partial<T>)
+    constructor(initialState : Partial<T>, actions : Actions = null)
     {
         this.state = initialState as T
 

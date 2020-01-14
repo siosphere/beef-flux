@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var actions_1 = require("./actions");
-exports.ActionsManager = actions_1.ActionsManager;
 var model_1 = require("./model");
 var base_store_1 = require("./base-store");
 exports.useStore = base_store_1.useStore;

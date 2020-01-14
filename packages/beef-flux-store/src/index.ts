@@ -1,4 +1,4 @@
-import Actions, {ActionsManager} from './actions'
+import Actions from './actions'
 import Model from './model'
 import Store, {useStore} from './base-store'
 import subscribe, {SubscribeMap} from './subscribe'
@@ -16,7 +16,6 @@ export default {
 }
 
 export {
-	ActionsManager,
 	SubscribeMap,
 	ContextManager,
     Schema,
