@@ -5,9 +5,8 @@ import cloneDeepWith = require('lodash/cloneDeepWith')
 import merge = require('lodash/merge')
 import * as moment from 'moment'
 import StoreManager from './store-manager'
-import ActionManager from './actions/manager'
 import StoreContext, { Manager } from './context'
-import Actions from 'actions'
+import Actions from './actions'
 
 export const useStore = <T>(store : Store<T>) : T => {
     const [storeState, setStoreState] = React.useState(store.getState())
@@ -229,8 +228,6 @@ abstract class Store<T>
 
         this.__onSeed(nextState)
         this.flush()
-
-        ActionManager.dispatch(`${Store.ACTION_SEED}_${this.uuid}`, [nextState])
     }
 
     public dump() : string
