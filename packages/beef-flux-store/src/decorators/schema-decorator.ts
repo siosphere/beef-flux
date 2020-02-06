@@ -5,6 +5,7 @@ import moment = require("moment");
 interface BaseConfig<T>
 {
     initial : (...any) => T
+    primaryKey ?: boolean
 }
 
 interface NumberConfig
@@ -29,6 +30,7 @@ interface ObjectConfig<T>
 {
     schema : null | ((...any) => object)
     factory ?: (raw : object) => T
+    reference ?: boolean
 }
 
 type arrayMember = "int" | "float" | "string" | "date" | "bool" | "object" | "array" | "callback" | "custom"
